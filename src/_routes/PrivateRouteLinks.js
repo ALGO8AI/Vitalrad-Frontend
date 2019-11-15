@@ -1,7 +1,7 @@
 // @flow
 import {
-  UserList,
-} from '../views/UserPage'
+  DiscrepancyList,
+} from '../views/DiscrepancyPage'
 
 import {
   HomePage,
@@ -14,8 +14,8 @@ export const PrivateRouteLinks = {
     roles: ['admin'],
   },
   user: {
-    component: UserList,
-    path: '/users',
+    component: DiscrepancyList,
+    path: '/discrepancy',
     roles: ['admin'],
   },
 }

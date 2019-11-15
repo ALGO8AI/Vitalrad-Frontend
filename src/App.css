@@ -53,6 +53,11 @@ body {
   color: #61dafb;
 }
 
+.container-fluid{
+  padding-right:0px !important;
+  padding-left:0px !important;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

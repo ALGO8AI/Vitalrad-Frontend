@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import './login.css'
 import {userActions} from '../../_actions'
 import _ from 'lodash'
-
+import logo from '../../img/logo.svg'
 type State = {
   username: string,
   password: string,
@@ -18,7 +18,8 @@ type Props = {
   loggingIn?: boolean,
   logout: Function,
   login: Function,
-}
+};
+
 export class LoginPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
@@ -57,52 +58,58 @@ export class LoginPage extends React.Component<Props, State> {
     const {loggingIn} = this.props
     const {username, password, submitted} = this.state
     return (
-      <div className="login-container">
-        <h2>Login</h2>
-        <form id="loginForm" name="form" onSubmit={e => this.handleSubmit(e)}>
-          <div
-            className={
-              'form-group' + (submitted && !username ? ' has-error' : '')
-            }>
-            <input
-              type="email"
-              placeholder="User Name"
-              className="form-control"
-              name="username"
-              value={username}
-              onChange={e => this.handleChange(e)}
-            />
-            {submitted && !username && (
-              <div className="help-block">Username is required</div>
-            )}
+      <div className="container-fluid page-body-wrapper full-page-wrapper">
+        <div className="content-wrapper d-flex align-items-center auth">
+          <div className="row flex-grow">
+            <div className="col-lg-4 mx-auto">
+              <div className="auth-form-light text-left p-5">
+                <div className="brand-logo">
+                  <img alt="Radio" src={logo} />
+                </div>
+                <h4>Admin-Panel</h4>
+                <h6 className="font-weight-light">Sign in to continue.</h6>
+                <form className="pt-3" id="loginForm" name="form" onSubmit={e => this.handleSubmit(e)}>
+                  <div className={'form-group' + (submitted && !username ? ' has-error' : '')}>
+                    <input
+                      type="email"
+                      placeholder="User Name"
+                      className="form-control"
+                      name="username"
+                      value={username}
+                      onChange={e => this.handleChange(e)}
+                    />
+                    {submitted && !username && (
+                      <div className="help-block">Username is required</div>
+                    )}
+                  </div>
+                  <div className={'form-group' + (submitted && !password ? ' has-error' : '')}>
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      className="form-control"
+                      name="password"
+                      value={password}
+                      autocomple="current-password"
+                      onChange={e => this.handleChange(e)}
+                    />
+                    {submitted && !password && (
+                      <div className="help-block">Password is required</div>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <button className="btn btn-primary">Login</button>
+                      {loggingIn && (
+                        <img
+                          alt="Loading"
+                          src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="
+                        />
+                      )}
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
-          <div
-            className={
-              'form-group' + (submitted && !password ? ' has-error' : '')
-            }>
-            <input
-              type="password"
-              placeholder="Password"
-              className="form-control"
-              name="password"
-              value={password}
-              autocomple="current-password"
-              onChange={e => this.handleChange(e)}
-            />
-            {submitted && !password && (
-              <div className="help-block">Password is required</div>
-            )}
-          </div>
-          <div className="form-group">
-            <button className="btn btn-primary">Login</button>
-            {loggingIn && (
-              <img
-                alt="Loading"
-                src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="
-              />
-            )}
-          </div>
-        </form>
+        </div>
       </div>
     )
   }

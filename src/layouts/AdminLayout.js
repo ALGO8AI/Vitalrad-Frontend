@@ -4,6 +4,8 @@ import {connect} from 'react-redux'
 import Header from '../components/header/header'
 import {alertActions} from '../_actions'
 import {history} from '../_helpers'
+import Asides from '../components/aside/aside'
+import Footer from '../components/common/Footer'
 
 type Props = {
   alert: any,
@@ -41,7 +43,7 @@ class AdminLayout extends React.Component<Props, State> {
   render() {
     const {children, alert} = this.props
     return (
-      <div className={this.state.isShow ? 'wrapper active' : 'wrapper'}>
+      <div className="container-scroller">
         <Header
           toggleShow={this.toggleShow}
           isOrgnaization={this.state.isOrgnaization}
@@ -49,7 +51,13 @@ class AdminLayout extends React.Component<Props, State> {
         {alert.message && (
           <div className={`alert ${alert.type}`}>{alert.message}</div>
         )}
-        {children}
+        <div className="container-fluid page-body-wrapper">
+          <Asides />
+          <div className="main-panel">
+            {children}
+            <Footer />
+          </div>
+        </div>
       </div>
     )
   }
