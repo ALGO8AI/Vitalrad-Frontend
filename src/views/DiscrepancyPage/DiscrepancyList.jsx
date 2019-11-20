@@ -49,57 +49,70 @@ export class DiscrepancyList extends React.Component<Props, State> {
             <div className="card">
               <div className="card-body">
                 <div className="d-sm-flex align-items-center mb-4">
-                  <h4 className="card-title mb-sm-0">Products Inventory</h4>
+                  <h4 className="card-title mb-sm-0">Discrepancy Dashboard</h4>
                 </div>
                 <div className="table-responsive border rounded p-1">
                   <table className="table">
                     <thead>
                       <tr>
-                        <th className="font-weight-bold">Store ID</th>
-                        <th className="font-weight-bold">Amount</th>
-                        <th className="font-weight-bold">Gateway</th>
-                        <th className="font-weight-bold">Created at</th>
-                        <th className="font-weight-bold">Paid at</th>
-                        <th className="font-weight-bold">Status</th>
+                        <th className="font-weight-bold">Date</th>
+                        <th className="font-weight-bold">Raised By</th>
+                        <th className="font-weight-bold">Accession No.</th>
+                        <th className="font-weight-bold">Discrepancy</th>
+                        <th className="font-weight-bold"></th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td> Katie Holmes </td>
-                        <td>$3621</td>
-                        <td>alipay</td>
-                        <td>04 Jun 2019</td>
-                        <td>18 Jul 2019</td>
+                        <td> 10 January 2019</td>
+                        <td>Dr Vital Reporter 1</td>
+                        <td>12345678</td>
+                        <td>Appears to have used in ACC slice 345-352</td>
                         <td>
                           <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
                         </td>
                       </tr>
                       <tr>
-                        <td> Minnie Copeland </td>
-                        <td>$6245</td>
-                        <td>Paypal</td>
-                        <td>25 Sep 2019</td>
-                        <td>07 Oct 2019</td>
+                        <td> 11 January 2019</td>
+                        <td>Dr Vital Reporter 3</td>
+                        <td>25445678</td>
+                        <td>Appears to have used in ACC slice 345-352</td>
                         <td>
                           <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
                         </td>
                       </tr>
                       <tr>
-                        <td> Rodney Sims </td>
-                        <td>$9265</td>
-                        <td> alipay</td>
-                        <td>12 dec 2019</td>
-                        <td>26 Aug 2019</td>
+                        <td> 12 January 2019</td>
+                        <td>Dr Vital Reporter 3</td>
+                        <td>87545678</td>
+                        <td>Appears to have used in ACC slice 345-352</td>
                         <td>
                           <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
                         </td>
                       </tr>
                       <tr>
-                        <td> Carolyn Barker </td>
-                        <td>$2263</td>
-                        <td> alipay</td>
-                        <td>30 Sep 2019</td>
-                        <td>20 Oct 2019</td>
+                        <td> 13 January 2019</td>
+                        <td>Dr Vital Reporter 4</td>
+                        <td>65245678</td>
+                        <td>Appears to have used in ACC slice 345-352</td>
+                        <td>
+                          <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td> 14 January 2019</td>
+                        <td>Dr Vital Reporter 2</td>
+                        <td>45215678</td>
+                        <td>Appears to have used in ACC slice 345-352</td>
+                        <td>
+                          <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td> 15 January 2019</td>
+                        <td>Dr Vital Reporter 5</td>
+                        <td>52345678</td>
+                        <td>Appears to have used in ACC slice 345-352</td>
                         <td>
                           <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
                         </td>

@@ -19,13 +19,13 @@ class Header extends React.Component<Props, State> {
     return (
       <nav className="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div className="navbar-brand-wrapper d-flex align-items-center">
-          <a className="navbar-brand brand-logo" href="index.html">
+          <a className="navbar-brand brand-logo" href="/">
             <img src={logo} alt="logo" className="logo-dark" />
           </a>
-          <a className="navbar-brand brand-logo-mini" href="index.html"><img src={logomini} alt="mini logo" /></a>
+          <a className="navbar-brand brand-logo-mini" href="/"><img src={logomini} alt="mini logo" /></a>
         </div>
         <div className="navbar-menu-wrapper d-flex align-items-center flex-grow-1">
-          <h5 className="mb-0 font-weight-medium d-none d-lg-flex">Welcome stallar dashboard!</h5>
+          <h5 className="mb-0 font-weight-medium d-none d-lg-flex">Welcome Radiology dashboard!</h5>
           <ul className="navbar-nav navbar-nav-right ml-auto">
             <li className="nav-item dropdown d-none d-xl-inline-flex user-dropdown">
               <Link
