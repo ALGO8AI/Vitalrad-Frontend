@@ -2,16 +2,25 @@
 import {userConstants} from '../_constants'
 import {userService} from '../_services'
 import {history} from '../_helpers'
+import {alertActions} from './'
 
-const login = (email: string, password: string) => (dispatch: any) => {
+const login = (username: string, password: string) => (dispatch: any) => {
   const request = user => ({type: userConstants.LOGIN_REQUEST, user})
   const success = user => ({type: userConstants.LOGIN_SUCCESS, user})
-  // const failure = error => ({type: userConstants.LOGIN_FAILURE, error})
-  dispatch(request({email}))
+  const failure = error => ({type: userConstants.LOGIN_FAILURE, error})
+  dispatch(request({username}))
 
-  const user = userService.login(email, password)
-  dispatch(success(user))
-  history.push('/dashboard')
+  userService.login(username, password).then(
+    user => {
+      dispatch(success(user))
+      history.push('/dashboard')
+    },
+    error => {
+      console.log('error', error)
+      dispatch(failure(error.toString()))
+      dispatch(alertActions.error(error.toString()))
+    }
+  )
 }
 
 const logout = () => {

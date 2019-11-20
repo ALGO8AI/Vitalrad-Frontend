@@ -10,7 +10,7 @@ export const PrivateRoute = ({component: Component, ...rest}) => (
         ? JSON.parse(localStorage.getItem('_radioauth'))
         : null
       let isAllowed = false;
-      if(tmpToken && tmpToken.name){
+      if(tmpToken && tmpToken.token){
         isAllowed = true
       }
       return isAllowed ? (

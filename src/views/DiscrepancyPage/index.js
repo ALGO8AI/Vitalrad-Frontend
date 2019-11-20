@@ -1,2 +1,2 @@
 //@flow
-export * from './DiscrepancyList'
+export {default as DiscrepancyList} from './DiscrepancyList'

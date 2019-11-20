@@ -31,7 +31,9 @@ export const authentication = (
         user: action.user,
       }
     case userConstants.LOGIN_FAILURE:
-      return {}
+      return {
+        ...state,
+      }
     case userConstants.LOGOUT:
       return {}
     default:

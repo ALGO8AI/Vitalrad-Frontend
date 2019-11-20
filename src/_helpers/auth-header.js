@@ -2,7 +2,7 @@
 export const authHeader = () => {
   // return authorization header with jwt token
   let user = {}
-  let tmpItem = localStorage.getItem('_bloomauth')
+  let tmpItem = localStorage.getItem('_radioauth')
   if (tmpItem) {
     user = JSON.parse(tmpItem)
   }

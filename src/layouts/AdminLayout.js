@@ -11,7 +11,7 @@ type Props = {
   alert: any,
 }
 
-type State = {isShow: boolean, isOrgnaization: string}
+type State = {isShow: boolean}
 
 class AdminLayout extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -19,7 +19,6 @@ class AdminLayout extends React.Component<Props, State> {
 
     this.state = {
       isShow: false,
-      isOrgnaization: '',
     }
   }
   componentDidMount() {
@@ -46,7 +45,6 @@ class AdminLayout extends React.Component<Props, State> {
       <div className="container-scroller">
         <Header
           toggleShow={this.toggleShow}
-          isOrgnaization={this.state.isOrgnaization}
         />
         {alert.message && (
           <div className={`alert ${alert.type}`}>{alert.message}</div>

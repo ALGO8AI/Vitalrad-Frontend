@@ -2,31 +2,49 @@
 import React from 'react'
 import { Widget, addResponseMessage } from 'react-chat-widget';
 import 'react-chat-widget/lib/styles.css';
+import {connect} from 'react-redux'
+import idx from 'idx'
+import {discrepancyActions} from '../../_actions'
 import chat from '../../img/chat.png'
+import Moment from 'react-moment'
 
 type Props = {
-
+  getDiscrepancy: Function,
+  discrepancies: Array<any>,
 }
 
 type State = {
   showChat: boolean,
+  discrepancyList: Array<any>
 };
 
-export class DiscrepancyList extends React.Component<Props, State> {
+class DiscrepancyList extends React.Component<Props, State> {
   
   constructor(props: Props) {
     super(props)
 
     this.state = {
       showChat: false,
+      discrepancyList: []
     }
   }
   componentDidMount() {
-    addResponseMessage("Welcome to this awesome chat!");
+    this.getDiscrepancyList()
+    // addResponseMessage("Welcome to this awesome chat!");
     // this.inputElement.click();
 
   }
   
+  getDiscrepancyList = () => {
+    this.props.getDiscrepancy()
+  }
+
+  UNSAFE_componentWillReceiveProps(nextProps: any) {
+    if (nextProps.discrepancies) {
+      this.setState({discrepancyList: nextProps.discrepancies})
+    }
+  }
+
   handleNewUserMessage = (newMessage) => {
     addResponseMessage("Welcome to this awesome chat!");
     // this.inputElement.click();
@@ -42,6 +60,21 @@ export class DiscrepancyList extends React.Component<Props, State> {
   }
 
   render() {
+    let discrepancyList = idx(this.state, _ => _.discrepancyList)
+      ? this.state.discrepancyList
+      : []
+    let disRow = null
+    disRow = discrepancyList.map((dis, index) => (
+      <tr key={index}>
+        <td><Moment format="Do MMMM YYYY">{dis.Scan_Received_Date}</Moment></td>
+        <td>{dis.Reported_By}</td>
+        <td>{dis.Accession_No}</td>
+        <td>Appears to have used in ACC slice 354-{359 + index + 1}</td>
+        <td>
+          <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
+        </td>
+      </tr>
+    ))
     return (
       <div className="content-wrapper">
         <div className="row">
@@ -63,60 +96,7 @@ export class DiscrepancyList extends React.Component<Props, State> {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td> 10 January 2019</td>
-                        <td>Dr Vital Reporter 1</td>
-                        <td>12345678</td>
-                        <td>Appears to have used in ACC slice 345-352</td>
-                        <td>
-                          <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td> 11 January 2019</td>
-                        <td>Dr Vital Reporter 3</td>
-                        <td>25445678</td>
-                        <td>Appears to have used in ACC slice 345-352</td>
-                        <td>
-                          <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td> 12 January 2019</td>
-                        <td>Dr Vital Reporter 3</td>
-                        <td>87545678</td>
-                        <td>Appears to have used in ACC slice 345-352</td>
-                        <td>
-                          <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td> 13 January 2019</td>
-                        <td>Dr Vital Reporter 4</td>
-                        <td>65245678</td>
-                        <td>Appears to have used in ACC slice 345-352</td>
-                        <td>
-                          <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td> 14 January 2019</td>
-                        <td>Dr Vital Reporter 2</td>
-                        <td>45215678</td>
-                        <td>Appears to have used in ACC slice 345-352</td>
-                        <td>
-                          <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td> 15 January 2019</td>
-                        <td>Dr Vital Reporter 5</td>
-                        <td>52345678</td>
-                        <td>Appears to have used in ACC slice 345-352</td>
-                        <td>
-                          <div className="badge badge-success p-2" onClick={e => this.openChat(e)}>Chat</div>
-                        </td>
-                      </tr>
+                      {disRow}
                     </tbody>
                   </table>
                 </div>
@@ -139,3 +119,17 @@ export class DiscrepancyList extends React.Component<Props, State> {
   }
 }
 
+const mapStateToProps = state => ({
+  discrepancies: state.discrepancy.detail || [],
+})
+
+const mapDispatchToProps = dispatch => ({
+  getDiscrepancy: () => {
+    dispatch(discrepancyActions.listing())
+  },
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(DiscrepancyList)

@@ -1,15 +1,26 @@
 // @flow week
+import {API_URL, headerConfig} from '../_config'
 import {history} from '../_helpers'
+import handleResponse from './handleResponse'
 
-const login = (email: string, password: string) => {
-  const user = {
-    email: email,
-    name: 'vinod',
-    token: 'sdfsdfsfw4643636346346rrtgr1qaqe'
+const login = (username: string, password: string) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: headerConfig.headerData,
+    mode: 'cors',
+    body: JSON.stringify({
+      username,
+      password,
+    }),
   }
 
-  localStorage.setItem('_radioauth', JSON.stringify(user))
-  return user
+  return fetch(`${API_URL}/login`, requestOptions)
+    .then(handleResponse)
+    .then(user => {
+      // store user details and jwt token in local storage to keep user logged in between page refreshes
+      localStorage.setItem('_radioauth', JSON.stringify(user))
+      return user
+    })
 }
 
 const logout = () => {

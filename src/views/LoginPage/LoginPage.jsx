@@ -71,7 +71,7 @@ export class LoginPage extends React.Component<Props, State> {
                 <form className="pt-3" id="loginForm" name="form" onSubmit={e => this.handleSubmit(e)}>
                   <div className={'form-group' + (submitted && !username ? ' has-error' : '')}>
                     <input
-                      type="email"
+                      type="text"
                       placeholder="User Name"
                       className="form-control"
                       name="username"
