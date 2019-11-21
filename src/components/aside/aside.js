@@ -1,6 +1,5 @@
 // @flow
 import React from 'react'
-import face8 from '../../img/faces/face8.jpg'
 import {Link} from 'react-router-dom'
 type Props = {
   pageType: string,
@@ -15,17 +14,9 @@ const Asides = (props: Props) => {
             to="/profile"
             className="nav-link"
             >
-            <div className="profile-image">
-              <img className="img-xs rounded-circle" src={face8} alt="profile face" />
-              <div className="dot-indicator bg-success"></div>
-            </div>
             <div className="text-wrapper">
-              <p className="profile-name">Allen Moreno</p>
+              <p className="profile-name">Admin</p>
               <p className="designation">Administrator</p>
-            </div>
-            <div className="icon-container">
-              <i className="icon-bubbles"></i>
-              <div className="dot-indicator bg-danger"></div>
             </div>
           </Link>
         </li>
@@ -49,13 +40,13 @@ const Asides = (props: Props) => {
         </li>
         <li className="nav-item">
           <Link /*exact*/ to="/discrepancy" className="nav-link">
-            <span className="menu-title">Audit</span>
+            <span className="menu-title">Audit Info</span>
             <i className="icon-book-open menu-icon"></i>
           </Link>
         </li>
         <li className="nav-item">
           <Link /*exact*/ to="/discrepancy" className="nav-link">
-            <span className="menu-title">Notes</span>
+            <span className="menu-title">Notices</span>
             <i className="icon-doc menu-icon"></i>
           </Link>
         </li>

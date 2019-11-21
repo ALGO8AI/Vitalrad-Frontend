@@ -2,7 +2,6 @@
 import React from 'react'
 import logo from '../../img/logo.svg'
 import logomini from '../../img/logo-mini.svg'
-import face8 from '../../img/faces/face8.jpg'
 import {Link} from 'react-router-dom'
 type Props = {
   toggleShow: Function,
@@ -34,13 +33,12 @@ class Header extends React.Component<Props, State> {
                 className="nav-link dropdown-toggle"
                 id="UserDropdown" data-toggle="dropdown" aria-expanded="false"
                 >
-                <img className="img-xs rounded-circle ml-2" src={face8} alt="face profile" /> <span className="font-weight-normal"> Allen Moreno </span>
+                <span className="font-weight-normal"> Dear Admin </span>
               </Link>
               <div className="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
                 <div className="dropdown-header text-center">
-                  <img className="img-md rounded-circle" src={face8} alt="round face" />
-                  <p className="mb-1 mt-3">Allen Moreno</p>
-                  <p className="font-weight-light text-muted mb-0">allenmoreno@gmail.com</p>
+                  <p className="mb-1 mt-3">Admin</p>
+                  <p className="font-weight-light text-muted mb-0">admin@gmail.com</p>
                 </div>
                 <Link
                     exact="true" 
