@@ -65,14 +65,24 @@ class DiscrepancyList extends React.Component<Props, State> {
       <tr key={index}>
         <td><Moment format="Do MMMM YYYY">{dis.Scan_Received_Date}</Moment></td>
         <td>{dis.Reported_By}</td>
-        <td data-tip data-for={'tip-'+dis.Accession_No}>{dis.Accession_No}
-        <ReactTooltip id={'tip-'+dis.Accession_No} aria-haspopup='true' role='example'>
+        <td data-tip type="light" data-for={'tip-'+dis.Accession_No}>{dis.Accession_No}
+        <ReactTooltip  type="light" className="grey-border" id={'tip-'+dis.Accession_No} aria-haspopup='true' role='example'>
           <table>
             <tbody>
-              <tr><td>Patients Name : {dis.Patient_First_Name}</td><td>Hospital Name : {dis.Hospital_Name}</td><td>Hospital Number : {dis.Hospital_Number}</td></tr>
-              <tr><td>Scan Received Date : {dis.Scan_Received_Date}</td><td>Scan Received Time : {dis.Scan_Received_time}</td><td>Modality : {dis.Modality}</td></tr>
-              <tr><td>Body Part : {dis.Body_Part}</td><td>Tat Status : {dis.TAT_Status}</td><td></td></tr>
-              <tr><td>Audit Person : {dis.Audit_Person}</td><td>Audit Category : {dis.Audit_Category}</td><td></td></tr>
+              <tr><td className="tip-label">Accession No :</td><td className="tip-value">{dis.Accession_No}</td></tr>
+              <tr><td className="tip-label">Discrepancy Raised by : </td><td className="tip-value">{dis.Reported_By}</td></tr>
+              <tr><td className="tip-label">Discrepancy : </td><td className="tip-value">Appears to have used in ACC slice 354-{359 + index + 1}</td></tr>
+              <tr><td className="tip-label">Day of Date : </td><td className="tip-value">{dis.Scan_Received_Date}</td></tr>
+            </tbody>
+          </table>
+          <br />
+          <h2 className="tip-value">Discrepancy Report</h2>
+          <table>
+            <tbody>
+              <tr className="tip-label"><td>Patients Name : {dis.Patient_First_Name} {dis.Surname}</td><td>Hospital Name : {dis.Hospital_Name}</td><td>Hospital Number : {dis.Hospital_Number}</td></tr>
+              <tr className="tip-label"><td>Scan Received Date : {dis.Scan_Received_Date}</td><td>Scan Received Time : {dis.Scan_Received_time}</td><td>Modality : {dis.Modality}</td></tr>
+              <tr className="tip-label"><td>Body Part : {dis.Body_Part}</td><td>Tat Status : {dis.TAT_Status}</td><td></td></tr>
+              <tr className="tip-label"><td>Audit Person : {dis.Audit_Person}</td><td>Audit Category : {dis.Audit_Category}</td><td></td></tr>
             </tbody>
           </table>
         </ReactTooltip>

@@ -34,7 +34,7 @@ const Asides = (props: Props) => {
         </li>
         <li className="nav-item">
           <Link /*exact*/ to="/discrepancy" className="nav-link">
-            <span className="menu-title">Batch Info</span>
+            <span className="menu-title">Activity Info</span>
             <i className="icon-grid menu-icon"></i>
           </Link>
         </li>

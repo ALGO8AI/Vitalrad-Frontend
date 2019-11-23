@@ -38,7 +38,21 @@ body {
   max-height: 400px;
   overflow-x: scroll;  
 }
-
+.grey-border{
+  border: 1px solid #808386
+}
+.tip-label{
+  color: #2d4b65;
+}
+.tip-value{
+  color: #ff0000;
+}
+h2.tip-value{
+  color: #ff0000;
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+}
 .App {
   text-align: center;
 }
