@@ -13,9 +13,14 @@ export const PrivateRouteLinks = {
     path: '/dashboard',
     roles: ['admin'],
   },
-  user: {
+  discrepancy: {
     component: DiscrepancyList,
     path: '/discrepancy',
     roles: ['admin'],
+  },
+  publicdiscrepancy: {
+    component: DiscrepancyList,
+    path: '/publicdiscrepancy',
+    roles: [],
   },
 }

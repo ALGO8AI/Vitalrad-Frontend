@@ -1,6 +1,7 @@
 import React from 'react'
 import {Route, Redirect} from 'react-router-dom'
 import AdminLayout from '../layouts/AdminLayout'
+import BlankLayout from '../layouts/BlankLayout'
 
 export const PrivateRoute = ({component: Component, ...rest}) => (
   <Route
@@ -13,11 +14,17 @@ export const PrivateRoute = ({component: Component, ...rest}) => (
       if(tmpToken && tmpToken.token){
         isAllowed = true
       }
-      return isAllowed ? (
-        <AdminLayout>
+      if(props.match.path === '/publicdiscrepancy'){
+        isAllowed = true
+      }
+      console.log('rest', rest, props.match)
+      return isAllowed ? ((props.match.path === '/publicdiscrepancy') ? (<BlankLayout>
+          <Component {...props} />
+        </BlankLayout>) :
+        (<AdminLayout>
           <Component {...props} />
         </AdminLayout>
-      ) : (
+      )) : (
         <Redirect to={{pathname: '/', state: {from: props.location}}} />
       )
     }}

@@ -53,6 +53,11 @@ h2.tip-value{
   font-weight: 800;
   text-align: center;
 }
+.blank-panel{
+  width: 100% !important
+}
+
+.blank-panel .content-wrapper{ padding: 0 !important }
 .App {
   text-align: center;
 }
