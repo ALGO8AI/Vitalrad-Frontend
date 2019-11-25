@@ -4,6 +4,11 @@ import {
 } from '../views/DiscrepancyPage'
 
 import {
+  AuditReport,
+} from '../views/AuditPage'
+
+
+import {
   HomePage,
 } from '../views/HomePage'
 
@@ -22,5 +27,10 @@ export const PrivateRouteLinks = {
     component: DiscrepancyList,
     path: '/publicdiscrepancy',
     roles: [],
+  },
+  auditreport: {
+    component: AuditReport,
+    path: '/audit',
+    roles: ['admin'],
   },
 }
