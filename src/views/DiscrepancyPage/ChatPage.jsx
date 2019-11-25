@@ -4,7 +4,7 @@ import 'react-chat-widget/lib/styles.css';
 import {connect} from 'react-redux'
 import idx from 'idx'
 import {chatActions} from '../../_actions'
-
+import './Chat.css'
 type Props = {
   getComment: Function,
   saveComment: Function,
@@ -87,7 +87,7 @@ class ChatPage extends React.Component<Props, State> {
     let chatRow = null
     chatRow = chatList.map((chat, index) => {
       let chatCss = (chat.from_id === 2) ? 'card bg-primary rounded w-75 float-right z-depth-0 mb-1' : 'd-flex w-75  justify-content-start'
-      let chatSubClass = (chat.from_id === 2) ? 'card-text text-white' : 'card-text black-text'
+      let chatSubClass = (chat.from_id === 2) ? 'card-text black-text' : 'card-text black-text'
       return (<div key={index} className={chatCss}>
           <div className="card-body p-2">
             <p className={chatSubClass}>{chat.message}</p>

@@ -56,6 +56,11 @@ h2.tip-value{
 .blank-panel{
   width: 100% !important
 }
+.bg-primary {
+  background: #dbe8f5 !important;
+  color: black !important;
+  background: none !important
+}
 
 .blank-panel .content-wrapper{ padding: 0 !important }
 .App {
