@@ -34,8 +34,6 @@ class AuditReport extends React.Component<Props, State> {
   }
   componentDidMount() {
     this.getDiscrepancyList()
-    let chart = this.refs.chart.getChart();
-    chart.series[0].addPoint({x: 10, y: 12});
   }
   
   getDiscrepancyList = () => {
