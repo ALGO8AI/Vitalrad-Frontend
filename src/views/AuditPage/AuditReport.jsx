@@ -3,7 +3,7 @@ import React from 'react'
 import 'react-chat-widget/lib/styles.css';
 import {connect} from 'react-redux'
 // import idx from 'idx'
-import {discrepancyActions} from '../../_actions'
+import {auditActions} from '../../_actions'
 import {Button} from 'react-bootstrap'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
@@ -11,14 +11,13 @@ import HighchartsReact from 'highcharts-react-official'
 
 
 type Props = {
-  getDiscrepancy: Function,
-  discrepancies: Array<any>,
+  getAuditInfo: Function,
+  audits: Array<any>,
 }
 
 type State = {
   showChat: boolean,
-  discrepancyList: Array<any>,
-  accessionNo: any,
+  auditInfo: Array<any>,
 };
 
 class AuditReport extends React.Component<Props, State> {
@@ -28,44 +27,35 @@ class AuditReport extends React.Component<Props, State> {
 
     this.state = {
       showChat: false,
-      discrepancyList: [],
-      accessionNo: '',
+      auditInfo: [],
     }
   }
   componentDidMount() {
-    this.getDiscrepancyList()
+    this.getAuditInfo()
   }
   
-  getDiscrepancyList = () => {
-    this.props.getDiscrepancy()
+  getAuditInfo = () => {
+    this.props.getAuditInfo()
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
-    if (nextProps.discrepancies) {
-      this.setState({discrepancyList: nextProps.discrepancies})
+    if (nextProps.audits) {
+      this.setState({auditInfo: nextProps.audits})
     }
   }
 
-  openChat = (e: any, disObj: Object) => {
-    this.setState({showChat: !this.state.showChat, activeDisData: disObj})
-  }
-
-  handleClose = (e: any) => {
-    this.setState({showChat: false, accessionNo: '', activeDisData: null})
-  }
-
   render() {
-
-    const options = {
-      title: {
-        text: 'My chart'
-      },
+    const {auditInfo} = this.state
+    console.log('auditInfo', auditInfo.pieData)
+    let pieData = (auditInfo.pieData) ? auditInfo.pieData.map( s => ({name:s.category, y: s.cat}) ) : [];
+    const pieOptions = {
       chart: {
         plotBackgroundColor: null,
         plotBorderWidth: null,
         plotShadow: false,
         type: 'pie'
       },
+      title:{text: null},
       tooltip: {
         pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
       },
@@ -76,44 +66,93 @@ class AuditReport extends React.Component<Props, State> {
           dataLabels: {
             enabled: true,
             format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-          }
+          },
+          showInLegend: true
         }
       },
+      // legend: {
+      //   enabled: true,
+      //   layout: 'horizontal',
+      //   align: 'right',
+      //   verticalAlign: 'middle',
+      // },
       series: [{
         name: 'Brands',
         colorByPoint: true,
-        data: [{
-            name: 'Chrome',
-            y: 61.41,
-            sliced: true,
-            selected: true
-        }, {
-            name: 'Internet Explorer',
-            y: 11.84
-        }, {
-            name: 'Firefox',
-            y: 10.85
-        }, {
-            name: 'Edge',
-            y: 4.67
-        }, {
-            name: 'Safari',
-            y: 4.18
-        }, {
-            name: 'Sogou Explorer',
-            y: 1.64
-        }, {
-            name: 'Opera',
-            y: 1.6
-        }, {
-            name: 'QQ',
-            y: 1.2
-        }, {
-            name: 'Other',
-            y: 2.61
-        }]
+        data: pieData
       }]
     }
+
+    // let graphData = (auditInfo.graphData) ? auditInfo.graphData.map( s => ({name:s.category, y: s.cat}) ) : [];
+    const stackOptions = {chart: {
+        type: 'column',
+        plotBackgroundColor: null,
+        plotBorderWidth: null,
+        plotShadow: false,
+      },
+      title: {
+          text: null
+      },
+      xAxis: {
+          categories: ['01-01-2018', '01-02-2018', '01-03-2018', '01-04-2018', '01-05-2018']
+      },
+      yAxis: {
+          min: 0,
+          title: {
+              text: 'Count'
+          },
+          stackLabels: {
+              enabled: true,
+              style: {
+                  fontWeight: 'bold',
+                  color: ( // theme
+                      Highcharts.defaultOptions.title.style &&
+                      Highcharts.defaultOptions.title.style.color
+                  ) || 'gray'
+              }
+          }
+      },
+      legend: {
+          align: 'right',
+          x: -30,
+          verticalAlign: 'top',
+          y: -10,
+          floating: true,
+          backgroundColor:
+              Highcharts.defaultOptions.legend.backgroundColor || 'white',
+          borderColor: '#CCC',
+          borderWidth: 1,
+          shadow: false
+      },
+      tooltip: {
+          headerFormat: '<b>{point.x}</b><br/>',
+          pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+      },
+      plotOptions: {
+          column: {
+              stacking: 'normal',
+              dataLabels: {
+                  enabled: true
+              }
+          }
+      },
+      series: [{
+          name: 'cat 1',
+          data: [5, 3, 4, 7, 2]
+      }, {
+          name: 'cat2',
+          data: [2, 2, 3, 2, 1]
+      }, {
+          name: 'cat 3',
+          data: [3, 4, 4, 2, 5]
+      }, {
+          name: 'cat 4',
+          data: [4, 1, 3, 2, 3]
+      }, {
+          name: 'cat 5',
+          data: [1, 3, 4, 2, 5]
+      }]
+    };
     return (
       <div className="content-wrapper">
         <div className="row">
@@ -138,7 +177,7 @@ class AuditReport extends React.Component<Props, State> {
                 </div>
                 <HighchartsReact
                   highcharts={Highcharts}
-                  options={options}
+                  options={pieOptions}
                 />
               </div>
             </div>
@@ -149,7 +188,10 @@ class AuditReport extends React.Component<Props, State> {
                 <div className="d-sm-flex align-items-center mb-4">
                   <h4 className="card-title mb-sm-0">Time-Line Audit Report</h4>
                 </div>
-                ---
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={stackOptions}
+                />
               </div>
             </div>
           </div>
@@ -160,12 +202,12 @@ class AuditReport extends React.Component<Props, State> {
 }
 
 const mapStateToProps = state => ({
-  discrepancies: state.discrepancy.detail || [],
+  audits: state.audit.detail || [],
 })
 
 const mapDispatchToProps = dispatch => ({
-  getDiscrepancy: () => {
-    dispatch(discrepancyActions.listing())
+  getAuditInfo: () => {
+    dispatch(auditActions.getAuditInfo())
   },
 })
 
