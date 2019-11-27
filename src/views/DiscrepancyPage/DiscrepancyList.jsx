@@ -33,7 +33,8 @@ class DiscrepancyList extends React.Component<Props, State> {
       activeDisData: null
     }
   }
-  componentDidMount() {
+  componentDidMount = () => {
+    console.log('this.props', this.props )
     this.getDiscrepancyList()
   }
   
@@ -41,7 +42,7 @@ class DiscrepancyList extends React.Component<Props, State> {
     this.props.getDiscrepancy()
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: any) {
+  UNSAFE_componentWillReceiveProps = (nextProps: any) => {
     if (nextProps.discrepancies) {
       this.setState({discrepancyList: nextProps.discrepancies})
     }
@@ -57,6 +58,7 @@ class DiscrepancyList extends React.Component<Props, State> {
 
   render() {
     const {activeDisData} = this.state
+    const {match} = this.props
     let discrepancyList = idx(this.state, _ => _.discrepancyList)
       ? this.state.discrepancyList
       : []
@@ -99,9 +101,9 @@ class DiscrepancyList extends React.Component<Props, State> {
           <div className="col-md-12 grid-margin stretch-card">
             <div className="card">
               <div className="card-body">
-                <div className="d-sm-flex align-items-center mb-4">
+                {match && match.path !== '/publicdiscrepancy' && (<div className="d-sm-flex align-items-center mb-4">
                   <h4 className="card-title mb-sm-0">Discrepancy Dashboard</h4>
-                </div>
+                </div>)}
                 <div className="table-responsive border rounded p-1">
                   <table className="table">
                     <thead>
