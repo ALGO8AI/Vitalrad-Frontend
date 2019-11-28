@@ -74,7 +74,7 @@ class DiscrepancyList extends React.Component<Props, State> {
               <tr><td className="tip-label">Accession No :</td><td className="tip-value">{dis.Accession_No}</td></tr>
               <tr><td className="tip-label">Discrepancy Raised by : </td><td className="tip-value">{dis.Reported_By}</td></tr>
               <tr><td className="tip-label">Discrepancy : </td><td className="tip-value">Appears to have used in ACC slice 354-{359 + index + 1}</td></tr>
-              <tr><td className="tip-label">Day of Date : </td><td className="tip-value">{dis.Scan_Received_Date}</td></tr>
+              <tr><td className="tip-label">Date : </td><td className="tip-value">{dis.Scan_Received_Date}</td></tr>
             </tbody>
           </table>
           <br />
