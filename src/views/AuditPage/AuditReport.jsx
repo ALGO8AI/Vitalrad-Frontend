@@ -44,6 +44,18 @@ class AuditReport extends React.Component<Props, State> {
     }
   }
 
+  stackChart = (graphData: any) => {
+    // let legendArr = ['Cat 1', 'Cat 3', 'Cat 4', 'Cat 5'];
+    // {
+    //       name: 'cat 1',
+    //       data: [5, 3, 4, 7, 2]
+    //   }
+    let catData = (graphData) ? graphData.map( s => s.Scan_Received_Date ) : [];
+    console.log('catData', catData, graphData)
+    let graphRowData = (graphData) ? graphData.map( s => ({name:s.category, y: s.cat}) ) : [];
+
+  }
+
   render() {
     const {auditInfo} = this.state
     console.log('auditInfo', auditInfo.pieData)
@@ -82,7 +94,9 @@ class AuditReport extends React.Component<Props, State> {
         data: pieData
       }]
     }
-
+    if(auditInfo.graphData){
+      this.stackChart(auditInfo.graphData)
+    }
     // let graphData = (auditInfo.graphData) ? auditInfo.graphData.map( s => ({name:s.category, y: s.cat}) ) : [];
     const stackOptions = {chart: {
         type: 'column',
