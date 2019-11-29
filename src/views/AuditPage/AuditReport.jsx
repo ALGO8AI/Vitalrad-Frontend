@@ -45,14 +45,22 @@ class AuditReport extends React.Component<Props, State> {
   }
 
   stackChart = (graphData: any) => {
-    // let legendArr = ['Cat 1', 'Cat 3', 'Cat 4', 'Cat 5'];
+    let legendArr = ['Cat 1', 'Cat 3', 'Cat 4', 'Cat 5'];
     // {
     //       name: 'cat 1',
     //       data: [5, 3, 4, 7, 2]
     //   }
     let catData = (graphData) ? graphData.map( s => s.Scan_Received_Date ) : [];
-    console.log('catData', catData, graphData)
-    let graphRowData = (graphData) ? graphData.map( s => ({name:s.category, y: s.cat}) ) : [];
+    
+    let seriesData = legendArr.map( s => ({name: s, data: []}) )
+    console.log('catData', catData, graphData, seriesData)
+    
+    graphData.map( s => {
+      console.log('s', s)
+      
+      
+    } )
+    // let graphRowData = (graphData) ? graphData.map( s => ({name:s.category, y: s.cat}) ) : [];
 
   }
 
