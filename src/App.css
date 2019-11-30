@@ -93,6 +93,11 @@ h2.tip-value{
   padding-left:0px !important;
 }
 
+.stackChartContainer .highcharts-container  {
+  overflow-x: scroll !important;
+}
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
