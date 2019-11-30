@@ -30,6 +30,23 @@ export const audit = (
         ...state,
         isDataProcessing: false,
       }
+    case auditConstants.AUDIT_FILTER_REQUEST:
+      return {
+        ...state,
+        isDataProcessing: true,
+        ...action.auditfilters,
+      }
+    case auditConstants.AUDIT_FILTER_SUCCESS:
+      return {
+        ...state,
+        isDataProcessing: false,
+        auditfilters: action.auditfilters.data.detail || [],
+      }
+    case auditConstants.AUDIT_FILTER_FAILURE:
+      return {
+        ...state,
+        isDataProcessing: false,
+      }
     default:
       return state
   }

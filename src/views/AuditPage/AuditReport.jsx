@@ -7,66 +7,130 @@ import {auditActions} from '../../_actions'
 import {Button} from 'react-bootstrap'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
-
-
-
+import Select from 'react-select'
+import makeAnimated from 'react-select/animated'
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
+import dateformat from "dateformat"
 type Props = {
   getAuditInfo: Function,
+  getAuditFilters: Function,
   audits: Array<any>,
+  auditfilters: Object
 }
 
 type State = {
   showChat: boolean,
   auditInfo: Array<any>,
+  hospitalFilter: Array<any>,
+  modalityFilter: Array<any>,
+  categoryFilter: Array<any>,
+  auditfilters: Object,
+  startDate: any,
+  endDate: any
 };
+
+const animatedComponents = makeAnimated()
 
 class AuditReport extends React.Component<Props, State> {
   
   constructor(props: Props) {
     super(props)
-
+    let newCurrDate = new Date()
+    newCurrDate.setMinutes(newCurrDate.getMinutes() - 15*24*60)
     this.state = {
       showChat: false,
       auditInfo: [],
+      hospitalFilter: [],
+      modalityFilter: [],
+      categoryFilter: [],
+      startDate: newCurrDate,
+      endDate: new Date()
     }
   }
   componentDidMount() {
     this.getAuditInfo()
+    this.props.getAuditFilters()
   }
   
   getAuditInfo = () => {
-    this.props.getAuditInfo()
+    const {startDate, endDate} = this.state
+    let formData = {from: startDate, to:endDate, hospital: this.state.hospitalFilter, modality: this.state.modalityFilter, category: this.state.categoryFilter}
+    this.props.getAuditInfo(formData)
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
     if (nextProps.audits) {
       this.setState({auditInfo: nextProps.audits})
     }
+
+    if (nextProps.auditfilters && this.state.auditfilters !== nextProps.auditfilters ) {
+      this.setState({auditfilters: nextProps.auditfilters})
+    }
   }
 
   stackChart = (graphData: any) => {
-    let legendArr = ['Cat 1', 'Cat 3', 'Cat 4', 'Cat 5'];
+    // let legendArr = ['Cat 1', 'Cat 3', 'Cat 4', 'Cat 5'];
     // {
     //       name: 'cat 1',
     //       data: [5, 3, 4, 7, 2]
     //   }
-    let catData = (graphData) ? graphData.map( s => s.Scan_Received_Date ) : [];
+    // let catData = (graphData) ? graphData.map( s => s.Scan_Received_Date ) : [];
     
-    let seriesData = legendArr.map( s => ({name: s, data: []}) )
-    console.log('catData', catData, graphData, seriesData)
+    // let seriesData = legendArr.map( s => ({name: s, data: []}) )
     
-    graphData.map( s => {
-      console.log('s', s)
+    // graphData.map( s => {
+    //   console.log('s', s)
       
       
-    } )
+    // } )
+    // let graphRowData = (graphData) ? graphData.map( s => ({name:s.category, y: s.cat}) ) : [];
     // let graphRowData = (graphData) ? graphData.map( s => ({name:s.category, y: s.cat}) ) : [];
 
   }
 
+  handleChange = (e: any) => {
+    const {name, value} = e.target
+    this.setState({[name]: value})
+  }
+
+  handleDateChange = (edate: any, dType) => {
+    this.setState({[dType]: edate})
+  }
+
+  optionClicked = (optionsList: any, optionType: string) => {
+    this.setState({[optionType]: optionsList})
+  }
+
+  formatFilterData = (dataType: string) => {
+    const {auditfilters} = this.state
+    let listData = (auditfilters && auditfilters[dataType]) ? auditfilters[dataType] : []
+    let tmpArr = []
+    tmpArr = listData.map(ele => ({
+        value: ele,
+        label: ele,
+      }))
+    return tmpArr
+  }
+
+  handleFilter = (e: any) => {
+    e.preventDefault()
+    const {startDate, endDate, hospitalFilter, modalityFilter, categoryFilter} = this.state
+    let tmpHospitalArr = (hospitalFilter) ? hospitalFilter.map( s => s.value ) : [];
+    let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
+    let tmpCategoryArr = (categoryFilter) ? categoryFilter.map( s => s.value ) : [];
+    let formData = {
+      from: dateformat(startDate, 'dd-mm-yyyy'), 
+      to:dateformat(endDate, 'dd-mm-yyyy'), 
+      hospital: tmpHospitalArr, 
+      modality: tmpModalityArr, 
+      category: tmpCategoryArr
+    }
+    this.props.getAuditInfo(formData)
+  }
+
   render() {
-    const {auditInfo} = this.state
-    console.log('auditInfo', auditInfo.pieData)
+    const {auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate} = this.state
     let pieData = (auditInfo.pieData) ? auditInfo.pieData.map( s => ({name:s.category, y: s.cat}) ) : [];
     const pieOptions = {
       chart: {
@@ -106,7 +170,8 @@ class AuditReport extends React.Component<Props, State> {
       this.stackChart(auditInfo.graphData)
     }
     // let graphData = (auditInfo.graphData) ? auditInfo.graphData.map( s => ({name:s.category, y: s.cat}) ) : [];
-    const stackOptions = {chart: {
+    const stackOptions = {
+      chart: {
         type: 'column',
         plotBackgroundColor: null,
         plotBorderWidth: null,
@@ -175,15 +240,69 @@ class AuditReport extends React.Component<Props, State> {
           data: [1, 3, 4, 2, 5]
       }]
     };
+
+    const hospitalList = this.formatFilterData('hospital')
+    const modalityList = this.formatFilterData('Modality')
+    const categoryList = this.formatFilterData('category')
     return (
       <div className="content-wrapper">
         <div className="row">
           <div className="col-md-12 grid-margin stretch-card">
             <div className="card">
               <div className="card-body">
-                <table>
+                <table className="table responsive-grid">
                   <tbody>
-                    <tr><td >Hospital :</td><td >Modality :</td><td >Category :</td><td >Date Range</td><td ><Button>Filter</Button></td></tr>
+                    <tr>
+                    <td>Hospital </td>
+                    <td><Select
+                      name="hospitalFilter"
+                      closeMenuOnSelect={false}
+                      components={animatedComponents}
+                      value={hospitalFilter}
+                      onChange={e => this.optionClicked(e, 'hospitalFilter')}
+                      isMulti
+                      options={hospitalList}
+                    />
+                    </td>
+                    <td >Modality </td>
+                    <td><Select
+                      name="modalityFilter"
+                      closeMenuOnSelect={false}
+                      components={animatedComponents}
+                      value={modalityFilter}
+                      onChange={e => this.optionClicked(e, 'modalityFilter')}
+                      isMulti
+                      options={modalityList}
+                    />
+                    </td><td >Category </td>
+                    <td><Select
+                      name="categoryFilter"
+                      closeMenuOnSelect={false}
+                      components={animatedComponents}
+                      value={categoryFilter}
+                      onChange={e => this.optionClicked(e, 'categoryFilter')}
+                      isMulti
+                      options={categoryList}
+                    /></td>
+                  </tr>
+                  <tr>
+                    <td >Date Range</td>
+                    <td ><DatePicker
+                        className="form-control"
+                        name= 'startDate'
+                        selected={startDate}
+                        onChange={e => this.handleDateChange(e, 'startDate')}
+                      /> - 
+                    </td>
+                    <td colSpan="2"><DatePicker
+                        className="form-control"
+                        name= 'endDate'
+                        selected={endDate}
+                        minDate={new Date()}
+                        onChange={e => this.handleDateChange(e, 'endDate')}
+                      />
+                    </td>
+                    <td colSpan="3"><Button onClick={e => this.handleFilter(e)}>Filter</Button></td></tr>
                   </tbody>
                 </table>
               </div>
@@ -225,11 +344,15 @@ class AuditReport extends React.Component<Props, State> {
 
 const mapStateToProps = state => ({
   audits: state.audit.detail || [],
+  ...state.audit || []
 })
 
 const mapDispatchToProps = dispatch => ({
-  getAuditInfo: () => {
-    dispatch(auditActions.getAuditInfo())
+  getAuditInfo: (formData: Object) => {
+    dispatch(auditActions.getAuditInfo(formData))
+  },
+  getAuditFilters: () => {
+    dispatch(auditActions.getAuditFilters())
   },
 })
 

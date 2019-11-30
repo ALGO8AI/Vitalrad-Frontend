@@ -29,6 +29,32 @@ const getAuditInfo = (formData: Object) => (dispatch: any) => {
   )
 }
 
+const getAuditFilters = () => (dispatch: any) => {
+  const request = auditfilters => ({
+    type: auditConstants.AUDIT_FILTER_REQUEST,
+    auditfilters,
+  })
+  const success = auditfilters => ({
+    type: auditConstants.AUDIT_FILTER_SUCCESS,
+    auditfilters,
+  })
+  const failure = error => ({
+    type: auditConstants.AUDIT_FILTER_FAILURE,
+    error,
+  })
+  dispatch(request([]))
+
+  auditService.getAuditFilters().then(
+    auditfilters => {
+      dispatch(success(auditfilters))
+    },
+    error => {
+      dispatch(failure(error.toString()))
+      dispatch(alertActions.error(error.toString()))
+    }
+  )
+}
 export const auditActions = {
   getAuditInfo,
+  getAuditFilters
 }
