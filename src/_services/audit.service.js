@@ -18,6 +18,21 @@ const getAuditInfo = (formData : Object) => {
     })
 }
 
+const getAuditByCategory = (formData : Object) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {...headerConfig.headerData, ...authHeader()},
+    mode: 'cors',
+    body: JSON.stringify(formData),
+  }
+
+  return fetch(`${API_URL}/getAuditByCategory`, requestOptions)
+    .then(handleResponse)
+    .then(audit => {
+      return audit
+    })
+}
+
 const getAuditFilters = (formData : Object = {}) => {
   const requestOptions = {
     method: 'POST',
@@ -35,5 +50,6 @@ const getAuditFilters = (formData : Object = {}) => {
 
 export const auditService = {
   getAuditInfo,
-  getAuditFilters
+  getAuditFilters,
+  getAuditByCategory
 }

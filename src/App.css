@@ -69,6 +69,22 @@ h2.tip-value{
 .btn-theme {
   background-color: #537b37;
 }
+
+.create-container .form-group {
+    display: block;
+    padding: 0 15px;
+}
+.create-container .form-label {
+    display: inline-block;
+    vertical-align: top;
+    width: 30%;
+    text-align: left;
+    margin-bottom: 0;
+    line-height: 38px;
+}
+.create-container .form-control {
+    text-align: left;
+}
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 40vmin;

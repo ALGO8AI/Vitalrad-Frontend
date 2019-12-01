@@ -4,7 +4,7 @@ import 'react-chat-widget/lib/styles.css';
 import {connect} from 'react-redux'
 // import idx from 'idx'
 import {auditActions} from '../../_actions'
-import {Button} from 'react-bootstrap'
+import {Button, Row, Col, Form} from 'react-bootstrap'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import Select from 'react-select'
@@ -12,9 +12,12 @@ import makeAnimated from 'react-select/animated'
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import dateformat from "dateformat"
+import Moment from 'react-moment'
+
 type Props = {
   getAuditInfo: Function,
   getAuditFilters: Function,
+  getAuditByCategory: Function,
   audits: Array<any>,
   auditfilters: Object
 }
@@ -27,7 +30,9 @@ type State = {
   categoryFilter: Array<any>,
   auditfilters: Object,
   startDate: any,
-  endDate: any
+  endDate: any,
+  auditList: Array<any>,
+  isTableShow: boolean
 };
 
 const animatedComponents = makeAnimated()
@@ -46,7 +51,9 @@ class AuditReport extends React.Component<Props, State> {
       categoryFilter: [],
       auditfilters: {},
       startDate: newCurrDate,
-      endDate: new Date()
+      endDate: new Date(),
+      auditList: [],
+      isTableShow: false
     }
   }
   componentDidMount() {
@@ -70,12 +77,17 @@ class AuditReport extends React.Component<Props, State> {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
+    // console.log('nextProps', nextProps)
     if (nextProps.audits) {
       this.setState({auditInfo: nextProps.audits})
     }
 
     if (nextProps.auditfilters && this.state.auditfilters !== nextProps.auditfilters ) {
       this.setState({auditfilters: nextProps.auditfilters})
+    }
+
+    if (nextProps.auditlist && this.state.auditList !== nextProps.auditlist ) {
+      this.setState({auditList: nextProps.auditlist})
     }
   }
 
@@ -145,12 +157,37 @@ class AuditReport extends React.Component<Props, State> {
     this.getAuditInfo()
   }
 
+  showTableData = (e) => {
+    const {name} = e.target
+    if(name){
+      this.setState({isTableShow: true})
+      const {startDate, endDate, hospitalFilter, modalityFilter} = this.state
+      let tmpHospitalArr = (hospitalFilter) ? hospitalFilter.map( s => s.value ) : [];
+      let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
+      let tmpCategoryArr = [name];
+      let formData = {
+        from: dateformat(startDate, 'dd-mm-yyyy'), 
+        to:dateformat(endDate, 'dd-mm-yyyy'), 
+        hospital: tmpHospitalArr, 
+        modality: tmpModalityArr, 
+        category: tmpCategoryArr
+      }
+      this.props.getAuditByCategory(formData)
+    }
+  }
+
   stackColumnChart = (auditInfo) => {
     const {graphData} = auditInfo
+    const filterChartData = (e) => this.showTableData(e)
+
     let dateSeries = (graphData) ? graphData.map( s => s.Scan_Received_Date ) : [];
     return {
       chart: {
         type: 'column',
+        scrollablePlotArea: {
+            minWidth: 400,
+            scrollPositionX: 1
+        },
         plotBackgroundColor: null,
         plotBorderWidth: null,
         plotShadow: false,
@@ -170,7 +207,7 @@ class AuditReport extends React.Component<Props, State> {
               text: 'Count'
           },
           stackLabels: {
-              enabled: true,
+              enabled: false,
               style: {
                   fontWeight: 'bold',
                   color: ( // theme
@@ -184,13 +221,13 @@ class AuditReport extends React.Component<Props, State> {
           align: 'right',
           x: -30,
           verticalAlign: 'top',
-          y: -10,
-          floating: true,
+          // y: -10,
+          // floating: true,
           backgroundColor:
               Highcharts.defaultOptions.legend.backgroundColor || 'white',
           borderColor: '#CCC',
-          borderWidth: 1,
-          shadow: false
+          // borderWidth: 1,
+          shadow: false,
       },
       tooltip: {
           headerFormat: '<b>{point.x}</b><br/>',
@@ -201,6 +238,11 @@ class AuditReport extends React.Component<Props, State> {
               stacking: 'normal',
               dataLabels: {
                   enabled: true
+              },
+              events: {
+                  legendItemClick: function(e){
+                    filterChartData(e)
+                  }
               },
               cropThreshold: 10000
           }
@@ -236,6 +278,18 @@ class AuditReport extends React.Component<Props, State> {
           showInLegend: true
         }
       },
+      legend: {
+        align: 'right',
+        x: -30,
+        verticalAlign: 'top',
+        // y: -10,
+        // floating: true,
+        backgroundColor:
+            Highcharts.defaultOptions.legend.backgroundColor || 'white',
+        borderColor: '#CCC',
+        // borderWidth: 1,
+        shadow: false,
+      },
       // legend: {
       //   enabled: true,
       //   layout: 'horizontal',
@@ -251,7 +305,7 @@ class AuditReport extends React.Component<Props, State> {
   }
 
   render() {
-    const {auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate} = this.state
+    const {auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate, isTableShow, auditList} = this.state
     
     const pieOptions = this.pieChart(auditInfo);
 
@@ -260,71 +314,95 @@ class AuditReport extends React.Component<Props, State> {
     const hospitalList = this.formatFilterData('hospital')
     const modalityList = this.formatFilterData('Modality')
     const categoryList = this.formatFilterData('category')
+
+    let auditCatRow = null
+    auditCatRow = auditList.map((audit, index) => (
+      <tr key={index}>
+        <td><Moment format="Do MMMM YYYY">{audit.Scan_Received_Date}</Moment></td>
+        <td>{audit.Reported_By}</td>
+        <td>{audit.Accession_No}
+        </td>
+        <td>Appears to have used in ACC slice 354-{359 + index + 1}</td>
+        <td>
+        </td>
+      </tr>
+    ))
+
     return (
       <div className="content-wrapper">
-        <div className="row">
-          <div className="col-md-12 grid-margin stretch-card">
-            <div className="card">
-              <div className="card-body">
-                <table className="table responsive-grid">
-                  <tbody>
-                    <tr>
-                    <td>Hospital </td>
-                    <td><Select
-                      name="hospitalFilter"
-                      closeMenuOnSelect={false}
-                      components={animatedComponents}
-                      value={hospitalFilter}
-                      onChange={e => this.optionClicked(e, 'hospitalFilter')}
-                      isMulti
-                      options={hospitalList}
-                    />
-                    </td>
-                    <td >Modality </td>
-                    <td><Select
-                      name="modalityFilter"
-                      closeMenuOnSelect={false}
-                      components={animatedComponents}
-                      value={modalityFilter}
-                      onChange={e => this.optionClicked(e, 'modalityFilter')}
-                      isMulti
-                      options={modalityList}
-                    />
-                    </td><td >Category </td>
-                    <td><Select
-                      name="categoryFilter"
-                      closeMenuOnSelect={false}
-                      components={animatedComponents}
-                      value={categoryFilter}
-                      onChange={e => this.optionClicked(e, 'categoryFilter')}
-                      isMulti
-                      options={categoryList}
-                    /></td>
-                  </tr>
-                  <tr>
-                    <td >Date Range</td>
-                    <td ><DatePicker
-                        className="form-control"
-                        name= 'startDate'
-                        selected={startDate}
-                        onChange={e => this.handleDateChange(e, 'startDate')}
-                      /> - 
-                    </td>
-                    <td colSpan="2"><DatePicker
-                        className="form-control"
-                        name= 'endDate'
-                        selected={endDate}
-                        minDate={new Date()}
-                        onChange={e => this.handleDateChange(e, 'endDate')}
-                      />
-                    </td>
-                    <td colSpan="3"><Button onClick={e => this.handleFilter(e)}>Filter</Button></td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <div className="card">
+          <div className="card-body">
+            <Row className="create-container">
+              <Col lg={4} md={4} sm={12}>
+                <Form.Group>
+                  <Form.Label>Hospital</Form.Label>
+                  <Select
+                    name="hospitalFilter"
+                    closeMenuOnSelect={false}
+                    components={animatedComponents}
+                    value={hospitalFilter}
+                    onChange={e => this.optionClicked(e, 'hospitalFilter')}
+                    isMulti
+                    options={hospitalList}
+                  />
+                </Form.Group>
+              </Col>
+              <Col lg={4} md={4} sm={12}>
+                <Form.Group>
+                  <Form.Label>Modality</Form.Label>
+                  <Select
+                    name="modalityFilter"
+                    closeMenuOnSelect={false}
+                    components={animatedComponents}
+                    value={modalityFilter}
+                    onChange={e => this.optionClicked(e, 'modalityFilter')}
+                    isMulti
+                    options={modalityList}
+                  />
+                </Form.Group>
+              </Col>
+              <Col lg={4} md={4} sm={12}>
+                <Form.Group>
+                  <Form.Label>Category</Form.Label>
+                  <Select
+                    name="categoryFilter"
+                    closeMenuOnSelect={false}
+                    components={animatedComponents}
+                    value={categoryFilter}
+                    onChange={e => this.optionClicked(e, 'categoryFilter')}
+                    isMulti
+                    options={categoryList}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <hr />
+            <Row className="create-container">
+              <Col lg={8} md={8} sm={12}>
+                <Form.Group>
+                  <Form.Label style={{'width': '16%'}}>Date Range</Form.Label>
+                  <DatePicker
+                    className="form-control"
+                    name= 'startDate'
+                    selected={startDate}
+                    onChange={e => this.handleDateChange(e, 'startDate')}
+                  /> -  
+                  <DatePicker
+                    className="form-control"
+                    name= 'endDate'
+                    selected={endDate}
+                    minDate={new Date()}
+                    onChange={e => this.handleDateChange(e, 'endDate')}
+                  />
+                </Form.Group>
+              </Col>
+              <Col lg={2} md={2} sm={12}>
+                <Button onClick={e => this.handleFilter(e)}>Filter</Button>
+              </Col>
+            </Row>
           </div>
         </div>
+        <br />  
         <div className="row">
           <div className="col-md-6 grid-margin stretch-card">
             <div className="card">
@@ -341,7 +419,7 @@ class AuditReport extends React.Component<Props, State> {
           </div>
           <div className="col-md-6 grid-margin stretch-card">
             <div className="card">
-              <div className="card-body stackChartContainer">
+              <div className="card-body">
                 <div className="d-sm-flex align-items-center mb-4">
                   <h4 className="card-title mb-sm-0">Time-Line Audit Report</h4>
                 </div>
@@ -353,6 +431,30 @@ class AuditReport extends React.Component<Props, State> {
             </div>
           </div>
         </div>
+        {isTableShow && (<div className="row">
+          <div className="col-md-12 grid-margin stretch-card">
+            <div className="card">
+              <div className="card-body">
+                <div className="table-responsive border rounded p-1">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th className="font-weight-bold">Date</th>
+                        <th className="font-weight-bold">Raised By</th>
+                        <th className="font-weight-bold">Accession No.</th>
+                        <th className="font-weight-bold">Discrepancy</th>
+                        <th className="font-weight-bold"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {auditCatRow}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>)}
       </div>
     )
   }
@@ -366,6 +468,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   getAuditInfo: (formData: Object) => {
     dispatch(auditActions.getAuditInfo(formData))
+  },
+  getAuditByCategory: (formData: Object) => {
+    dispatch(auditActions.getAuditByCategory(formData))
   },
   getAuditFilters: () => {
     dispatch(auditActions.getAuditFilters())

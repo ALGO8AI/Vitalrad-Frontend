@@ -29,6 +29,32 @@ const getAuditInfo = (formData: Object) => (dispatch: any) => {
   )
 }
 
+const getAuditByCategory = (formData: Object) => (dispatch: any) => {
+  const request = auditlist => ({
+    type: auditConstants.AUDIT_CATEGORY_DATA_REQUEST,
+    auditlist,
+  })
+  const success = auditlist => ({
+    type: auditConstants.AUDIT_CATEGORY_DATA_SUCCESS,
+    auditlist,
+  })
+  const failure = error => ({
+    type: auditConstants.AUDIT_CATEGORY_DATA_FAILURE,
+    error,
+  })
+  dispatch(request([]))
+
+  auditService.getAuditByCategory(formData).then(
+    auditlist => {
+      dispatch(success(auditlist))
+    },
+    error => {
+      dispatch(failure(error.toString()))
+      dispatch(alertActions.error(error.toString()))
+    }
+  )
+}
+
 const getAuditFilters = () => (dispatch: any) => {
   const request = auditfilters => ({
     type: auditConstants.AUDIT_FILTER_REQUEST,
@@ -56,5 +82,6 @@ const getAuditFilters = () => (dispatch: any) => {
 }
 export const auditActions = {
   getAuditInfo,
-  getAuditFilters
+  getAuditFilters,
+  getAuditByCategory
 }
