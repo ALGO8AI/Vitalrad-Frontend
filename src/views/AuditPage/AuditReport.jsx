@@ -256,6 +256,7 @@ class AuditReport extends React.Component<Props, State> {
 
   pieChart = (auditInfo) => {
     let pieData = (auditInfo.pieData) ? auditInfo.pieData.map( s => ({name:s.category, y: s.cat}) ) : [];
+    const filterChartData = (e) => this.showTableData(e)
     return {
       chart: {
         plotBackgroundColor: null,
@@ -276,7 +277,14 @@ class AuditReport extends React.Component<Props, State> {
             format: '<b>{point.name}</b>: {point.percentage:.1f} %'
           },
           showInLegend: true,
-          colors: ['#8b0000', '#ffcccb', '#ffa500', '#417f68', '#013220']
+          colors: ['#8b0000', '#ffcccb', '#ffa500', '#417f68', '#013220'],
+          point: {
+            events: {
+              legendItemClick: function(e) {
+                filterChartData(e)    
+              }
+            }
+          }
         }
       },
       legend: {
