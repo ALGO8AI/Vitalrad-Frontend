@@ -1,7 +1,7 @@
 // @flow
 import React from 'react'
-import logo from '../../img/logo.svg'
-import logomini from '../../img/logo-mini.svg'
+import logo from '../../img/logo.jpg'
+import logomini from '../../img/logo-mini.jpg'
 import {Link} from 'react-router-dom'
 type Props = {
   toggleShow: Function,

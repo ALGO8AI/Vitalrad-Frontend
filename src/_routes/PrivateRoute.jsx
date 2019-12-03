@@ -14,11 +14,11 @@ export const PrivateRoute = ({component: Component, ...rest}) => (
       if(tmpToken && tmpToken.token){
         isAllowed = true
       }
-      if(props.match.path === '/publicdiscrepancy'){
+      const publicUrl = ['/publicdiscrepancy', '/publicaudit']
+      if(publicUrl.find(k => k===props.match.path)){
         isAllowed = true
       }
-      console.log('rest', rest, props.match)
-      return isAllowed ? ((props.match.path === '/publicdiscrepancy') ? (<BlankLayout>
+      return isAllowed ? ((publicUrl.find(k => k===props.match.path)) ? (<BlankLayout>
           <Component {...props} />
         </BlankLayout>) :
         (<AdminLayout>

@@ -12305,7 +12305,7 @@ dl {
     -webkit-transition: width 0.25s ease, background 0.25s ease;
     -moz-transition: width 0.25s ease, background 0.25s ease;
     -ms-transition: width 0.25s ease, background 0.25s ease;
-    background: #181824;
+    background: #fff; /*#181824;*/
     width: 240px;
     height: 70px;
     padding: 0 1.75rem; }
@@ -12588,7 +12588,7 @@ dl {
 /* Sidebar */
 .sidebar {
   min-height: calc(100vh - 70px);
-  background: #181824;
+  background: #73031a; /*#181824;*/
   font-family: "Open Sans", sans-serif;
   padding: 0;
   width: 240px;

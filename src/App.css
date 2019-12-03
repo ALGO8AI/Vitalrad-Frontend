@@ -113,6 +113,13 @@ h2.tip-value{
   overflow-x: scroll !important;
 }
 
+.navbar .navbar-brand-wrapper .navbar-brand img {
+     width: auto; 
+     max-width: inherit !important ; 
+     height: 70px; 
+    margin: auto;
+    vertical-align: middle;
+}
 
 @keyframes App-logo-spin {
   from {

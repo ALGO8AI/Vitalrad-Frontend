@@ -107,7 +107,7 @@ class AuditReport extends React.Component<Props, State> {
   stackColumnChartData = (graphData: any) => {
     const {auditfilters} = this.state
     let legendArr = (auditfilters && auditfilters.category) ? auditfilters.category : [] ;
-    
+    let legendColors = {'Cat 1':'#8b0000', 'Cat 2':'#ffcccb', 'Cat 3':'#ffa500', 'Cat 4':'#417f68', 'Cat 5':'#013220'};
     let dateSeries = (graphData) ? graphData.map( s => s.Scan_Received_Date ) : [];
     let dataSeries = (graphData) ? graphData.map( s => s.catcount ) : [];
     let seriesData = []
@@ -121,7 +121,7 @@ class AuditReport extends React.Component<Props, State> {
         else
         {
           let tmpCount = this.getCount(dataSeries, dindex, cval)
-          seriesData.push({name: cval, data: [tmpCount]})
+          seriesData.push({name: cval, color: legendColors[cval], data: [tmpCount]})
         }
       })
     })
@@ -234,18 +234,18 @@ class AuditReport extends React.Component<Props, State> {
           pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
       },
       plotOptions: {
-          column: {
-              stacking: 'normal',
-              dataLabels: {
-                  enabled: true
-              },
-              events: {
-                  legendItemClick: function(e){
-                    filterChartData(e)
-                  }
-              },
-              cropThreshold: 10000
-          }
+        column: {
+          stacking: 'normal',
+          dataLabels: {
+            enabled: true
+          },
+          events: {
+            legendItemClick: function(e){
+              filterChartData(e)
+            }
+          },
+          cropThreshold: 10000,
+        }
       },
       scrollbar: {
         enabled: true
@@ -275,7 +275,8 @@ class AuditReport extends React.Component<Props, State> {
             enabled: true,
             format: '<b>{point.name}</b>: {point.percentage:.1f} %'
           },
-          showInLegend: true
+          showInLegend: true,
+          colors: ['#8b0000', '#ffcccb', '#ffa500', '#417f68', '#013220']
         }
       },
       legend: {
@@ -318,13 +319,20 @@ class AuditReport extends React.Component<Props, State> {
     let auditCatRow = null
     auditCatRow = auditList.map((audit, index) => (
       <tr key={index}>
-        <td><Moment format="Do MMMM YYYY">{audit.Scan_Received_Date}</Moment></td>
+        <td><Moment format="lll">{audit.Scan_Received_Date}</Moment></td>
         <td>{audit.Reported_By}</td>
-        <td>{audit.Accession_No}
-        </td>
+        <td>{audit.Accession_No}</td>
+        <td>{audit.Hospital_Number}</td>
+        <td>{audit.Hospital_Name}</td>
+        <td>{audit.Patient_First_Name} {audit.Surname}</td>
+        <td>{audit.Modality}</td>
+        <td>{audit.Body_Part}</td>
+        <td>{audit.Reported}</td>
+        <td>{audit.Reported_By}</td>
+        <td>{audit.TAT_Status}</td>
+        <td>{audit.Audit_Person}</td>
+        <td>{audit.Audit_Category}</td>
         <td>Appears to have used in ACC slice 354-{359 + index + 1}</td>
-        <td>
-        </td>
       </tr>
     ))
 
@@ -442,8 +450,17 @@ class AuditReport extends React.Component<Props, State> {
                         <th className="font-weight-bold">Date</th>
                         <th className="font-weight-bold">Raised By</th>
                         <th className="font-weight-bold">Accession No.</th>
+                        <th className="font-weight-bold">Hospital No.</th>
+                        <th className="font-weight-bold">Hospital</th>
+                        <th className="font-weight-bold">Patient</th>
+                        <th className="font-weight-bold">Modality</th>
+                        <th className="font-weight-bold">Body Part</th>
+                        <th className="font-weight-bold">Report</th>
+                        <th className="font-weight-bold">Reported By</th>
+                        <th className="font-weight-bold">TAT Status</th>
+                        <th className="font-weight-bold">Audit Person</th>
+                        <th className="font-weight-bold">Audit Category</th>
                         <th className="font-weight-bold">Discrepancy</th>
-                        <th className="font-weight-bold"></th>
                       </tr>
                     </thead>
                     <tbody>

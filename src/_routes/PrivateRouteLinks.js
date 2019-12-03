@@ -33,4 +33,9 @@ export const PrivateRouteLinks = {
     path: '/audit',
     roles: ['admin'],
   },
+  publicauditreport: {
+    component: AuditReport,
+    path: '/publicaudit',
+    roles: [],
+  },
 }

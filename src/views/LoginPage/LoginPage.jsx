@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import './login.css'
 import {userActions} from '../../_actions'
 import _ from 'lodash'
-import logo from '../../img/logo.svg'
+import logo from '../../img/logo.jpg'
 type State = {
   username: string,
   password: string,
