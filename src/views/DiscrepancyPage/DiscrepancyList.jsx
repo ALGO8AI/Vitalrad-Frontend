@@ -8,6 +8,7 @@ import Moment from 'react-moment'
 import {Modal} from 'react-bootstrap'
 import ReactTooltip from 'react-tooltip'
 import ChatPage from './ChatPage'
+import {Pagination} from '../../components/common';
 
 type Props = {
   getDiscrepancy: Function,
@@ -18,7 +19,10 @@ type State = {
   showChat: boolean,
   discrepancyList: Array<any>,
   accessionNo: any,
-  activeDisData: Object
+  activeDisData: Object,
+  currentPage: number,
+  totalPages: number,
+  pageLimit: number
 };
 
 class DiscrepancyList extends React.Component<Props, State> {
@@ -30,16 +34,23 @@ class DiscrepancyList extends React.Component<Props, State> {
       showChat: false,
       discrepancyList: [],
       accessionNo: '',
-      activeDisData: null
+      activeDisData: null,
+      totalPages: 0,
+      pageLimit: 10,
+      currentPage: 1
     }
   }
   componentDidMount = () => {
-    console.log('this.props', this.props )
     this.getDiscrepancyList()
   }
   
   getDiscrepancyList = () => {
-    this.props.getDiscrepancy()
+    const {currentPage, pageLimit} = this.state
+    let formData = {
+      offset: currentPage * pageLimit,
+      limit: pageLimit
+    }
+    this.props.getDiscrepancy(formData)
   }
 
   UNSAFE_componentWillReceiveProps = (nextProps: any) => {
@@ -56,13 +67,28 @@ class DiscrepancyList extends React.Component<Props, State> {
     this.setState({showChat: false, accessionNo: '', activeDisData: null})
   }
 
+  onPageChanged = data => {
+    const { currentPage } = data;
+    const {pageLimit} = this.state
+    const offset = (currentPage) * pageLimit;
+    
+    let formData = {
+      offset: offset,
+      limit: pageLimit
+    }
+    this.props.getDiscrepancy(formData)
+    
+
+  }
+
   render() {
-    const {activeDisData} = this.state
+    const {activeDisData, pageLimit} = this.state
     const {match} = this.props
     let discrepancyList = idx(this.state, _ => _.discrepancyList)
       ? this.state.discrepancyList
       : []
     let disRow = null
+    let totalDiscrepancy = (discrepancyList.length > 0) ? discrepancyList[0].totalcount : 0
     disRow = discrepancyList.map((dis, index) => (
       <tr key={index}>
         <td><Moment format="Do MMMM YYYY">{dis.Scan_Received_Date}</Moment></td>
@@ -120,7 +146,14 @@ class DiscrepancyList extends React.Component<Props, State> {
                     </tbody>
                   </table>
                 </div>
+                {(totalDiscrepancy > 0) && (<Pagination 
+                  totalRecords={totalDiscrepancy} 
+                  pageLimit={pageLimit} 
+                  pageNeighbours={1} 
+                  onPageChanged={this.onPageChanged} 
+                />)}
               </div>
+              
               <Modal
                 className="add-event"
                 show={this.state.showChat}
@@ -140,8 +173,8 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  getDiscrepancy: () => {
-    dispatch(discrepancyActions.listing())
+  getDiscrepancy: (formData: Object) => {
+    dispatch(discrepancyActions.listing(formData))
   },
 })
 
