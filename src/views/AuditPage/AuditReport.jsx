@@ -6,7 +6,10 @@ import {connect} from 'react-redux'
 import {auditActions} from '../../_actions'
 import {Button, Row, Col, Form} from 'react-bootstrap'
 import Highcharts from 'highcharts'
-import HighchartsReact from 'highcharts-react-official'
+import Highstock from 'highcharts/highstock';
+import ReactHighcharts from 'react-highcharts';
+
+// import HighchartsReact from 'highcharts-react-official'
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated'
 import DatePicker from "react-datepicker"
@@ -36,6 +39,7 @@ type State = {
 };
 
 const animatedComponents = makeAnimated()
+const Charts = ReactHighcharts.withHighcharts(Highstock);
 
 class AuditReport extends React.Component<Props, State> {
   
@@ -181,11 +185,11 @@ class AuditReport extends React.Component<Props, State> {
     const filterChartData = (e) => this.showTableData(e)
 
     let dateSeries = (graphData) ? graphData.map( s => s.Scan_Received_Date ) : [];
+    let scrollMax = (dateSeries.length === 0) ? 0 : ((dateSeries.length >=4) ? 4 : dateSeries.length-1) 
     return {
       chart: {
         type: 'column',
         scrollablePlotArea: {
-            minWidth: 400,
             scrollPositionX: 1
         },
         plotBackgroundColor: null,
@@ -197,9 +201,10 @@ class AuditReport extends React.Component<Props, State> {
       },
       xAxis: {
           categories: dateSeries,
-          scrollbar: {
-            enabled: true
-          },
+          max: scrollMax,
+      },
+      scrollbar: {
+        enabled: true
       },
       yAxis: {
           min: 0,
@@ -246,9 +251,6 @@ class AuditReport extends React.Component<Props, State> {
           },
           cropThreshold: 10000,
         }
-      },
-      scrollbar: {
-        enabled: true
       },
       series: this.stackColumnChartData(graphData)
     }
@@ -313,6 +315,21 @@ class AuditReport extends React.Component<Props, State> {
     }
   }
 
+  // test = () =>{
+  //   var data = [];
+  //   for (var i = 0; i < 100; i++) {
+  //     var value = Math.random() * 10;
+  //     var x = {
+  //       id: i,
+  //       name: 'test ' + i,
+  //       y: value
+  //     }
+  //     data.push(x);
+  //   }
+  //   console.log('data', data)
+  //   return data;
+  // }
+
   render() {
     const {auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate, isTableShow, auditList} = this.state
     
@@ -323,6 +340,48 @@ class AuditReport extends React.Component<Props, State> {
     const hospitalList = this.formatFilterData('hospital')
     const modalityList = this.formatFilterData('Modality')
     const categoryList = this.formatFilterData('category')
+
+    // const testFn = () => this.test()
+
+    // const scrollChartOptions = {
+    //   chart: {
+    //     type: 'column',
+    //     scrollablePlotArea: {
+    //         minWidth: 500,
+    //         scrollPositionX: 1
+    //     },
+    //   },
+    //   plotOptions: {
+    //     column: {
+    //       stacking: 'normal',
+    //       cropThreshold: 10000
+    //     },
+    //   },
+    //   xAxis: {
+    //     type: 'category',
+    //     max: 10,
+    //   },
+    //   scrollbar: {
+    //     enabled: true
+    //   },
+    //   series: [{
+    //       name: "A",
+    //       data: testFn()
+    //     }, {
+    //       name: "B",
+    //       data: testFn()
+    //     },
+    //     {
+    //       name: "C",
+    //       data: testFn()
+    //     },
+    //     {
+    //       name: "D",
+    //       data: testFn()
+    //     }
+    //   ]
+    // }
+
 
     let auditCatRow = null
     auditCatRow = auditList.map((audit, index) => (
@@ -426,10 +485,11 @@ class AuditReport extends React.Component<Props, State> {
                 <div className="d-sm-flex align-items-center mb-4">
                   <h4 className="card-title mb-sm-0">Category Split Report</h4>
                 </div>
-                <HighchartsReact
+                {/*<HighchartsReact
                   highcharts={Highcharts}
                   options={pieOptions}
-                />
+                />*/}
+                <Charts isPureConfig={true} config={pieOptions}></Charts>
               </div>
             </div>
           </div>
@@ -439,14 +499,21 @@ class AuditReport extends React.Component<Props, State> {
                 <div className="d-sm-flex align-items-center mb-4">
                   <h4 className="card-title mb-sm-0">Time-Line Audit Report</h4>
                 </div>
-                <HighchartsReact
+                {/*<HighchartsReact
                   highcharts={Highcharts}
                   options={stackOptions}
-                />
+                />*/}
+                <Charts isPureConfig={true} config={stackOptions}></Charts>
               </div>
             </div>
           </div>
-        </div>
+        </div>   
+          {/*<Charts isPureConfig={true} config={scrollChartOptions}></Charts>
+
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={scrollChartOptions}
+                />*/}
         {isTableShow && (<div className="row">
           <div className="col-md-12 grid-margin stretch-card">
             <div className="card">
