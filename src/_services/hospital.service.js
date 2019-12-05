@@ -16,14 +16,14 @@ const create = (formData: formType) => {
     body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/api/category`, requestOptions)
+  return fetch(`${API_URL}/api/hospital`, requestOptions)
     .then(handleResponse)
-    .then(category => {
-      return category
+    .then(hospital => {
+      return hospital
     })
 }
 
-const updateDetail = (formData: formType, categoryId: string) => {
+const updateDetail = (formData: formType, hospitalId: string) => {
   const requestOptions = {
     method: 'PUT',
     headers: {...headerConfig.headerData, ...authHeader()},
@@ -31,10 +31,10 @@ const updateDetail = (formData: formType, categoryId: string) => {
     body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/api/category/${categoryId}`, requestOptions)
+  return fetch(`${API_URL}/api/hospital/${hospitalId}`, requestOptions)
     .then(handleResponse)
-    .then(category => {
-      return category
+    .then(hospital => {
+      return hospital
     })
 }
 
@@ -45,60 +45,45 @@ const listing = () => {
     mode: 'cors',
   }
 
-  return fetch(`${API_URL}/api/category`, requestOptions)
+  return fetch(`${API_URL}/api/hospital`, requestOptions)
     .then(handleResponse)
-    .then(category => {
-      return category
+    .then(hospital => {
+      return hospital
     })
 }
 
-const fetchCategoryWithHobby = () => {
-  const requestOptions = {
-    method: 'POST',
-    headers: {...headerConfig.headerData, ...authHeader()},
-    mode: 'cors',
-  }
-
-  return fetch(`${API_URL}/api/category/fetchHobbyByCategory`, requestOptions)
-    .then(handleResponse)
-    .then(category => {
-      return category
-    })
-}
-
-const detail = (categoryId: string) => {
+const detail = (hospitalId: string) => {
   const requestOptions = {
     method: 'GET',
     headers: {...headerConfig.headerData, ...authHeader()},
     mode: 'cors',
   }
 
-  return fetch(`${API_URL}/api/category/${categoryId}`, requestOptions)
+  return fetch(`${API_URL}/api/hospital/${hospitalId}`, requestOptions)
     .then(handleResponse)
     .then((response: any) => {
-      return response.category
+      return response.hospital
     })
 }
 
-const deleteRecord = (categoryId: string) => {
+const deleteRecord = (hospitalId: string) => {
   const requestOptions = {
     method: 'DELETE',
     headers: {...headerConfig.headerData, ...authHeader()},
     mode: 'cors',
   }
 
-  return fetch(`${API_URL}/api/category/${categoryId}`, requestOptions)
+  return fetch(`${API_URL}/api/hospital/${hospitalId}`, requestOptions)
     .then(handleResponse)
     .then((response: any) => {
       return response.message
     })
 }
 
-export const categoryService = {
+export const hospitalService = {
   create,
   listing,
   detail,
   deleteRecord,
   updateDetail,
-  fetchCategoryWithHobby,
 }

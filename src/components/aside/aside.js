@@ -1,6 +1,7 @@
 // @flow
 import React from 'react'
 import {Link} from 'react-router-dom'
+import './aside.css'
 type Props = {
   pageType: string,
 };
@@ -47,6 +48,18 @@ const Asides = (props: Props) => {
         <li className="nav-item">
           <Link /*exact*/ to="/discrepancy" className="nav-link">
             <span className="menu-title">Notices</span>
+            <i className="icon-doc menu-icon"></i>
+          </Link>
+        </li>
+        <li className="nav-item">
+          <Link /*exact*/ to="/hospital" className="nav-link">
+            <span className="menu-title">Hospital</span>
+            <i className="icon-doc menu-icon"></i>
+          </Link>
+        </li>
+        <li className="nav-item">
+          <Link /*exact*/ to="/doctor" className="nav-link">
+            <span className="menu-title">Doctor</span>
             <i className="icon-doc menu-icon"></i>
           </Link>
         </li>
