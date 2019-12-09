@@ -17,14 +17,19 @@ type Props = {
 
 type State = {
   name: string,
-  description: string,
+  address: string,
+  username: string,
+  password: string,
+  email: string,
+  mobile: string,
+  code: string,
   submitted: boolean,
   hospitalId: string,
   validation: Object,
-}
+};
 
 const checklength = (checklength: string) => {
-  return checklength.length > 10 ? false : true
+  return checklength.length > 3 ? false : true
 }
 
 const validator = new FormValidator([
@@ -35,16 +40,34 @@ const validator = new FormValidator([
     message: 'Name is required.',
   },
   {
-    field: 'description',
+    field: 'code',
     method: 'isEmpty',
     validWhen: false,
-    message: 'Description is required.',
+    message: 'code is required.',
   },
   {
-    field: 'description',
+    field: 'username',
+    method: 'isEmpty',
+    validWhen: false,
+    message: 'Username is required.',
+  },
+  {
+    field: 'username',
     method: checklength,
     validWhen: false,
-    message: 'Description length must be at least 10 characters long.',
+    message: 'Username length must be at least 3 characters long.',
+  },
+  {
+    field: 'password',
+    method: 'isEmpty',
+    validWhen: false,
+    message: 'Password is required.',
+  },
+  {
+    field: 'password',
+    method: checklength,
+    validWhen: false,
+    message: 'Password length must be at least 3 characters long.',
   },
 ])
 
@@ -54,7 +77,12 @@ export class HospitalFormPage extends React.Component<Props, State> {
 
     this.state = {
       name: '',
-      description: '',
+      code: '',
+      username: '',
+      password: '',
+      email: '',
+      mobile: '',
+      address: '',
       submitted: false,
       hospitalId: '',
       validation: validator.valid(),
@@ -72,11 +100,18 @@ export class HospitalFormPage extends React.Component<Props, State> {
     this.setState({validation})
     this.setState({submitted: true})
     if (validation.isValid) {
-      const {name, description, hospitalId} = this.state
-      if (name && description) {
+      const {name, code, username, password, email, mobile, address, hospitalId} = this.state
+      if (name && code) {
         let formData = {
           name: name,
-          description: description,
+          code: code,
+          username: username,
+          password: password,
+          email: email,
+          mobile: mobile,
+          address : address,
+          user_type: 'hospital',
+          "status":'active'
         }
         if (hospitalId && hospitalId !== '') {
           this.props.updateDetail(formData, hospitalId)
@@ -94,7 +129,12 @@ export class HospitalFormPage extends React.Component<Props, State> {
   clearState = () => {
     this.setState({
       name: '',
-      description: '',
+      code: '',
+      username: '',
+      password: '',
+      email: '',
+      mobile: '',
+      address: '',
       submitted: false,
       validation: validator.valid(),
     })
@@ -134,7 +174,11 @@ export class HospitalFormPage extends React.Component<Props, State> {
       let {hospitalDetail} = nextProps.hospital
       this.setState({
         name: hospitalDetail.name,
-        description: hospitalDetail.description,
+        code: hospitalDetail.code,
+        username: hospitalDetail.username,
+        email: hospitalDetail.email,
+        mobile: hospitalDetail.mobile,
+        address: hospitalDetail.address,
       })
     }
   }
@@ -144,7 +188,7 @@ export class HospitalFormPage extends React.Component<Props, State> {
     let isProcessing =
       hospital && hospital.isProcessing ? hospital.isProcessing : false
 
-    const {name, description, submitted, hospitalId} = this.state
+    const {name, code, username, password, mobile, email, address, submitted, hospitalId} = this.state
     let validation
     validation = submitted // if the form has been submitted at least once
       ? validator.validate(this.state) // then check validity every time we render
@@ -176,22 +220,71 @@ export class HospitalFormPage extends React.Component<Props, State> {
                   )}
                 </Form.Group>
                 <Form.Group
-                  className={
-                    validation.description.isInvalid ? ' has-error' : ''
-                  }>
-                  <Form.Label>Description</Form.Label>
+                  className={validation.code.isInvalid ? ' has-error' : ''}>
+                  <Form.Label>Hospital Code</Form.Label>
                   <Form.Control
-                    as="textarea"
-                    name="description"
-                    rows="3"
-                    value={description}
+                    type="text"
+                    name="code"
+                    value={code}
                     onChange={e => this.handleChange(e)}
                   />
-                  {validation.description.isInvalid && (
-                    <div className="help-block">
-                      {validation.description.message}
-                    </div>
+                  {validation.code.isInvalid && (
+                    <div className="help-block">{validation.code.message}</div>
                   )}
+                </Form.Group>
+                <Form.Group
+                  className={validation.username.isInvalid ? ' has-error' : ''}>
+                  <Form.Label>Username</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="username"
+                    value={username}
+                    onChange={e => this.handleChange(e)}
+                  />
+                  {validation.username.isInvalid && (
+                    <div className="help-block">{validation.username.message}</div>
+                  )}
+                </Form.Group>
+                <Form.Group
+                  className={validation.password.isInvalid ? ' has-error' : ''}>
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="password"
+                    value={password}
+                    onChange={e => this.handleChange(e)}
+                  />
+                  {validation.password.isInvalid && (
+                    <div className="help-block">{validation.password.message}</div>
+                  )}
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={e => this.handleChange(e)}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Mobile</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="mobile"
+                    value={mobile}
+                    onChange={e => this.handleChange(e)}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    name="address"
+                    rows="3"
+                    value={address}
+                    onChange={e => this.handleChange(e)}
+                  />
                 </Form.Group>
                 <Button type="submit" className="btn btn-primary">
                   {hospitalId ? 'Update' : 'Create'}

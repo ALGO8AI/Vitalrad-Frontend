@@ -16,7 +16,7 @@ const create = (formData: formType) => {
     body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/api/hospital`, requestOptions)
+  return fetch(`${API_URL}/signup`, requestOptions)
     .then(handleResponse)
     .then(hospital => {
       return hospital
