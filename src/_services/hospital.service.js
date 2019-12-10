@@ -38,19 +38,21 @@ const updateDetail = (formData: formType, hospitalId: string) => {
     })
 }
 
-const listing = () => {
+const listing = (formData: formType) => {
   const requestOptions = {
-    method: 'GET',
+    method: 'POST',
     headers: {...headerConfig.headerData, ...authHeader()},
     mode: 'cors',
+    body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/api/hospital`, requestOptions)
+  return fetch(`${API_URL}/getProfiles`, requestOptions)
     .then(handleResponse)
     .then(hospital => {
       return hospital
     })
 }
+
 
 const detail = (hospitalId: string) => {
   const requestOptions = {

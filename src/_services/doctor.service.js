@@ -17,7 +17,7 @@ const create = (formData: formType) => {
     body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/api/doctor`, requestOptions)
+  return fetch(`${API_URL}/getProfiles`, requestOptions)
     .then(handleResponse)
     .then(doctor => {
       return doctor
@@ -39,14 +39,15 @@ const updateDetail = (formData: formType, doctorId: string) => {
     })
 }
 
-const listing = () => {
+const listing = (formData: formType) => {
   const requestOptions = {
-    method: 'GET',
+    method: 'POST',
     headers: {...headerConfig.headerData, ...authHeader()},
     mode: 'cors',
+    body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/api/doctor`, requestOptions)
+  return fetch(`${API_URL}/getProfiles`, requestOptions)
     .then(handleResponse)
     .then(doctor => {
       return doctor

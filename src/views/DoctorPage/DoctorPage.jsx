@@ -22,7 +22,7 @@ type State = {
   doctorList: Array<any>,
   doctorId: string,
   showDoctorFrom: boolean,
-}
+};
 
 export class DoctorPage extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -97,9 +97,9 @@ export class DoctorPage extends React.Component<Props, State> {
         : []
       doctorList = doctorList.filter(
         item =>
-          item.name.toLowerCase().search(event.target.value.toLowerCase()) !==
+          item.profile.name.toLowerCase().search(event.target.value.toLowerCase()) !==
             -1 ||
-          item.description
+          item.username
             .toLowerCase()
             .search(event.target.value.toLowerCase()) !== -1
       )
@@ -109,16 +109,18 @@ export class DoctorPage extends React.Component<Props, State> {
 
   render() {
     const {showDoctorFrom, doctorId} = this.state
-    let HospitalRow = null
+    let doctorRow = null
     let doctorList = idx(this.state, _ => _.doctorList)
       ? this.state.doctorList
       : []
-    HospitalRow = doctorList.map((doctor, index) => (
+    doctorRow = doctorList.map((doctor, index) => (
       <tr key={index}>
         <td className="doctorname">
-          <span className="name">{doctor.name}</span>
-          <span className="detail">{doctor.description}</span>
+          <span className="name">{doctor.username}</span>
         </td>
+        <td className="doctorname">{doctor.profile.name}</td>
+        <td className="doctorname">{doctor.profile.code}</td>
+        <td className="doctorname">{doctor.status}</td>
         <td className="actions">
           <Button onClick={e => this.handleShow(e, doctor._id)}>
             <Icon icon={pencil} />
@@ -159,11 +161,14 @@ export class DoctorPage extends React.Component<Props, State> {
           <Table className="responsive-grid">
             <thead>
               <tr>
+                <th>Username</th>
                 <th>Name</th>
+                <th>Code</th>
+                <th>Status</th>
                 <th width="10%">Actions</th>
               </tr>
             </thead>
-            <tbody>{HospitalRow}</tbody>
+            <tbody>{doctorRow}</tbody>
           </Table>
         </div>
         <Modal
@@ -178,7 +183,7 @@ export class DoctorPage extends React.Component<Props, State> {
 }
 
 const mapStateToProps = state => ({
-  doctors: state.doctor.doctors || [],
+  doctors: state.doctor.detail || [],
 })
 
 const mapDispatchToProps = dispatch => ({

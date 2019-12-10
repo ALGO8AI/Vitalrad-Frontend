@@ -22,7 +22,7 @@ type State = {
   hospitalList: Array<any>,
   hospitalId: string,
   showHospitalFrom: boolean,
-}
+};
 
 export class HospitalPage extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -97,9 +97,9 @@ export class HospitalPage extends React.Component<Props, State> {
         : []
       hospitalList = hospitalList.filter(
         item =>
-          item.name.toLowerCase().search(event.target.value.toLowerCase()) !==
+          item.profile.name.toLowerCase().search(event.target.value.toLowerCase()) !==
             -1 ||
-          item.description
+          item.username
             .toLowerCase()
             .search(event.target.value.toLowerCase()) !== -1
       )
@@ -115,10 +115,12 @@ export class HospitalPage extends React.Component<Props, State> {
       : []
     hospitalRow = hospitalList.map((hospital, index) => (
       <tr key={index}>
-        <td className="name">
-          <span className="name">{hospital.name}</span>
-          <span className="detail">{hospital.description}</span>
+        <td className="hospitalname">
+          <span className="name">{hospital.username}</span>
         </td>
+        <td className="hospitalname">{hospital.profile.name}</td>
+        <td className="hospitalname">{hospital.profile.code}</td>
+        <td className="hospitalname">{hospital.status}</td>
         <td className="actions">
           <Button onClick={e => this.handleShow(e, hospital._id)}>
             <Icon icon={pencil} />
@@ -161,7 +163,10 @@ export class HospitalPage extends React.Component<Props, State> {
           <Table className="responsive-grid">
             <thead>
               <tr>
+                <th>Username</th>
                 <th>Name</th>
+                <th>Code</th>
+                <th>Status</th>
                 <th width="10%">Actions</th>
               </tr>
             </thead>
@@ -188,7 +193,7 @@ export class HospitalPage extends React.Component<Props, State> {
 }
 
 const mapStateToProps = state => ({
-  hospitals: state.hospital.hospitals || [],
+  hospitals: state.hospital.detail || [],
 })
 
 const mapDispatchToProps = dispatch => ({
