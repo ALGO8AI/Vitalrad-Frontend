@@ -40,7 +40,7 @@ export class HospitalPage extends React.Component<Props, State> {
   }
 
   getHospitalListing = () => {
-    this.props.hospitalListing()
+    this.props.hospitalListing({"user_type": "hospital"})
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
@@ -57,8 +57,14 @@ export class HospitalPage extends React.Component<Props, State> {
 
   deleteHospital = (hospitalId: string) => {
     if (hospitalId) {
-      this.props.deleteRecord(hospitalId)
-      this.getHospitalListing()
+      let formData = {
+        "_id" :hospitalId,
+        "deleted": true
+      }
+      this.props.deleteRecord(formData)
+      setTimeout(() => {
+        this.getHospitalListing()
+      }, 500);
     }
   }
 
@@ -197,11 +203,11 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  hospitalListing: () => {
-    dispatch(hospitalActions.listing())
+  hospitalListing: (formData) => {
+    dispatch(hospitalActions.listing(formData))
   },
-  deleteRecord: hospitalId => {
-    dispatch(hospitalActions.deleteRecord(hospitalId))
+  deleteRecord: formData => {
+    dispatch(hospitalActions.deleteRecord(formData))
   },
 })
 

@@ -111,7 +111,7 @@ export class HospitalFormPage extends React.Component<Props, State> {
           mobile: mobile,
           address : address,
           user_type: 'hospital',
-          "status":'active'
+          // status:'active'
         }
         if (hospitalId && hospitalId !== '') {
           this.props.updateDetail(formData, hospitalId)

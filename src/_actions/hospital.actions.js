@@ -69,7 +69,7 @@ const updateDetail = (formData: formType, hospitalId: string) => (
   )
 }
 
-const listing = () => (dispatch: any) => {
+const listing = (formData) => (dispatch: any) => {
   const request = hospitals => ({
     type: hospitalConstants.HOSPITAL_LISTING_REQUEST,
     hospitals,
@@ -84,7 +84,7 @@ const listing = () => (dispatch: any) => {
   })
   dispatch(request([]))
 
-  hospitalService.listing().then(
+  hospitalService.listing(formData).then(
     hospitals => {
       dispatch(success(hospitals))
     },

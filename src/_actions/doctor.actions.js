@@ -51,7 +51,7 @@ const updateDetail = (formData: formType, doctorId: string) => (
   )
 }
 
-const listing = () => (dispatch: any) => {
+const listing = (formData) => (dispatch: any) => {
   const request = doctors => ({
     type: doctorConstants.DOCTOR_LISTING_REQUEST,
     doctors,
@@ -63,7 +63,7 @@ const listing = () => (dispatch: any) => {
   const failure = error => ({type: doctorConstants.DOCTOR_LISTING_FAILURE, error})
   dispatch(request([]))
 
-  doctorService.listing().then(
+  doctorService.listing(formData).then(
     doctors => {
       dispatch(success(doctors))
     },

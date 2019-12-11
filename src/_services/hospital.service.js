@@ -68,14 +68,15 @@ const detail = (hospitalId: string) => {
     })
 }
 
-const deleteRecord = (hospitalId: string) => {
+const deleteRecord = (formData: Object) => {
   const requestOptions = {
-    method: 'DELETE',
+    method: 'POST',
     headers: {...headerConfig.headerData, ...authHeader()},
     mode: 'cors',
+    body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/api/hospital/${hospitalId}`, requestOptions)
+  return fetch(`${API_URL}/removeUser`, requestOptions)
     .then(handleResponse)
     .then((response: any) => {
       return response.message
