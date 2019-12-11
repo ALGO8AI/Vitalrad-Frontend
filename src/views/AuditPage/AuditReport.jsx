@@ -407,7 +407,7 @@ class AuditReport extends React.Component<Props, State> {
       <div className="content-wrapper">
         <div className="card">
           <div className="card-body">
-            <Row className="create-container">
+            <Row >
               <Col lg={4} md={4} sm={12}>
                 <Form.Group>
                   <Form.Label>Hospital</Form.Label>
@@ -452,7 +452,7 @@ class AuditReport extends React.Component<Props, State> {
               </Col>
             </Row>
             <hr />
-            <Row className="create-container">
+            <Row >
               <Col lg={8} md={8} sm={12}>
                 <Form.Group>
                   <Form.Label style={{'width': '16%'}}>Date Range</Form.Label>

@@ -130,7 +130,7 @@ class DiscrepancyList extends React.Component<Props, State> {
                 {match && match.path !== '/publicdiscrepancy' && (<div className="d-sm-flex align-items-center mb-4">
                   <h4 className="card-title mb-sm-0">Discrepancy Dashboard</h4>
                 </div>)}
-                <div className="table-responsive border rounded p-1">
+                <div className="table-responsive">
                   <table className="table">
                     <thead>
                       <tr>

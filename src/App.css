@@ -31,6 +31,9 @@ body {
 .rcw-widget-container{
   z-index: 9999 !important;
 }
+
+.grey-border table tr {border: 0px !important}
+.table {width:99% !important;}
 .modal .modal-dialog{
   margin-top: 50px !important
 }
