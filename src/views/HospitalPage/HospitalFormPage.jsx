@@ -32,6 +32,18 @@ const checklength = (checklength: string) => {
   return checklength.length > 3 ? false : true
 }
 
+const checkPassword = (password: string, state: Object) => {
+  if (state.hospitalId !== '' && password.length === 0) {
+    return false
+  } else if (state.hospitalId !== '' && password.length > 5) {
+    return false
+  } else if (state.hospitalId === '' && password.length > 5) {
+    return false
+  } else {
+    return true
+  }
+}
+
 const validator = new FormValidator([
   {
     field: 'name',
@@ -59,13 +71,7 @@ const validator = new FormValidator([
   },
   {
     field: 'password',
-    method: 'isEmpty',
-    validWhen: false,
-    message: 'Password is required.',
-  },
-  {
-    field: 'password',
-    method: checklength,
+    method: checkPassword,
     validWhen: false,
     message: 'Password length must be at least 3 characters long.',
   },
@@ -114,6 +120,7 @@ export class HospitalFormPage extends React.Component<Props, State> {
           // status:'active'
         }
         if (hospitalId && hospitalId !== '') {
+          formData._id = hospitalId
           this.props.updateDetail(formData, hospitalId)
         } else {
           this.props.create(formData)
@@ -146,7 +153,11 @@ export class HospitalFormPage extends React.Component<Props, State> {
       const {hospitalID} = this.props
       if (hospitalID) {
         this.setState({hospitalId: hospitalID})
-        this.props.detail(hospitalID)
+        let formData = {
+          "_id" : hospitalID,
+          "user_type" : "hospital"
+        }
+        this.props.detail(formData)
       }
     }
   }
@@ -166,6 +177,7 @@ export class HospitalFormPage extends React.Component<Props, State> {
     }
 
     //set data
+
     if (
       this.state.hospitalId !== '' &&
       idx(nextProps, _ => _.hospital.hospitalDetail._id) &&
@@ -173,12 +185,12 @@ export class HospitalFormPage extends React.Component<Props, State> {
     ) {
       let {hospitalDetail} = nextProps.hospital
       this.setState({
-        name: hospitalDetail.name,
-        code: hospitalDetail.code,
+        name: hospitalDetail.profile.name || '',
+        code: hospitalDetail.profile.code || '',
         username: hospitalDetail.username,
-        email: hospitalDetail.email,
-        mobile: hospitalDetail.mobile,
-        address: hospitalDetail.address,
+        email: hospitalDetail.profile.email || '',
+        mobile: hospitalDetail.profile.mobile || '',
+        address: hospitalDetail.profile.address || '',
       })
     }
   }
@@ -299,10 +311,12 @@ export class HospitalFormPage extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = state => ({
-  hospital: state.hospital,
+const mapStateToProps = state => {
+  console.log('state', state)
+  return {
+  hospital: state.hospital || null,
   alert: state.alert || false,
-})
+}}
 
 const mapDispatchToProps = dispatch => ({
   create: formData => {
@@ -311,8 +325,8 @@ const mapDispatchToProps = dispatch => ({
   updateDetail: (formData, hospitalId) => {
     dispatch(hospitalActions.updateDetail(formData, hospitalId))
   },
-  detail: hospitalId => {
-    dispatch(hospitalActions.detail(hospitalId))
+  detail: formData => {
+    dispatch(hospitalActions.detail(formData))
   },
 })
 

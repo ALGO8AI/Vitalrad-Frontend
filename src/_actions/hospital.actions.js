@@ -95,7 +95,7 @@ const listing = (formData) => (dispatch: any) => {
   )
 }
 
-const detail = (hospitalId: string) => (dispatch: any) => {
+const detail = (formData: Object) => (dispatch: any) => {
   const request = hospitalDetail => ({
     type: hospitalConstants.HOSPITAL_DETAIL_REQUEST,
     hospitalDetail,
@@ -110,7 +110,7 @@ const detail = (hospitalId: string) => (dispatch: any) => {
   })
   dispatch(request({}))
 
-  hospitalService.detail(hospitalId).then(
+  hospitalService.detail(formData).then(
     response => {
       dispatch(success(response))
     },

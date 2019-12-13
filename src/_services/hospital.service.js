@@ -25,13 +25,13 @@ const create = (formData: formType) => {
 
 const updateDetail = (formData: formType, hospitalId: string) => {
   const requestOptions = {
-    method: 'PUT',
+    method: 'POST',
     headers: {...headerConfig.headerData, ...authHeader()},
     mode: 'cors',
     body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/api/hospital/${hospitalId}`, requestOptions)
+  return fetch(`${API_URL}/updateProfile`, requestOptions)
     .then(handleResponse)
     .then(hospital => {
       return hospital
@@ -54,17 +54,19 @@ const listing = (formData: formType) => {
 }
 
 
-const detail = (hospitalId: string) => {
+const detail = (formData: Object) => {
   const requestOptions = {
-    method: 'GET',
+    method: 'POST',
     headers: {...headerConfig.headerData, ...authHeader()},
     mode: 'cors',
+    body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/api/hospital/${hospitalId}`, requestOptions)
+  return fetch(`${API_URL}/getProfile`, requestOptions)
     .then(handleResponse)
     .then((response: any) => {
-      return response.hospital
+      console.log('response', response)
+      return response.detail
     })
 }
 
