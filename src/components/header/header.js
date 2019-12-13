@@ -3,6 +3,7 @@ import React from 'react'
 import logo from '../../img/logo.jpg'
 import logomini from '../../img/logo-mini.jpg'
 import {Link} from 'react-router-dom'
+import {authDetail} from '../../_helpers'
 type Props = {
   toggleShow: Function,
 }
@@ -15,6 +16,7 @@ class Header extends React.Component<Props, State> {
   }
 
   render() {
+    let authData = authDetail()
     return (
       <nav className="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div className="navbar-brand-wrapper d-flex align-items-center">
@@ -33,20 +35,15 @@ class Header extends React.Component<Props, State> {
                 className="nav-link dropdown-toggle"
                 id="UserDropdown" data-toggle="dropdown" aria-expanded="false"
                 >
-                <span className="font-weight-normal"> Dear Admin </span>
+                <span className="font-weight-normal"> Dear {(authData && authData.detail && authData.detail.username) ? authData.detail.username : 'Admin'} </span>
               </Link>
               <div className="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
-                <div className="dropdown-header text-center">
-                  <p className="mb-1 mt-3">Admin</p>
-                  <p className="font-weight-light text-muted mb-0">admin@gmail.com</p>
-                </div>
                 <Link
                     exact="true" 
                     to="/profile"
                     className="dropdown-item"
                     >
-                    <i className="dropdown-item-icon icon-user text-primary"></i> My Profile <span className="badge badge-pill badge-danger">1</span>
-                  </Link>
+                    <i className="dropdown-item-icon icon-user text-primary"></i> My Profile </Link>
                 <Link
                     exact="true" 
                     to="/logout"

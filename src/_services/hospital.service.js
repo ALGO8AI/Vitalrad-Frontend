@@ -65,7 +65,6 @@ const detail = (formData: Object) => {
   return fetch(`${API_URL}/getProfile`, requestOptions)
     .then(handleResponse)
     .then((response: any) => {
-      console.log('response', response)
       return response.detail
     })
 }

@@ -18,7 +18,9 @@ const login = (username: string, password: string) => {
     .then(handleResponse)
     .then(user => {
       // store user details and jwt token in local storage to keep user logged in between page refreshes
-      localStorage.setItem('_radioauth', JSON.stringify(user))
+      if(user.status){
+        localStorage.setItem('_radioauth', JSON.stringify(user))
+      }
       return user
     })
 }

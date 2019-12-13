@@ -12,11 +12,17 @@ const login = (username: string, password: string) => (dispatch: any) => {
 
   userService.login(username, password).then(
     user => {
-      dispatch(success(user))
-      history.push('/dashboard')
+      if(user.status){
+        dispatch(success(user))
+        history.push('/dashboard')
+      }
+      else
+      {
+        dispatch(failure(user.error.toString()))
+        dispatch(alertActions.error(user.error.toString()))
+      }
     },
     error => {
-      console.log('error', error)
       dispatch(failure(error.toString()))
       dispatch(alertActions.error(error.toString()))
     }

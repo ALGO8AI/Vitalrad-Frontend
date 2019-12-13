@@ -14,10 +14,10 @@ export const isTokenExpired = (token: string) => {
 
 export const tokenDetail = () => {
   try {
-    let bloomauth = localStorage.getItem('_bloomauth')
-      ? localStorage.getItem('_bloomauth')
+    let radioauth = localStorage.getItem('_radioauth')
+      ? localStorage.getItem('_radioauth')
       : '{}'
-    let tmpToken = bloomauth ? JSON.parse(bloomauth) : null
+    let tmpToken = radioauth ? JSON.parse(radioauth) : null
 
     return tmpToken && tmpToken.token ? decode(tmpToken.token) : false
   } catch (err) {
@@ -25,14 +25,30 @@ export const tokenDetail = () => {
   }
 }
 
-export const isOrganization = () => {
+
+export const authDetail = () => {
   try {
-    const authData = tokenDetail()
-    let orgId = false
-    if (idx(authData, _ => _.orgId) && authData.orgId !== '') {
-      orgId = authData.orgId
+    let radioauth = localStorage.getItem('_radioauth')
+      ? localStorage.getItem('_radioauth')
+      : '{}'
+    let authData = radioauth ? JSON.parse(radioauth) : null
+    return authData
+  } catch (err) {
+    return null
+  }
+}
+
+export const isAdmin = () => {
+  try {
+    let radioauth = localStorage.getItem('_radioauth')
+      ? localStorage.getItem('_radioauth')
+      : '{}'
+    let authData = radioauth ? JSON.parse(radioauth) : null
+    let isAdmin = false
+    if (idx(authData, _ => _.detail) && authData.detail.user_type === 'superadmin') {
+      isAdmin = true
     }
-    return orgId
+    return isAdmin
   } catch (err) {
     return false
   }

@@ -112,12 +112,14 @@ export class HospitalFormPage extends React.Component<Props, State> {
           name: name,
           code: code,
           username: username,
-          password: password,
           email: email,
           mobile: mobile,
           address : address,
           user_type: 'hospital',
           // status:'active'
+        }
+        if(password !==''){
+          formData.password = password
         }
         if (hospitalId && hospitalId !== '') {
           formData._id = hospitalId
@@ -261,7 +263,7 @@ export class HospitalFormPage extends React.Component<Props, State> {
                   className={validation.password.isInvalid ? ' has-error' : ''}>
                   <Form.Label>Password</Form.Label>
                   <Form.Control
-                    type="text"
+                    type="password"
                     name="password"
                     value={password}
                     onChange={e => this.handleChange(e)}

@@ -74,7 +74,7 @@ const listing = (formData) => (dispatch: any) => {
   )
 }
 
-const detail = (doctorId: string) => (dispatch: any) => {
+const detail = (formData: Object) => (dispatch: any) => {
   const request = doctorDetail => ({
     type: doctorConstants.DOCTOR_DETAIL_REQUEST,
     doctorDetail,
@@ -86,7 +86,7 @@ const detail = (doctorId: string) => (dispatch: any) => {
   const failure = error => ({type: doctorConstants.DOCTOR_DETAIL_FAILURE, error})
   dispatch(request({}))
 
-  doctorService.detail(doctorId).then(
+  doctorService.detail(formData).then(
     response => {
       dispatch(success(response))
     },
@@ -98,7 +98,7 @@ const detail = (doctorId: string) => (dispatch: any) => {
   )
 }
 
-const deleteRecord = (doctorId: string) => (dispatch: any) => {
+const deleteRecord = (formData: Object) => (dispatch: any) => {
   const request = doctorDetail => ({
     type: doctorConstants.DOCTOR_DELETE_REQUEST,
     doctorDetail,
@@ -110,7 +110,7 @@ const deleteRecord = (doctorId: string) => (dispatch: any) => {
   const failure = error => ({type: doctorConstants.DOCTOR_DELETE_FAILURE, error})
   dispatch(request({}))
 
-  doctorService.deleteRecord(doctorId).then(
+  doctorService.deleteRecord(formData).then(
     (response: any) => {
       dispatch(success(response))
       history.push('/doctor')

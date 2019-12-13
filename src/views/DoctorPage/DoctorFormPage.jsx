@@ -11,7 +11,7 @@ type Props = {
   doctorID: string,
   hospitals: Array<any>,
   updateDetail: Function,
-  listing: Function,
+  hospitalListing: Function,
   create: Function,
   detail: Function,
   alert: any,
@@ -19,18 +19,34 @@ type Props = {
 
 type State = {
   name: string,
-  description: string,
+  address: string,
+  username: string,
+  password: string,
+  email: string,
+  mobile: string,
+  code: string,
   submitted: boolean,
   hospitalId: string,
   doctorId: string,
   hospitalList: any,
   validation: Object,
-}
+};
 
 const checklength = (checklength: string) => {
-  return checklength.length > 10 ? false : true
+  return checklength.length > 3 ? false : true
 }
 
+const checkPassword = (password: string, state: Object) => {
+  if (state.doctorId !== '' && password.length === 0) {
+    return false
+  } else if (state.doctorId !== '' && password.length > 5) {
+    return false
+  } else if (state.doctorId === '' && password.length > 5) {
+    return false
+  } else {
+    return true
+  }
+}
 const validator = new FormValidator([
   {
     field: 'name',
@@ -39,16 +55,28 @@ const validator = new FormValidator([
     message: 'Name is required.',
   },
   {
-    field: 'description',
+    field: 'code',
     method: 'isEmpty',
     validWhen: false,
-    message: 'Description is required.',
+    message: 'code is required.',
   },
   {
-    field: 'description',
+    field: 'username',
+    method: 'isEmpty',
+    validWhen: false,
+    message: 'Username is required.',
+  },
+  {
+    field: 'username',
     method: checklength,
     validWhen: false,
-    message: 'Description length must be at least 10 characters long.',
+    message: 'Username length must be at least 3 characters long.',
+  },
+  {
+    field: 'password',
+    method: checkPassword,
+    validWhen: false,
+    message: 'Password length must be at least 3 characters long.',
   },
   {
     field: 'hospitalId',
@@ -64,7 +92,12 @@ export class DoctorFormPage extends React.Component<Props, State> {
 
     this.state = {
       name: '',
-      description: '',
+      address: '',
+      username: '',
+      password: '',
+      email: '',
+      mobile: '',
+      code: '',
       submitted: false,
       hospitalId: '',
       doctorId: '',
@@ -84,14 +117,23 @@ export class DoctorFormPage extends React.Component<Props, State> {
     this.setState({validation})
     this.setState({submitted: true})
     if (validation.isValid) {
-      const {name, description, hospitalId, doctorId} = this.state
-      if (name && description && hospitalId) {
+      const {name, address, code, username, password, email, mobile, hospitalId, doctorId} = this.state
+      if (name && code && username) {
         let formData = {
           name: name,
-          description: description,
-          hospitals: [hospitalId],
+          address: address,
+          username: username,
+          email: email,
+          mobile: mobile,
+          code: code,
+          hospital_id: hospitalId,
+          user_type: 'doctor',
+        }
+        if(password !==''){
+          formData.password = password
         }
         if (doctorId && doctorId !== '') {
+          formData._id = doctorId
           this.props.updateDetail(formData, doctorId)
         } else {
           this.props.create(formData)
@@ -107,7 +149,12 @@ export class DoctorFormPage extends React.Component<Props, State> {
   clearState = () => {
     this.setState({
       name: '',
-      description: '',
+      address: '',
+      username: '',
+      email: '',
+      mobile: '',
+      code: '',
+      password: '',
       hospitalId: '',
       submitted: false,
       validation: validator.valid(),
@@ -116,14 +163,18 @@ export class DoctorFormPage extends React.Component<Props, State> {
 
   componentDidMount() {
     if (this.state.hospitalList.length === 0) {
-      this.props.listing()
+      this.props.hospitalListing({"user_type": "hospital"})
     }
     //edit - get data
     if (this.props.doctorID && this.props.doctorID !== '') {
       const {doctorID} = this.props
       if (doctorID) {
         this.setState({doctorId: doctorID})
-        this.props.detail(doctorID)
+        let formData = {
+          "_id" : doctorID,
+          "user_type" : "doctor"
+        }
+        this.props.detail(formData)
       }
     }
   }
@@ -140,13 +191,14 @@ export class DoctorFormPage extends React.Component<Props, State> {
       !nextProps.doctor.isProcessing
     ) {
       let {doctorDetail} = nextProps.doctor
-      let tmpHospitalId = idx(doctorDetail, _ => _.hospitals[0].hospitalId._id)
-        ? doctorDetail.hospitals[0].hospitalId._id
-        : doctorDetail.hospitals[0].hospitalId
       this.setState({
-        name: doctorDetail.name,
-        description: doctorDetail.description,
-        hospitalId: tmpHospitalId,
+        name: doctorDetail.profile.name,
+        address: doctorDetail.profile.address,
+        code: doctorDetail.profile.code || '',
+        username: doctorDetail.username,
+        email: doctorDetail.profile.email || '',
+        mobile: doctorDetail.profile.mobile || '',
+        hospitalId: doctorDetail.profile.hospitalId,
       })
     }
 
@@ -158,7 +210,7 @@ export class DoctorFormPage extends React.Component<Props, State> {
   render() {
     const {alert} = this.props
     const {isProcessing} = this.props.doctor || false
-    const {name, description, submitted, hospitalId, doctorId} = this.state
+    const {name, address, code, username, password, email, mobile, submitted, hospitalId, doctorId} = this.state
     const hospitalList = this.state.hospitalList || []
     let validation
     validation = submitted // if the form has been submitted at least once
@@ -170,7 +222,7 @@ export class DoctorFormPage extends React.Component<Props, State> {
         key={index}
         onChange={e => this.handleChange(e)}
         value={hospital._id}>
-        {hospital.name}
+        {hospital.profile.name}
       </option>
     ))
 
@@ -221,22 +273,71 @@ export class DoctorFormPage extends React.Component<Props, State> {
                   )}
                 </Form.Group>
                 <Form.Group
-                  className={
-                    validation.description.isInvalid ? ' has-error' : ''
-                  }>
-                  <Form.Label>Description</Form.Label>
+                  className={validation.code.isInvalid ? ' has-error' : ''}>
+                  <Form.Label>Doctor Code</Form.Label>
                   <Form.Control
-                    as="textarea"
-                    name="description"
-                    rows="3"
-                    value={description}
+                    type="text"
+                    name="code"
+                    value={code}
                     onChange={e => this.handleChange(e)}
                   />
-                  {validation.description.isInvalid && (
-                    <div className="help-block">
-                      {validation.description.message}
-                    </div>
+                  {validation.code.isInvalid && (
+                    <div className="help-block">{validation.code.message}</div>
                   )}
+                </Form.Group>
+                <Form.Group
+                  className={validation.username.isInvalid ? ' has-error' : ''}>
+                  <Form.Label>Username</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="username"
+                    value={username}
+                    onChange={e => this.handleChange(e)}
+                  />
+                  {validation.username.isInvalid && (
+                    <div className="help-block">{validation.username.message}</div>
+                  )}
+                </Form.Group>
+                <Form.Group
+                  className={validation.password.isInvalid ? ' has-error' : ''}>
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    name="password"
+                    value={password}
+                    onChange={e => this.handleChange(e)}
+                  />
+                  {validation.password.isInvalid && (
+                    <div className="help-block">{validation.password.message}</div>
+                  )}
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={e => this.handleChange(e)}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Mobile</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="mobile"
+                    value={mobile}
+                    onChange={e => this.handleChange(e)}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    name="address"
+                    rows="3"
+                    value={address}
+                    onChange={e => this.handleChange(e)}
+                  />
                 </Form.Group>
                 <Button type="submit" className="btn btn-primary">
                   {doctorId ? 'Update' : 'Create'}
@@ -251,11 +352,13 @@ export class DoctorFormPage extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = state => {
+  console.log('state', state)
+  return {
   doctor: state.doctor,
-  hospitals: state.hospital.hospitals || [],
+  hospitals: state.hospital.detail || [],
   alert: state.alert || false,
-})
+}}
 
 const mapDispatchToProps = dispatch => ({
   create: formData => {
@@ -264,11 +367,11 @@ const mapDispatchToProps = dispatch => ({
   updateDetail: (formData, doctorId) => {
     dispatch(doctorActions.updateDetail(formData, doctorId))
   },
-  detail: doctorId => {
-    dispatch(doctorActions.detail(doctorId))
+  detail: formData => {
+    dispatch(doctorActions.detail(formData))
   },
-  listing: () => {
-    dispatch(hospitalActions.listing())
+  hospitalListing: (formData) => {
+    dispatch(hospitalActions.listing(formData))
   },
 })
 

@@ -22,7 +22,7 @@ export const authentication = (
   switch (action.type) {
     case userConstants.LOGIN_REQUEST:
       return {
-        loggingIn: true,
+        loggingIn: false,
         user: action.user,
       }
     case userConstants.LOGIN_SUCCESS:
@@ -33,6 +33,7 @@ export const authentication = (
     case userConstants.LOGIN_FAILURE:
       return {
         ...state,
+        loggedIn: false,
       }
     case userConstants.LOGOUT:
       return {}

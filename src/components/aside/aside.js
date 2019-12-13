@@ -2,11 +2,15 @@
 import React from 'react'
 import {Link} from 'react-router-dom'
 import './aside.css'
+import {isAdmin, authDetail} from '../../_helpers'
+
 type Props = {
   pageType: string,
 };
 
+
 const Asides = (props: Props) => {
+  let authData = authDetail()
   return (<nav className="sidebar sidebar-offcanvas" id="sidebar">
       <ul className="nav">
         <li className="nav-item nav-profile">
@@ -16,7 +20,7 @@ const Asides = (props: Props) => {
             className="nav-link"
             >
             <div className="text-wrapper">
-              <p className="profile-name">Admin</p>
+              <p className="profile-name">{(authData && authData.detail && authData.detail.username) ? authData.detail.username : 'Admin'}</p>
               <p className="designation">Administrator</p>
             </div>
           </Link>
@@ -51,18 +55,18 @@ const Asides = (props: Props) => {
             <i className="icon-doc menu-icon"></i>
           </Link>
         </li>
-        <li className="nav-item">
+        {isAdmin() && (<li className="nav-item">
           <Link /*exact*/ to="/hospital" className="nav-link">
             <span className="menu-title">Hospital</span>
             <i className="icon-doc menu-icon"></i>
           </Link>
-        </li>
-        <li className="nav-item">
+        </li>)}
+        {isAdmin() && (<li className="nav-item">
           <Link /*exact*/ to="/doctor" className="nav-link">
             <span className="menu-title">Doctor</span>
             <i className="icon-doc menu-icon"></i>
           </Link>
-        </li>
+        </li>)}
       </ul>
     </nav>)
 }

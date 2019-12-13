@@ -145,48 +145,51 @@ export class HospitalPage extends React.Component<Props, State> {
             this.dialog = el
           }}
         />
-        <div className="heading">
-          <h2>Hospital</h2>
-          <div className="btn-container">
-            <div className="filter">
-              <Form.Group>
-                <Form.Control
-                  type="text"
-                  placeholder="Search Hospital...."
-                  onChange={e => this.filterHospital(e)}
-                />
-              </Form.Group>
-              <Button className="btn-primary">
-                <Icon icon={filter} />
+        <div className="card">
+          <div className="card-body">
+          <div className="heading">
+            <h2>Hospital</h2>
+            <div className="btn-container">
+              <div className="filter">
+                <Form.Group>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search Hospital...."
+                    onChange={e => this.filterHospital(e)}
+                  />
+                </Form.Group>
+                <Button className="btn-primary">
+                  <Icon icon={filter} />
+                </Button>
+              </div>
+              <Button onClick={e => this.handleShow(e, '')}>
+                Create Hospital
               </Button>
             </div>
-            <Button onClick={e => this.handleShow(e, '')}>
-              Create Hospital
-            </Button>
+          </div>
+          <div className="listing-container">
+            <Table className="responsive-grid">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Name</th>
+                  <th>Code</th>
+                  <th>Status</th>
+                  <th width="10%">Actions</th>
+                </tr>
+              </thead>
+              <tbody>{hospitalRow}</tbody>
+              {hospitalRow.length === 0 && (
+                <tbody>
+                  <tr>
+                    <td colSpan="5">No Records Found</td>
+                  </tr>
+                </tbody>
+              )}
+            </Table>
           </div>
         </div>
-        <div className="listing-container">
-          <Table className="responsive-grid">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Name</th>
-                <th>Code</th>
-                <th>Status</th>
-                <th width="10%">Actions</th>
-              </tr>
-            </thead>
-            <tbody>{hospitalRow}</tbody>
-            {hospitalRow.length === 0 && (
-              <tbody>
-                <tr>
-                  <td>No Records Found</td>
-                  <td></td>
-                </tr>
-              </tbody>
-            )}
-          </Table>
-        </div>
+      </div>
         <Modal
           className="add-hospital"
           show={showHospitalFrom}

@@ -145,38 +145,49 @@ export class DoctorPage extends React.Component<Props, State> {
             this.dialog = el
           }}
         />
-        <div className="heading">
-          <h2>Doctors</h2>
-          <div className="btn-container">
-            <div className="filter">
-              <Form.Group>
-                <Form.Control
-                  type="text"
-                  placeholder="Search Doctors...."
-                  onChange={e => this.filterDoctor(e)}
-                />
-              </Form.Group>
-              <Button className="btn-primary">
-                <Icon icon={filter} />
-              </Button>
+        <div className="card">
+          <div className="card-body">
+            <div className="heading">
+              <h2>Doctors</h2>
+              <div className="btn-container">
+                <div className="filter">
+                  <Form.Group>
+                    <Form.Control
+                      type="text"
+                      placeholder="Search Doctors...."
+                      onChange={e => this.filterDoctor(e)}
+                    />
+                  </Form.Group>
+                  <Button className="btn-primary">
+                    <Icon icon={filter} />
+                  </Button>
+                </div>
+                <Button onClick={e => this.handleShow(e, '')}>Create Doctor</Button>
+              </div>
             </div>
-            <Button onClick={e => this.handleShow(e, '')}>Create Doctor</Button>
-          </div>
-        </div>
-        <div className="listing-container">
-          <Table className="responsive-grid">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Name</th>
-                <th>Code</th>
-                <th>Status</th>
-                <th width="10%">Actions</th>
-              </tr>
-            </thead>
-            <tbody>{doctorRow}</tbody>
-          </Table>
-        </div>
+            <div className="listing-container">
+              <Table className="responsive-grid">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Status</th>
+                    <th width="10%">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>{doctorRow}</tbody>
+                {doctorRow.length === 0 && (
+                  <tbody>
+                    <tr>
+                      <td colSpan="5">No Records Found</td>
+                    </tr>
+                  </tbody>
+                )}
+              </Table>
+            </div>
+          </div> 
+        </div> 
         <Modal
           className="add-doctor"
           show={showDoctorFrom}
