@@ -2,7 +2,7 @@
 import React from 'react'
 import 'react-chat-widget/lib/styles.css';
 import {connect} from 'react-redux'
-// import idx from 'idx'
+import idx from 'idx'
 import {auditActions} from '../../_actions'
 import {Button, Row, Col, Form} from 'react-bootstrap'
 import Highcharts from 'highcharts'
@@ -16,6 +16,7 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import dateformat from "dateformat"
 import Moment from 'react-moment'
+import {authDetail, loggedInUser} from '../../_helpers'
 
 type Props = {
   getAuditInfo: Function,
@@ -35,7 +36,8 @@ type State = {
   startDate: any,
   endDate: any,
   auditList: Array<any>,
-  isTableShow: boolean
+  isTableShow: boolean,
+  loggedInUser:string
 };
 
 const animatedComponents = makeAnimated()
@@ -57,7 +59,8 @@ class AuditReport extends React.Component<Props, State> {
       startDate: newCurrDate,
       endDate: new Date(),
       auditList: [],
-      isTableShow: false
+      isTableShow: false,
+      loggedInUser: loggedInUser()
     }
   }
   componentDidMount() {
@@ -70,6 +73,12 @@ class AuditReport extends React.Component<Props, State> {
     let tmpHospitalArr = (hospitalFilter) ? hospitalFilter.map( s => s.value ) : [];
     let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
     let tmpCategoryArr = (categoryFilter) ? categoryFilter.map( s => s.value ) : [];
+
+    let authData = authDetail()
+    if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
+      tmpHospitalArr = ['Hospital 7']
+      this.setState({hospitalFilter: [{value: 'Hospital 7', label:'Hospital 7'}]})
+    }
     let formData = {
       from: dateformat(startDate, 'dd-mm-yyyy'), 
       to:dateformat(endDate, 'dd-mm-yyyy'), 
@@ -331,8 +340,8 @@ class AuditReport extends React.Component<Props, State> {
   // }
 
   render() {
-    const {auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate, isTableShow, auditList} = this.state
-    
+    const {loggedInUser, auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate, isTableShow, auditList} = this.state
+    console.log('hospitalFilter', hospitalFilter)
     const pieOptions = this.pieChart(auditInfo);
 
     const stackOptions = this.stackColumnChart(auditInfo);
@@ -418,6 +427,7 @@ class AuditReport extends React.Component<Props, State> {
                     value={hospitalFilter}
                     onChange={e => this.optionClicked(e, 'hospitalFilter')}
                     isMulti
+                    isDisabled={(loggedInUser && loggedInUser ==='hospital')}
                     options={hospitalList}
                   />
                 </Form.Group>

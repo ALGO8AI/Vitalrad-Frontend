@@ -53,3 +53,19 @@ export const isAdmin = () => {
     return false
   }
 }
+
+export const loggedInUser = () => {
+  try {
+    let radioauth = localStorage.getItem('_radioauth')
+      ? localStorage.getItem('_radioauth')
+      : '{}'
+    let authData = radioauth ? JSON.parse(radioauth) : null
+    let userType = 'superadmin'
+    if (idx(authData, _ => _.detail.user_type)) {
+      userType = authData.detail.user_type
+    }
+    return userType
+  } catch (err) {
+    return false
+  }
+}

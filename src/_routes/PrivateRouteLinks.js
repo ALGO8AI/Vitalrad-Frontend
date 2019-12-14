@@ -16,6 +16,8 @@ import {HospitalPage, HospitalFormPage} from '../views/HospitalPage'
 
 import {DoctorPage, DoctorFormPage} from '../views/DoctorPage'
 
+import {RadiologistPage, RadiologistFormPage} from '../views/RadiologistPage'
+
 export const PrivateRouteLinks = {
   dashboard: {
     component: HomePage,
@@ -60,6 +62,16 @@ export const PrivateRouteLinks = {
   addHospital: {
     component: HospitalFormPage,
     path: '/hospital/create',
+    roles: ['admin'],
+  },
+  radiologist: {
+    component: RadiologistPage,
+    path: '/radiologist',
+    roles: ['admin'],
+  },
+  addRadiologist: {
+    component: RadiologistFormPage,
+    path: '/radiologist/create',
     roles: ['admin'],
   },
 }
