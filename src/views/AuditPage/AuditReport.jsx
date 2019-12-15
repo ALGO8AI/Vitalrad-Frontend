@@ -76,8 +76,9 @@ class AuditReport extends React.Component<Props, State> {
 
     let authData = authDetail()
     if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
-      tmpHospitalArr = ['Hospital 7']
-      this.setState({hospitalFilter: [{value: 'Hospital 7', label:'Hospital 7'}]})
+      let hospitalName = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : 'Hospital 7'
+      tmpHospitalArr = [hospitalName]
+      this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
     }
     let formData = {
       from: dateformat(startDate, 'dd-mm-yyyy'), 
@@ -90,7 +91,6 @@ class AuditReport extends React.Component<Props, State> {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
-    // console.log('nextProps', nextProps)
     if (nextProps.audits) {
       this.setState({auditInfo: nextProps.audits})
     }
@@ -341,7 +341,6 @@ class AuditReport extends React.Component<Props, State> {
 
   render() {
     const {loggedInUser, auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate, isTableShow, auditList} = this.state
-    console.log('hospitalFilter', hospitalFilter)
     const pieOptions = this.pieChart(auditInfo);
 
     const stackOptions = this.stackColumnChart(auditInfo);

@@ -28,9 +28,16 @@ const create = (formData: formType) => (dispatch: any) => {
 
   hospitalService.create(formData).then(
     hospital => {
-      dispatch(success(hospital))
-      let message = 'Hospital Created successfully'
-      dispatch(alertActions.success(message.toString()))
+      if(hospital.success){
+        dispatch(success(hospital))
+        let message = 'Hospital Created successfully'
+        dispatch(alertActions.success(message.toString()))
+      }
+      else
+      {
+        dispatch(failure(hospital.data.message.toString()))
+        dispatch(alertActions.error(hospital.data.message.toString()))
+      }
     },
     error => {
       dispatch(failure(error.toString()))
@@ -58,9 +65,16 @@ const updateDetail = (formData: formType, hospitalId: string) => (
 
   hospitalService.updateDetail(formData, hospitalId).then(
     hospital => {
-      dispatch(success(hospital))
-      let message = 'Hospital Updated successfully'
-      dispatch(alertActions.success(message.toString()))
+      if(hospital.success){
+        dispatch(success(hospital))
+        let message = 'Hospital Updated successfully'
+        dispatch(alertActions.success(message.toString()))
+      }
+      else
+      {
+        dispatch(failure(hospital.data.message.toString()))
+        dispatch(alertActions.error(hospital.data.message.toString())) 
+      }
     },
     error => {
       dispatch(failure(error.toString()))

@@ -28,9 +28,16 @@ const create = (formData: formType) => (dispatch: any) => {
 
   radiologistService.create(formData).then(
     radiologist => {
-      dispatch(success(radiologist))
-      let message = 'Radiologist Created successfully'
-      dispatch(alertActions.success(message.toString()))
+      if(radiologist.success){
+        dispatch(success(radiologist))
+        let message = 'Radiologist Created successfully'
+        dispatch(alertActions.success(message.toString()))
+      }
+      else
+      {
+        dispatch(failure(radiologist.data.message.toString()))
+        dispatch(alertActions.error(radiologist.data.message.toString())) 
+      }
     },
     error => {
       dispatch(failure(error.toString()))
@@ -58,9 +65,16 @@ const updateDetail = (formData: formType, radiologistId: string) => (
 
   radiologistService.updateDetail(formData, radiologistId).then(
     radiologist => {
-      dispatch(success(radiologist))
-      let message = 'Radiologist Updated successfully'
-      dispatch(alertActions.success(message.toString()))
+      if(radiologist.success){
+        dispatch(success(radiologist))
+        let message = 'Radiologist Updated successfully'
+        dispatch(alertActions.success(message.toString()))
+      }
+      else
+      {
+        dispatch(failure(radiologist.data.message.toString()))
+        dispatch(alertActions.error(radiologist.data.message.toString())) 
+      }
     },
     error => {
       dispatch(failure(error.toString()))

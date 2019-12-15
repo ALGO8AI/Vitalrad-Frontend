@@ -18,9 +18,16 @@ const create = (formData: formType) => (dispatch: any) => {
 
   doctorService.create(formData).then(
     doctor => {
-      dispatch(success(doctor))
-      let message = 'Doctor Created successfully'
-      dispatch(alertActions.success(message.toString()))
+      if(doctor.success){
+        dispatch(success(doctor))
+        let message = 'Doctor Created successfully'
+        dispatch(alertActions.success(message.toString()))
+      }
+      else
+      {
+        dispatch(failure(doctor.data.message.toString()))
+        dispatch(alertActions.error(doctor.data.message.toString())) 
+      }
     },
     error => {
       dispatch(failure(error.toString()))
@@ -40,9 +47,16 @@ const updateDetail = (formData: formType, doctorId: string) => (
 
   doctorService.updateDetail(formData, doctorId).then(
     doctor => {
-      dispatch(success(doctor))
-      let message = 'Doctor Updated successfully'
-      dispatch(alertActions.success(message.toString()))
+      if(doctor.success){
+        dispatch(success(doctor))
+        let message = 'Doctor Updated successfully'
+        dispatch(alertActions.success(message.toString()))
+      }
+      else
+      {
+        dispatch(failure(doctor.data.message.toString()))
+        dispatch(alertActions.error(doctor.data.message.toString())) 
+      }
     },
     error => {
       dispatch(failure(error.toString()))
