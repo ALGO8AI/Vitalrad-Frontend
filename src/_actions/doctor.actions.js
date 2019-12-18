@@ -47,15 +47,15 @@ const updateDetail = (formData: formType, doctorId: string) => (
 
   doctorService.updateDetail(formData, doctorId).then(
     doctor => {
-      if(doctor.success){
+      if(doctor.status){
         dispatch(success(doctor))
         let message = 'Doctor Updated successfully'
         dispatch(alertActions.success(message.toString()))
       }
       else
       {
-        dispatch(failure(doctor.data.message.toString()))
-        dispatch(alertActions.error(doctor.data.message.toString())) 
+        dispatch(failure(doctor.message.toString()))
+        dispatch(alertActions.error(doctor.message.toString())) 
       }
     },
     error => {

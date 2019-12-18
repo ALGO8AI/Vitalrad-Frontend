@@ -9,6 +9,7 @@ import {Modal} from 'react-bootstrap'
 import ReactTooltip from 'react-tooltip'
 import ChatPage from './ChatPage'
 import {Pagination} from '../../components/common';
+import {authDetail, loggedInUser} from '../../_helpers'
 
 type Props = {
   getDiscrepancy: Function,
@@ -22,7 +23,8 @@ type State = {
   activeDisData: Object,
   currentPage: number,
   totalPages: number,
-  pageLimit: number
+  pageLimit: number,
+  loggedInUser:string
 };
 
 class DiscrepancyList extends React.Component<Props, State> {
@@ -37,20 +39,52 @@ class DiscrepancyList extends React.Component<Props, State> {
       activeDisData: null,
       totalPages: 0,
       pageLimit: 10,
-      currentPage: 1
+      currentPage: 1,
+      loggedInUser: loggedInUser()
     }
   }
   componentDidMount = () => {
     this.getDiscrepancyList()
   }
   
+  manageUserFilter =() => {
+    let authData = authDetail()
+    let formData = {}
+    switch(this.state.loggedInUser) {
+      case 'hospital':
+        if(idx(authData, _ => _.detail.user_type)){
+          let hospitalName = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : 'Hospital 7'
+          formData.hospital_name = hospitalName
+        }
+        
+        break;
+      case 'radiologist':
+        if(idx(authData, _ => _.detail.user_type)){
+          let radiologistId = (idx(authData, _ => _.detail.profile.code)) ? authData.detail.profile.code : '1001'
+          formData.radiologist_id = radiologistId
+        }
+        break;
+      case 'doctor':
+        if(idx(authData, _ => _.detail.user_type)){
+          let doctorId = (idx(authData, _ => _.detail.profile.code)) ? authData.detail.profile.code : '1001'
+          formData.doctor_id = doctorId
+        }
+        break;
+      default:
+        break; 
+    }
+    return formData;
+  }
+
   getDiscrepancyList = () => {
     const {currentPage, pageLimit} = this.state
     let formData = {
       offset: currentPage * pageLimit,
       limit: pageLimit
     }
-    this.props.getDiscrepancy(formData)
+    let userFilter = this.manageUserFilter()
+    let postData = {...formData, ...userFilter}
+    this.props.getDiscrepancy(postData)
   }
 
   UNSAFE_componentWillReceiveProps = (nextProps: any) => {
@@ -76,7 +110,9 @@ class DiscrepancyList extends React.Component<Props, State> {
       offset: offset,
       limit: pageLimit
     }
-    this.props.getDiscrepancy(formData)
+    let userFilter = this.manageUserFilter()
+    let postData = {...formData, ...userFilter}
+    this.props.getDiscrepancy(postData)
     
 
   }

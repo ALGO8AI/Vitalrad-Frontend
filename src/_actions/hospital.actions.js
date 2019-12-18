@@ -65,15 +65,15 @@ const updateDetail = (formData: formType, hospitalId: string) => (
 
   hospitalService.updateDetail(formData, hospitalId).then(
     hospital => {
-      if(hospital.success){
+      if(hospital.status){
         dispatch(success(hospital))
         let message = 'Hospital Updated successfully'
         dispatch(alertActions.success(message.toString()))
       }
       else
       {
-        dispatch(failure(hospital.data.message.toString()))
-        dispatch(alertActions.error(hospital.data.message.toString())) 
+        dispatch(failure(hospital.message.toString()))
+        dispatch(alertActions.error(hospital.message.toString())) 
       }
     },
     error => {

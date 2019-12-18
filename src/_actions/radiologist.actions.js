@@ -65,15 +65,15 @@ const updateDetail = (formData: formType, radiologistId: string) => (
 
   radiologistService.updateDetail(formData, radiologistId).then(
     radiologist => {
-      if(radiologist.success){
+      if(radiologist.status){
         dispatch(success(radiologist))
         let message = 'Radiologist Updated successfully'
         dispatch(alertActions.success(message.toString()))
       }
       else
       {
-        dispatch(failure(radiologist.data.message.toString()))
-        dispatch(alertActions.error(radiologist.data.message.toString())) 
+        dispatch(failure(radiologist.message.toString()))
+        dispatch(alertActions.error(radiologist.message.toString())) 
       }
     },
     error => {
