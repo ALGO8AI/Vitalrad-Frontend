@@ -67,7 +67,7 @@ const updateDetail = (formData: formType, hospitalId: string) => (
     hospital => {
       if(hospital.status){
         dispatch(success(hospital))
-        let message = 'Hospital Updated successfully'
+        let message = hospital.message || 'Hospital Updated successfully'
         dispatch(alertActions.success(message.toString()))
       }
       else

@@ -39,6 +39,7 @@ body {
 }
 .chat-message{
   max-height: 400px;
+  min-height: 100px;
   overflow-x: scroll;  
 }
 .grey-border{

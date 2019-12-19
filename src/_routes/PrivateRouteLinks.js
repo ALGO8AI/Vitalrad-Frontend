@@ -1,21 +1,10 @@
 // @flow
-import {
-  DiscrepancyList,
-} from '../views/DiscrepancyPage'
-
-import {
-  AuditReport,
-} from '../views/AuditPage'
-
-
-import {
-  HomePage,
-} from '../views/HomePage'
-
+import {DiscrepancyList} from '../views/DiscrepancyPage'
+import {AuditReport} from '../views/AuditPage'
+import {HomePage} from '../views/HomePage'
+import {AccountPage} from '../views/UserPage'
 import {HospitalPage, HospitalFormPage} from '../views/HospitalPage'
-
 import {DoctorPage, DoctorFormPage} from '../views/DoctorPage'
-
 import {RadiologistPage, RadiologistFormPage} from '../views/RadiologistPage'
 
 export const PrivateRouteLinks = {
@@ -73,5 +62,9 @@ export const PrivateRouteLinks = {
     component: RadiologistFormPage,
     path: '/radiologist/create',
     roles: ['admin'],
+  },
+  account: {
+    component: AccountPage,
+    path: '/account',
   },
 }

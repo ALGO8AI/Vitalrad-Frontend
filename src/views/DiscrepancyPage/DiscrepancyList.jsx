@@ -191,7 +191,7 @@ class DiscrepancyList extends React.Component<Props, State> {
               </div>
               
               <Modal
-                className="add-event"
+                className="add-chat"
                 show={this.state.showChat}
                 onHide={e => this.handleClose(e)}>
                 <ChatPage activeDisData={activeDisData}/>

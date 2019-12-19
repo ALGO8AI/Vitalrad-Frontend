@@ -5,6 +5,7 @@ import {connect} from 'react-redux'
 import idx from 'idx'
 import {chatActions} from '../../_actions'
 import './Chat.css'
+import {loggedInUser} from '../../_helpers'
 type Props = {
   getComment: Function,
   saveComment: Function,
@@ -14,7 +15,8 @@ type Props = {
 
 type State = {
   chatList: Array<any>,
-  chatText: string
+  chatText: string,
+  loggedInUser:string
 };
 
 class ChatPage extends React.Component<Props, State> {
@@ -25,7 +27,8 @@ class ChatPage extends React.Component<Props, State> {
     this.state = {
       chatList: [],
       chatText: '',
-      activeDisData: null
+      activeDisData: null,
+      loggedInUser: loggedInUser()
     }
   }
   componentDidMount() {
@@ -65,6 +68,7 @@ class ChatPage extends React.Component<Props, State> {
           to_name: activeDisData.Audit_Person,
           status: 'unseen',
           message: value,
+          user_type: this.state.loggedInUser
         }
         this.props.saveComment(formData)
 

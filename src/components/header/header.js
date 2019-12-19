@@ -31,7 +31,7 @@ class Header extends React.Component<Props, State> {
             <li className="nav-item dropdown d-none d-xl-inline-flex user-dropdown">
               <Link
                 exact="true" 
-                to="/profile"
+                to="/account"
                 className="nav-link dropdown-toggle"
                 id="UserDropdown" data-toggle="dropdown" aria-expanded="false"
                 >
@@ -40,7 +40,7 @@ class Header extends React.Component<Props, State> {
               <div className="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
                 <Link
                     exact="true" 
-                    to="/profile"
+                    to="/account"
                     className="dropdown-item"
                     >
                     <i className="dropdown-item-icon icon-user text-primary"></i> My Profile </Link>
