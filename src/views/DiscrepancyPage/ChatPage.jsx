@@ -5,7 +5,7 @@ import {connect} from 'react-redux'
 import idx from 'idx'
 import {chatActions} from '../../_actions'
 import './Chat.css'
-import {loggedInUser} from '../../_helpers'
+import {authDetail, loggedInUser} from '../../_helpers'
 type Props = {
   getComment: Function,
   saveComment: Function,
@@ -16,7 +16,9 @@ type Props = {
 type State = {
   chatList: Array<any>,
   chatText: string,
-  loggedInUser:string
+  loggedInUser:string,
+  from_id: string,
+  from_name: string
 };
 
 class ChatPage extends React.Component<Props, State> {
@@ -32,8 +34,22 @@ class ChatPage extends React.Component<Props, State> {
     }
   }
   componentDidMount() {
+    let authData = authDetail()
+    let from_id = ''
+    let from_name = ''
+    if(this.state.loggedInUser){
+      if(this.state.loggedInUser === "superadmin"){
+        from_id = authData.detail._id
+        from_name = authData.detail.username
+      }
+      else
+      {
+        from_id = (idx(authData, _ => _.detail.profile.code)) ? authData.detail.profile.code : '1001'
+        from_name = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : '1001'  
+      }
+    }
     this.getChatList()
-    this.setState({activeDisData: this.props.activeDisData})
+    this.setState({activeDisData: this.props.activeDisData, from_id: from_id, from_name: from_name})
   }
   
   getChatList = () => {
@@ -60,15 +76,22 @@ class ChatPage extends React.Component<Props, State> {
       const {value} = e.target
       const {activeDisData} = this.props
       if (value !== '') {
+        let from_id = activeDisData.Doctor_Id
+        let from_name = activeDisData.Reported_By
+        if(this.state.loggedInUser){
+          from_id = this.state.from_id
+          from_name = this.state.from_name
+        }
+
         let formData = {
           accession_no: activeDisData.Accession_No,
-          from_id: activeDisData.Doctor_Id,
-          from_name: activeDisData.Reported_By,
+          from_id: from_id,
+          from_name: from_name,
           to_id: activeDisData.Radiologist_Id,
           to_name: activeDisData.Audit_Person,
           status: 'unseen',
           message: value,
-          user_type: this.state.loggedInUser
+          user_type: this.state.loggedInUser || 'doctor'
         }
         this.props.saveComment(formData)
 
@@ -90,8 +113,8 @@ class ChatPage extends React.Component<Props, State> {
       : []
     let chatRow = null
     chatRow = chatList.map((chat, index) => {
-      let chatCss = (chat.from_id === 2) ? 'card bg-primary rounded w-75 float-right z-depth-0 mb-1' : 'd-flex w-75  justify-content-start'
-      let chatSubClass = (chat.from_id === 2) ? 'card-text black-text' : 'card-text black-text'
+      let chatCss = (chat.from_id == this.state.from_id) ? 'card bg-primary rounded w-75 float-right z-depth-0 mb-1' : 'd-flex w-75  justify-content-start'
+      let chatSubClass = (chat.from_id == this.state.from_id) ? 'card-text black-text' : 'card-text black-text'
       return (<div key={index} className={chatCss}>
           <div className="card-body p-2">
             <p className={chatSubClass}>{chat.message}</p>

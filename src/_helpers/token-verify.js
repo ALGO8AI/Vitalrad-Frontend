@@ -60,7 +60,7 @@ export const loggedInUser = () => {
       ? localStorage.getItem('_radioauth')
       : '{}'
     let authData = radioauth ? JSON.parse(radioauth) : null
-    let userType = 'superadmin'
+    let userType = null
     if (idx(authData, _ => _.detail.user_type)) {
       userType = authData.detail.user_type
     }
