@@ -113,7 +113,7 @@ class ChatPage extends React.Component<Props, State> {
       : []
     let chatRow = null
     chatRow = chatList.map((chat, index) => {
-      let chatCss = (chat.from_id == this.state.from_id) ? 'card bg-primary rounded w-75 float-right z-depth-0 mb-1' : 'd-flex w-75  justify-content-start'
+      let chatCss = (chat.from_id == this.state.from_id) ? 'card bg-primary rounded w-75 float-right z-depth-0 mb-1' : 'd-flex w-75 mb-1 left-bg-primary rounded justify-content-start'
       let chatSubClass = (chat.from_id == this.state.from_id) ? 'card-text black-text' : 'card-text black-text'
       return (<div key={index} className={chatCss}>
           <div className="card-body p-2">
