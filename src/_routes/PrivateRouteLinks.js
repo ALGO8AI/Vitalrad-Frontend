@@ -1,6 +1,8 @@
 // @flow
 import {DiscrepancyList} from '../views/DiscrepancyPage'
 import {AuditReport} from '../views/AuditPage'
+import {ActivityReport} from '../views/ActivityPage'
+import {NoticeList} from '../views/NoticePage'
 import {HomePage} from '../views/HomePage'
 import {AccountPage} from '../views/UserPage'
 import {HospitalPage, HospitalFormPage} from '../views/HospitalPage'
@@ -26,6 +28,16 @@ export const PrivateRouteLinks = {
   auditreport: {
     component: AuditReport,
     path: '/audit',
+    roles: ['admin'],
+  },
+  activityreport: {
+    component: ActivityReport,
+    path: '/activity',
+    roles: ['admin'],
+  },
+  notice: {
+    component: NoticeList,
+    path: '/notice',
     roles: ['admin'],
   },
   publicauditreport: {

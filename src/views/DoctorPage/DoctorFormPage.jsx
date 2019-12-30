@@ -352,13 +352,11 @@ export class DoctorFormPage extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = state => {
-  console.log('state', state)
-  return {
+const mapStateToProps = state => ({
   doctor: state.doctor,
   hospitals: state.hospital.detail || [],
   alert: state.alert || false,
-}}
+})
 
 const mapDispatchToProps = dispatch => ({
   create: formData => {

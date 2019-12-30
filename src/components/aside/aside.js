@@ -32,7 +32,7 @@ const Asides = (props: Props) => {
           </Link>
         </li>
         <li className="nav-item">
-          <Link /*exact*/ to="/discrepancy" className="nav-link">
+          <Link /*exact*/ to="/activity" className="nav-link">
             <span className="menu-title">Activity Information</span>
             <i className="icon-grid menu-icon"></i>
           </Link>
@@ -50,7 +50,7 @@ const Asides = (props: Props) => {
           </Link>
         </li>
         <li className="nav-item">
-          <Link /*exact*/ to="/discrepancy" className="nav-link">
+          <Link /*exact*/ to="/notice" className="nav-link">
             <span className="menu-title">Notices</span>
             <i className="icon-doc menu-icon"></i>
           </Link>

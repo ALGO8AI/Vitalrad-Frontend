@@ -3,7 +3,7 @@ import React from 'react'
 import {Button, Form, Modal} from 'react-bootstrap'
 import {connect} from 'react-redux'
 import idx from 'idx'
-import {radiologistActions} from '../../_actions'
+import {radiologistActions, hospitalActions} from '../../_actions'
 import FormValidator from '../../_helpers/FormValidator'
 
 type Props = {
@@ -13,6 +13,8 @@ type Props = {
   create: Function,
   detail: Function,
   alert: any,
+  hospitals: Array<any>,
+  hospitalListing: Function,
 }
 
 type State = {
@@ -26,6 +28,8 @@ type State = {
   submitted: boolean,
   radiologistId: string,
   validation: Object,
+  hospitalId: string,
+  hospitalList: any,
 };
 
 const checklength = (checklength: string) => {
@@ -75,6 +79,12 @@ const validator = new FormValidator([
     validWhen: false,
     message: 'Password length must be at least 3 characters long.',
   },
+  {
+    field: 'hospitalId',
+    method: 'isEmpty',
+    validWhen: false,
+    message: 'Hospital is required.',
+  },
 ])
 
 export class RadiologistFormPage extends React.Component<Props, State> {
@@ -91,6 +101,8 @@ export class RadiologistFormPage extends React.Component<Props, State> {
       address: '',
       submitted: false,
       radiologistId: '',
+      hospitalId: '',
+      hospitalList: [],
       validation: validator.valid(),
     }
   }
@@ -106,7 +118,7 @@ export class RadiologistFormPage extends React.Component<Props, State> {
     this.setState({validation})
     this.setState({submitted: true})
     if (validation.isValid) {
-      const {name, code, username, password, email, mobile, address, radiologistId} = this.state
+      const {name, code, username, password, email, mobile, address, hospitalId, radiologistId} = this.state
       if (name && code) {
         let formData = {
           name: name,
@@ -115,6 +127,7 @@ export class RadiologistFormPage extends React.Component<Props, State> {
           email: email,
           mobile: mobile,
           address : address,
+          hospital_id: hospitalId,
           user_type: 'radiologist',
           // status:'active'
         }
@@ -144,12 +157,16 @@ export class RadiologistFormPage extends React.Component<Props, State> {
       email: '',
       mobile: '',
       address: '',
+      hospitalId: '',
       submitted: false,
       validation: validator.valid(),
     })
   }
 
   componentDidMount() {
+    if (this.state.hospitalList.length === 0) {
+      this.props.hospitalListing({"user_type": "hospital"})
+    }
     //edit - get data
     if (this.props.radiologistID && this.props.radiologistID !== '') {
       const {radiologistID} = this.props
@@ -165,6 +182,10 @@ export class RadiologistFormPage extends React.Component<Props, State> {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
+    if (nextProps.hospitals) {
+      this.setState({hospitalList: nextProps.hospitals})
+    }
+
     if (
       idx(nextProps, _ => _.radiologist.radiologist._id) &&
       this.state.radiologistId === ''
@@ -201,12 +222,22 @@ export class RadiologistFormPage extends React.Component<Props, State> {
     const {radiologist, alert} = this.props
     let isProcessing =
       radiologist && radiologist.isProcessing ? radiologist.isProcessing : false
-
-    const {name, code, username, password, mobile, email, address, submitted, radiologistId} = this.state
+    const hospitalList = this.state.hospitalList || []
+    const {name, code, username, password, mobile, email, address, submitted, hospitalId, radiologistId} = this.state
     let validation
     validation = submitted // if the form has been submitted at least once
       ? validator.validate(this.state) // then check validity every time we render
       : this.state.validation // otherwise just use what's in state
+    
+    const hospitalRow = hospitalList.map((hospital, index) => (
+      <option
+        defaultValue={hospitalId}
+        key={index}
+        onChange={e => this.handleChange(e)}
+        value={hospital._id}>
+        {hospital.profile.name}
+      </option>
+    ))
 
     return (
       <div>
@@ -244,6 +275,25 @@ export class RadiologistFormPage extends React.Component<Props, State> {
                   />
                   {validation.code.isInvalid && (
                     <div className="help-block">{validation.code.message}</div>
+                  )}
+                </Form.Group>
+                <Form.Group
+                  className={
+                    validation.hospitalId.isInvalid ? ' has-error' : ''
+                  }>
+                  <Form.Label>Select Hospital</Form.Label>
+                  <Form.Control
+                    as="select"
+                    name="hospitalId"
+                    value={hospitalId}
+                    onChange={e => this.handleChange(e)}>
+                    <option value="">Select Hospital</option>
+                    {hospitalRow}
+                  </Form.Control>
+                  {validation.hospitalId.isInvalid && (
+                    <div className="help-block">
+                      {validation.hospitalId.message}
+                    </div>
                   )}
                 </Form.Group>
                 <Form.Group
@@ -313,12 +363,11 @@ export class RadiologistFormPage extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = state => {
-  console.log('state', state)
-  return {
+const mapStateToProps = state => ({
   radiologist: state.radiologist || null,
+  hospitals: state.hospital.detail || [],
   alert: state.alert || false,
-}}
+})
 
 const mapDispatchToProps = dispatch => ({
   create: formData => {
@@ -329,6 +378,9 @@ const mapDispatchToProps = dispatch => ({
   },
   detail: formData => {
     dispatch(radiologistActions.detail(formData))
+  },
+  hospitalListing: (formData) => {
+    dispatch(hospitalActions.listing(formData))
   },
 })
 

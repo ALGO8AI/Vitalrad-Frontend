@@ -83,6 +83,8 @@ h2.tip-value{
   height: 40px;
 }
 
+.daterow {float: left;}
+.daterow .react-datepicker-wrapper {width: 48%}
 .blank-panel .content-wrapper{ padding: 0 !important }
 .App {
   text-align: center;
