@@ -54,6 +54,22 @@ export const isAdmin = () => {
   }
 }
 
+export const isAdminHospital = () => {
+  try {
+    let radioauth = localStorage.getItem('_radioauth')
+      ? localStorage.getItem('_radioauth')
+      : '{}'
+    let authData = radioauth ? JSON.parse(radioauth) : null
+    let isAdmin = false
+    if (idx(authData, _ => _.detail) && (authData.detail.user_type === 'superadmin' || authData.detail.user_type === 'hospital')) {
+      isAdmin = true
+    }
+    return isAdmin
+  } catch (err) {
+    return false
+  }
+}
+
 export const loggedInUser = () => {
   try {
     let radioauth = localStorage.getItem('_radioauth')
