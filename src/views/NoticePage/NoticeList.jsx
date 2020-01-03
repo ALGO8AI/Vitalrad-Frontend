@@ -8,6 +8,8 @@ import Moment from 'react-moment'
 import ReactTooltip from 'react-tooltip'
 import {Pagination} from '../../components/common';
 import {authDetail, loggedInUser} from '../../_helpers'
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 type Props = {
   getDiscrepancy: Function,
@@ -20,7 +22,8 @@ type State = {
   currentPage: number,
   totalPages: number,
   pageLimit: number,
-  loggedInUser:string
+  loggedInUser:string,
+  allChecked: boolean
 };
 
 class NoticeList extends React.Component<Props, State> {
@@ -35,6 +38,7 @@ class NoticeList extends React.Component<Props, State> {
       totalPages: 0,
       pageLimit: 10,
       currentPage: 1,
+      allChecked: false,
       loggedInUser: loggedInUser()
     }
   }
@@ -104,6 +108,28 @@ class NoticeList extends React.Component<Props, State> {
 
   }
 
+  handleAllCheck =() => this.setState({allChecked: !this.state.allChecked})
+
+  handleCheck =(e) => {
+    console.log('e', e)
+    confirmAlert({
+      title: 'Confirm to submit',
+      message: 'Are you sure to do this.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => alert('Click Yes')
+        },
+        {
+          label: 'No',
+          onClick: () => alert('Click No')
+        }
+      ],
+      closeOnEscape: false,
+      closeOnClickOutside: false,
+    });
+  }
+
   render() {
     const {pageLimit} = this.state
     const {match} = this.props
@@ -114,8 +140,10 @@ class NoticeList extends React.Component<Props, State> {
     let totalDiscrepancy = (discrepancyList.length > 0) ? discrepancyList[0].totalcount : 0
     disRow = discrepancyList.map((dis, index) => (
       <tr key={index}>
+        <td>{dis.Reported === 'Reported' ? 'Acknowleged' : 'Action & Acknowlege'}</td>
         <td><Moment format="Do MMMM YYYY">{dis.Scan_Received_Date}</Moment></td>
         <td>{dis.Reported_By}</td>
+        <td>{dis.Patient_First_Name} {dis.Surname}</td>
         <td data-tip type="light" data-for={'tip-'+dis.Accession_No}>{dis.Accession_No}
         <ReactTooltip  type="light" className="grey-border" id={'tip-'+dis.Accession_No} aria-haspopup='true' role='example'>
           <table>
@@ -138,9 +166,8 @@ class NoticeList extends React.Component<Props, State> {
           </table>
         </ReactTooltip>
         </td>
-        <td>Appears to have used in ACC slice 354-{359 + index + 1}</td>
         <td>
-          
+          <input type="checkbox" onChange={this.handleCheck} defaultChecked={this.state.allChecked}/>
         </td>
       </tr>
     ))
@@ -157,11 +184,12 @@ class NoticeList extends React.Component<Props, State> {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th className="font-weight-bold">Date</th>
-                        <th className="font-weight-bold">Raised By</th>
+                        <th className="font-weight-bold">Action Required</th>
+                        <th className="font-weight-bold">Scan Received Date</th>
+                        <th className="font-weight-bold">Sent By</th>
+                        <th className="font-weight-bold">Patient</th>
                         <th className="font-weight-bold">Accession No.</th>
-                        <th className="font-weight-bold">Discrepancy</th>
-                        <th className="font-weight-bold"></th>
+                        <th className="font-weight-bold">Acknowlege Record {/*<input type="checkbox" onChange={this.handleAllCheck} defaultChecked={this.state.allChecked}/>*/}</th>
                       </tr>
                     </thead>
                     <tbody>

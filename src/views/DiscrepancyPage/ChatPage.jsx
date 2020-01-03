@@ -1,4 +1,6 @@
 // @flow
+/*jshint eqeqeq: false */
+
 import React from 'react'
 import 'react-chat-widget/lib/styles.css';
 import {connect} from 'react-redux'
@@ -38,6 +40,7 @@ class ChatPage extends React.Component<Props, State> {
     let from_id = ''
     let from_name = ''
     if(this.state.loggedInUser){
+      console.log('authData', authData)
       if(this.state.loggedInUser === "superadmin"){
         from_id = authData.detail._id
         from_name = authData.detail.username
@@ -93,6 +96,7 @@ class ChatPage extends React.Component<Props, State> {
           message: value,
           user_type: this.state.loggedInUser || 'doctor'
         }
+        console.log('formData', formData)
         this.props.saveComment(formData)
 
         setTimeout(() => {
