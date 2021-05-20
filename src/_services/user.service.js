@@ -1,6 +1,6 @@
 // @flow week
 import {API_URL, headerConfig} from '../_config'
-import {history} from '../_helpers'
+import {history, authHeader} from '../_helpers'
 import handleResponse from './handleResponse'
 
 const login = (username: string, password: string) => {
@@ -31,7 +31,22 @@ const logout = () => {
   history.push('/')
 }
 
+const getUser = (formData: Object) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {...headerConfig.headerData, ...authHeader()},
+    mode: 'cors',
+    body: JSON.stringify(formData),
+  }
+
+  return fetch(`${API_URL}/getUser`, requestOptions)
+    .then(handleResponse)
+    .then((response: any) => {
+      return response.detail
+    })
+}
 export const userService = {
   login,
   logout,
+  getUser
 }

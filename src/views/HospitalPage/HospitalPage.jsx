@@ -96,7 +96,7 @@ export class HospitalPage extends React.Component<Props, State> {
 
   // Search Filter
   filterHospital = (event: any) => {
-    let regVal = /^[A-Za-z\d]+$/
+    let regVal = /^[A-Za-z\d\-_\s]+$/i
     if (regVal.test(event.target.value) || event.target.value.length === 0) {
       let hospitalList = idx(this.props, _ => _.hospitals)
         ? this.props.hospitals
@@ -105,9 +105,8 @@ export class HospitalPage extends React.Component<Props, State> {
         item =>
           item.profile.name.toLowerCase().search(event.target.value.toLowerCase()) !==
             -1 ||
-          item.username
-            .toLowerCase()
-            .search(event.target.value.toLowerCase()) !== -1
+          item.username.toLowerCase().search(event.target.value.toLowerCase()) !== -1 ||
+          item.profile.mobile.toLowerCase().search(event.target.value.toLowerCase()) !== -1
       )
       this.setState({hospitalList: hospitalList})
     }
@@ -122,11 +121,11 @@ export class HospitalPage extends React.Component<Props, State> {
     hospitalRow = hospitalList.map((hospital, index) => (
       <tr key={index}>
         <td className="hospitalname">
-          <span className="name">{hospital.username}</span>
+          <span className="name">{(hospital.username) ? hospital.username : ''}</span>
         </td>
-        <td className="hospitalname">{hospital.profile.name}</td>
-        <td className="hospitalname">{hospital.profile.code}</td>
-        <td className="hospitalname">{hospital.status}</td>
+        <td className="hospitalname">{(hospital.profile && hospital.profile.name) ? hospital.profile.name : ''}</td>
+        <td className="hospitalname">{(hospital.profile && hospital.profile.mobile) ? hospital.profile.mobile : ''}</td>
+        {/*<td className="hospitalname">{hospital.status}</td>*/}
         <td className="actions">
           <Button onClick={e => this.handleShow(e, hospital._id)}>
             <Icon icon={pencil} />
@@ -148,7 +147,7 @@ export class HospitalPage extends React.Component<Props, State> {
         <div className="card">
           <div className="card-body">
           <div className="heading">
-            <h2>Hospital</h2>
+            <h4>Hospital</h4>
             <div className="btn-container">
               <div className="filter">
                 <Form.Group>
@@ -173,8 +172,8 @@ export class HospitalPage extends React.Component<Props, State> {
                 <tr>
                   <th>Username</th>
                   <th>Name</th>
-                  <th>Code</th>
-                  <th>Status</th>
+                  <th>Phone</th>
+                  {/*<th>Status</th>*/}
                   <th width="10%">Actions</th>
                 </tr>
               </thead>
@@ -193,6 +192,8 @@ export class HospitalPage extends React.Component<Props, State> {
         <Modal
           className="add-hospital"
           show={showHospitalFrom}
+          size="lg"
+          backdrop="static"
           onHide={e => this.handleClose(e)}>
           <HospitalFormPage hospitalID={hospitalId} />
         </Modal>

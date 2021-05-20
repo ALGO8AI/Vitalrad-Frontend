@@ -130,7 +130,7 @@ const detail = (formData: Object) => (dispatch: any) => {
     },
     error => {
       dispatch(failure(error.toString()))
-      history.push('/hospital')
+      history.push('/dashboard')
       dispatch(alertActions.error(error.toString()))
     }
   )

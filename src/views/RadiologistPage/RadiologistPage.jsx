@@ -96,7 +96,7 @@ export class RadiologistPage extends React.Component<Props, State> {
 
   // Search Filter
   filterRadiologist = (event: any) => {
-    let regVal = /^[A-Za-z\d]+$/
+    let regVal = /^[A-Za-z\d\-_\s]+$/i
     if (regVal.test(event.target.value) || event.target.value.length === 0) {
       let radiologistList = idx(this.props, _ => _.radiologists)
         ? this.props.radiologists
@@ -105,9 +105,8 @@ export class RadiologistPage extends React.Component<Props, State> {
         item =>
           item.profile.name.toLowerCase().search(event.target.value.toLowerCase()) !==
             -1 ||
-          item.username
-            .toLowerCase()
-            .search(event.target.value.toLowerCase()) !== -1
+          item.username.toLowerCase().search(event.target.value.toLowerCase()) !== -1 ||
+          item.profile.mobile.toLowerCase().search(event.target.value.toLowerCase()) !== -1
       )
       this.setState({radiologistList: radiologistList})
     }
@@ -124,9 +123,9 @@ export class RadiologistPage extends React.Component<Props, State> {
         <td className="radiologistname">
           <span className="name">{radiologist.username}</span>
         </td>
-        <td className="radiologistname">{radiologist.profile.name}</td>
-        <td className="radiologistname">{radiologist.profile.code}</td>
-        <td className="radiologistname">{radiologist.status}</td>
+        <td className="radiologistname">{(radiologist.profile) ? radiologist.profile.name : ''}</td>
+        <td className="radiologistname">{(radiologist.profile) ? radiologist.profile.mobile : ''}</td>
+        <td className="radiologistname">{(radiologist.profile) ? radiologist.profile.code : ''}</td>
         <td className="actions">
           <Button onClick={e => this.handleShow(e, radiologist._id)}>
             <Icon icon={pencil} />
@@ -148,7 +147,7 @@ export class RadiologistPage extends React.Component<Props, State> {
         <div className="card">
           <div className="card-body">
           <div className="heading">
-            <h2>Radiologist</h2>
+            <h4>Radiologist</h4>
             <div className="btn-container">
               <div className="filter">
                 <Form.Group>
@@ -173,8 +172,8 @@ export class RadiologistPage extends React.Component<Props, State> {
                 <tr>
                   <th>Username</th>
                   <th>Name</th>
+                  <th>Mobile</th>
                   <th>Code</th>
-                  <th>Status</th>
                   <th width="10%">Actions</th>
                 </tr>
               </thead>
@@ -191,6 +190,8 @@ export class RadiologistPage extends React.Component<Props, State> {
         </div>
       </div>
         <Modal
+          size="lg"
+          backdrop="static"
           className="add-radiologist"
           show={showRadiologistFrom}
           onHide={e => this.handleClose(e)}>

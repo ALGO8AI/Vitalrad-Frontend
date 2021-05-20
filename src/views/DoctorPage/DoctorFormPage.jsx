@@ -3,17 +3,21 @@ import React from 'react'
 import {Button, Form, Modal} from 'react-bootstrap'
 import {connect} from 'react-redux'
 import idx from 'idx'
-import {doctorActions, hospitalActions} from '../../_actions'
+import {doctorActions, auditActions, userActions} from '../../_actions'
 import FormValidator from '../../_helpers/FormValidator'
+import {authDetail, loggedInUser} from '../../_helpers'
 
 type Props = {
   doctor: any,
   doctorID: string,
   hospitals: Array<any>,
   updateDetail: Function,
-  hospitalListing: Function,
+  getAuditFilters: Function,
+  getUser: Function,
+  auditfilters: Object,
   create: Function,
   detail: Function,
+  userInfo: any,
   alert: any,
 }
 
@@ -25,28 +29,50 @@ type State = {
   email: string,
   mobile: string,
   code: string,
+  hospitalName: string,
   submitted: boolean,
   hospitalId: string,
   doctorId: string,
-  hospitalList: any,
   validation: Object,
+  auditfilters: Object,
+  userDetail: Object
 };
 
 const checklength = (checklength: string) => {
-  return checklength.length > 3 ? false : true
+  return checklength.trim().length >= 3 ? false : true
+}
+
+const checkCodelength = (checklength: string) => {
+  return checklength.trim().length >= 1 ? false : true
 }
 
 const checkPassword = (password: string, state: Object) => {
-  if (state.doctorId !== '' && password.length === 0) {
+  if (state.doctorId !== '' && password.trim().length === 0) {
     return false
-  } else if (state.doctorId !== '' && password.length > 5) {
+  } else if (state.doctorId !== '' && password.trim().length >= 5) {
     return false
-  } else if (state.doctorId === '' && password.length > 5) {
+  } else if (state.doctorId === '' && password.trim().length >= 5) {
     return false
   } else {
     return true
   }
 }
+
+const checkPhonenumber = (mobile: string ) => {
+  var phoneno = /^\d{10}$/;
+  if(mobile !==''){
+    return (mobile.match(phoneno)) ? false : true
+  }
+  else{
+    return false;
+  }
+}
+
+const checkEmail = (checkEmail: string) => {
+  var emailReg = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,15}/g
+  return !checkEmail.match(emailReg)
+}
+
 const validator = new FormValidator([
   {
     field: 'name',
@@ -55,10 +81,22 @@ const validator = new FormValidator([
     message: 'Name is required.',
   },
   {
+    field: 'name',
+    method: checklength,
+    validWhen: false,
+    message: 'Name length must be at least 3 characters long.',
+  },
+  {
     field: 'code',
     method: 'isEmpty',
     validWhen: false,
     message: 'code is required.',
+  },
+  {
+    field: 'code',
+    method: checkCodelength,
+    validWhen: false,
+    message: 'Code length must be at least 1 characters long.',
   },
   {
     field: 'username',
@@ -76,7 +114,19 @@ const validator = new FormValidator([
     field: 'password',
     method: checkPassword,
     validWhen: false,
-    message: 'Password length must be at least 3 characters long.',
+    message: 'Password length must be at least 5 characters long.',
+  },
+  {
+    field: 'email',
+    method: checkEmail,
+    validWhen: false,
+    message: 'Please enter valid Email.',
+  },
+  {
+    field: 'mobile',
+    method: checkPhonenumber,
+    validWhen: false,
+    message: 'Invalid Mobile number. Mobile must be 10 digit',
   },
   {
     field: 'hospitalId',
@@ -98,10 +148,12 @@ export class DoctorFormPage extends React.Component<Props, State> {
       email: '',
       mobile: '',
       code: '',
+      hospitalName: '',
       submitted: false,
       hospitalId: '',
       doctorId: '',
-      hospitalList: [],
+      auditfilters: {},
+      userDetail: {},
       validation: validator.valid(),
     }
   }
@@ -109,6 +161,13 @@ export class DoctorFormPage extends React.Component<Props, State> {
   handleChange = (e: any) => {
     const {name, value} = e.target
     this.setState({[name]: value})
+    if(name === 'name' ){
+      let formData = {
+        'user_type': 'doctor',
+        name: value
+      }
+      this.props.getUser(formData)
+    }
   }
 
   handleSubmit = (e: any) => {
@@ -117,8 +176,10 @@ export class DoctorFormPage extends React.Component<Props, State> {
     this.setState({validation})
     this.setState({submitted: true})
     if (validation.isValid) {
-      const {name, address, code, username, password, email, mobile, hospitalId, doctorId} = this.state
-      if (name && code && username) {
+
+      const {name, code, hospitalName, address, username, password, email, mobile, hospitalId, doctorId} = this.state
+
+      if (name && username) {
         let formData = {
           name: name,
           address: address,
@@ -127,6 +188,7 @@ export class DoctorFormPage extends React.Component<Props, State> {
           mobile: mobile,
           code: code,
           hospital_id: hospitalId,
+          hospital_name: hospitalName,
           user_type: 'doctor',
         }
         if(password !==''){
@@ -154,18 +216,24 @@ export class DoctorFormPage extends React.Component<Props, State> {
       email: '',
       mobile: '',
       code: '',
+      hospitalName: '',
       password: '',
       hospitalId: '',
       submitted: false,
+      userDetail: {},
       validation: validator.valid(),
     })
   }
 
   componentDidMount() {
-    if (this.state.hospitalList.length === 0) {
-      this.props.hospitalListing({"user_type": "hospital"})
+    if(loggedInUser() ==='hospital'){
+      let authData = authDetail() 
+      let hospitalId = (idx(authData, _ => _.detail._id)) ? authData.detail._id : null 
+      this.setState({hospitalId : hospitalId})
     }
     //edit - get data
+    this.props.getAuditFilters()
+
     if (this.props.doctorID && this.props.doctorID !== '') {
       const {doctorID} = this.props
       if (doctorID) {
@@ -180,10 +248,17 @@ export class DoctorFormPage extends React.Component<Props, State> {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.hospitals) {
-      this.setState({hospitalList: nextProps.hospitals})
+    if (nextProps.userInfo && this.state.name !=='') {
+      let userDetail = (nextProps.userInfo[0]) ? nextProps.userInfo[0] : {}
+      let hospital_number = (userDetail.Hospital_Number) ? userDetail.Hospital_Number : ''
+      let Hospital_Name = (userDetail.Hospital_Name) ? userDetail.Hospital_Name : ''
+      let doctor_code = (userDetail.Doctor_id) ? userDetail.Doctor_id : ''
+      this.setState({userDetail: userDetail, hospitalId: hospital_number, code: doctor_code, hospitalName: Hospital_Name})
     }
 
+    if (nextProps.auditfilters && this.state.auditfilters !== nextProps.auditfilters ) {
+      this.setState({auditfilters: nextProps.auditfilters})
+    }
     //set data
     if (
       this.state.doctorId !== '' &&
@@ -191,14 +266,16 @@ export class DoctorFormPage extends React.Component<Props, State> {
       !nextProps.doctor.isProcessing
     ) {
       let {doctorDetail} = nextProps.doctor
+      let profileData = (idx(doctorDetail, _ => _.profile.name)) ? doctorDetail.profile : {} 
       this.setState({
-        name: doctorDetail.profile.name,
-        address: doctorDetail.profile.address,
-        code: doctorDetail.profile.code || '',
+        name: profileData.name,
+        address: profileData.address,
+        code: profileData.code || '',
         username: doctorDetail.username,
-        email: doctorDetail.profile.email || '',
-        mobile: doctorDetail.profile.mobile || '',
-        hospitalId: doctorDetail.profile.hospitalId,
+        email: profileData.email || '',
+        mobile: profileData.mobile || '',
+        hospitalId: profileData.hospital_id || '',
+        hospitalName: profileData.hospital_name[0] || '',        
       })
     }
 
@@ -210,21 +287,20 @@ export class DoctorFormPage extends React.Component<Props, State> {
   render() {
     const {alert} = this.props
     const {isProcessing} = this.props.doctor || false
-    const {name, address, code, username, password, email, mobile, submitted, hospitalId, doctorId} = this.state
-    const hospitalList = this.state.hospitalList || []
+    const {name, address, hospitalName, code, auditfilters, username, password, email, mobile, submitted, doctorId} = this.state
     let validation
     validation = submitted // if the form has been submitted at least once
       ? validator.validate(this.state) // then check validity every time we render
       : this.state.validation // otherwise just use what's in state
-    const hospitalRow = hospitalList.map((hospital, index) => (
-      <option
-        defaultValue={hospitalId}
+
+    const doctorList = auditfilters['doctor'] || []
+    const doctorRow = doctorList.map((doctor, index) => (<option
+        defaultValue={name}
         key={index}
         onChange={e => this.handleChange(e)}
-        value={hospital._id}>
-        {hospital.profile.name}
-      </option>
-    ))
+        value={doctor}>
+        {doctor}
+      </option>))
 
     return (
       <div>
@@ -242,11 +318,14 @@ export class DoctorFormPage extends React.Component<Props, State> {
                   className={validation.name.isInvalid ? ' has-error' : ''}>
                   <Form.Label>Doctor Name</Form.Label>
                   <Form.Control
-                    type="text"
+                    as="select"
                     name="name"
                     value={name}
-                    onChange={e => this.handleChange(e)}
-                  />
+                    disabled={(doctorId && name !=='') ? true : false}
+                    onChange={e => this.handleChange(e)}>
+                    <option value="">Select Name</option>
+                    {doctorRow}
+                  </Form.Control>
                   {validation.name.isInvalid && (
                     <div className="help-block">
                       {validation.name.message}
@@ -259,13 +338,11 @@ export class DoctorFormPage extends React.Component<Props, State> {
                   }>
                   <Form.Label>Select Hospital</Form.Label>
                   <Form.Control
-                    as="select"
+                    type="text"
                     name="hospitalId"
-                    value={hospitalId}
-                    onChange={e => this.handleChange(e)}>
-                    <option value="">Select Hospital</option>
-                    {hospitalRow}
-                  </Form.Control>
+                    value={hospitalName}
+                    disabled={true}
+                  />
                   {validation.hospitalId.isInvalid && (
                     <div className="help-block">
                       {validation.hospitalId.message}
@@ -279,7 +356,7 @@ export class DoctorFormPage extends React.Component<Props, State> {
                     type="text"
                     name="code"
                     value={code}
-                    onChange={e => this.handleChange(e)}
+                    disabled={true}
                   />
                   {validation.code.isInvalid && (
                     <div className="help-block">{validation.code.message}</div>
@@ -311,7 +388,7 @@ export class DoctorFormPage extends React.Component<Props, State> {
                     <div className="help-block">{validation.password.message}</div>
                   )}
                 </Form.Group>
-                <Form.Group>
+                <Form.Group className={validation.email.isInvalid ? ' has-error' : ''}>
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     type="email"
@@ -319,8 +396,11 @@ export class DoctorFormPage extends React.Component<Props, State> {
                     value={email}
                     onChange={e => this.handleChange(e)}
                   />
+                  {validation.email.isInvalid && (
+                    <div className="help-block">{validation.email.message}</div>
+                  )}
                 </Form.Group>
-                <Form.Group>
+                <Form.Group className={validation.mobile.isInvalid ? ' has-error' : ''}>
                   <Form.Label>Mobile</Form.Label>
                   <Form.Control
                     type="text"
@@ -328,6 +408,9 @@ export class DoctorFormPage extends React.Component<Props, State> {
                     value={mobile}
                     onChange={e => this.handleChange(e)}
                   />
+                  {validation.mobile.isInvalid && (
+                    <div className="help-block">{validation.mobile.message}</div>
+                  )}
                 </Form.Group>
                 <Form.Group>
                   <Form.Label>Address</Form.Label>
@@ -353,7 +436,9 @@ export class DoctorFormPage extends React.Component<Props, State> {
 }
 
 const mapStateToProps = state => ({
+  auditfilters: state.audit.auditfilters || [],
   doctor: state.doctor,
+  userInfo: state.authentication.userInfo || [],
   hospitals: state.hospital.detail || [],
   alert: state.alert || false,
 })
@@ -362,14 +447,17 @@ const mapDispatchToProps = dispatch => ({
   create: formData => {
     dispatch(doctorActions.create(formData))
   },
+  getAuditFilters: () => {
+    dispatch(auditActions.getAuditFilters())
+  },
   updateDetail: (formData, doctorId) => {
     dispatch(doctorActions.updateDetail(formData, doctorId))
   },
   detail: formData => {
     dispatch(doctorActions.detail(formData))
   },
-  hospitalListing: (formData) => {
-    dispatch(hospitalActions.listing(formData))
+  getUser: formData => {
+    dispatch(userActions.getUser(formData))
   },
 })
 

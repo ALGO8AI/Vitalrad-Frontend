@@ -9,6 +9,8 @@ import {chat} from './chat.reducer'
 import {audit} from './audit.reducer'
 import {radiologist} from './radiologist.reducer'
 import {alert} from './alert.reducer'
+import {invoice} from './invoice.reducer'
+import {modality} from './modality.reducer'
 
 const rootReducer = combineReducers({
   authentication,
@@ -18,7 +20,9 @@ const rootReducer = combineReducers({
   discrepancy,
   chat,
   audit,
-  radiologist
+  radiologist,
+  invoice,
+  modality
 })
 
 export default rootReducer

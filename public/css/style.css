@@ -12651,7 +12651,7 @@ dl {
         .sidebar .nav .nav-item .nav-link[aria-expanded="true"] .menu-arrow:before {
           content: "\f140"; }
       .sidebar .nav .nav-item.active:not(.navbar-brand-mini-wrapper) {
-        background: #282828; }
+        background:#73031a; }
         .sidebar .nav .nav-item.active:not(.navbar-brand-mini-wrapper) > .nav-link .menu-title {
           color: #b3b3b3;
           font-family: "Open Sans", sans-serif;
@@ -12659,7 +12659,7 @@ dl {
         .sidebar .nav .nav-item.active:not(.navbar-brand-mini-wrapper) > .nav-link i {
           color: #38ce3c; }
       .sidebar .nav .nav-item:not(.nav-category):hover {
-        background: #2c2c43; }
+        background: #73031a; }
       .sidebar .nav .nav-item.nav-profile {
         max-width: 270px;
         margin-top: 10px;

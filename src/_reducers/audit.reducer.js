@@ -64,6 +64,57 @@ export const audit = (
         ...state,
         isDataProcessing: false,
       }
+    case auditConstants.NOTICE_STATUS_REQUEST:
+      return {
+        ...state,
+        isDataProcessing: true,
+        ...action.astatus,
+      }
+    case auditConstants.NOTICE_STATUS_SUCCESS:
+      return {
+        ...state,
+        isDataProcessing: false,
+        ...action.astatus,
+      }
+    case auditConstants.NOTICE_STATUS_FAILURE:
+      return {
+        ...state,
+        isDataProcessing: false,
+      }
+    case auditConstants.DASHBOARD_INFO_REQUEST:
+      return {
+        ...state,
+        isDataProcessing: true,
+        ...action.dashboardInfo,
+      }
+    case auditConstants.DASHBOARD_INFO_SUCCESS:
+      return {
+        ...state,
+        isDataProcessing: false,
+        dashboardInfo : action.dashboardInfo.detail,
+      }
+    case auditConstants.DASHBOARD_INFO_FAILURE:
+      return {
+        ...state,
+        isDataProcessing: false,
+      }
+    case auditConstants.ACTIVITY_INFO_REQUEST:
+      return {
+        ...state,
+        isDataProcessing: true,
+        activityInfo: {},
+      }
+    case auditConstants.ACTIVITY_INFO_SUCCESS:
+      return {
+        ...state,
+        isDataProcessing: false,
+        activityInfo : action.activityInfo.detail,
+      }
+    case auditConstants.ACTIVITY_INFO_FAILURE:
+      return {
+        ...state,
+        isDataProcessing: false,
+      }
     default:
       return state
   }

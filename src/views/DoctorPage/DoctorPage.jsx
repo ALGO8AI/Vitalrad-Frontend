@@ -8,6 +8,7 @@ import Dialog from 'react-bootstrap-dialog'
 import idx from 'idx'
 import {doctorActions} from '../../_actions'
 import DoctorFormPage from './DoctorFormPage'
+import {authDetail, loggedInUser} from '../../_helpers'
 
 type Props = {
   doctorListing: Function,
@@ -40,7 +41,16 @@ export class DoctorPage extends React.Component<Props, State> {
   }
 
   getDoctorListing = () => {
-    this.props.doctorListing({"user_type": "doctor"})
+    let hospitalName = null
+    let formData = {"user_type": "doctor"}
+    if(loggedInUser() === 'hospital'){
+      let authData = authDetail()
+      hospitalName = idx(authData, _ => _.detail.profile.name) ? authData.detail.profile.name : null
+      if(hospitalName){
+        formData.hospital_name = hospitalName
+      }
+    }
+    this.props.doctorListing(formData)
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
@@ -96,7 +106,7 @@ export class DoctorPage extends React.Component<Props, State> {
 
   // Search Filter
   filterDoctor = (event: any) => {
-    let regVal = /^[A-Za-z\d]+$/
+    let regVal = /^[A-Za-z\d\-_\s]+$/i
     if (regVal.test(event.target.value) || event.target.value.length === 0) {
       let doctorList = idx(this.props, _ => _.doctors)
         ? this.props.doctors
@@ -105,9 +115,8 @@ export class DoctorPage extends React.Component<Props, State> {
         item =>
           item.profile.name.toLowerCase().search(event.target.value.toLowerCase()) !==
             -1 ||
-          item.username
-            .toLowerCase()
-            .search(event.target.value.toLowerCase()) !== -1
+          item.username.toLowerCase().search(event.target.value.toLowerCase()) !== -1 ||
+          item.profile.mobile.toLowerCase().search(event.target.value.toLowerCase()) !== -1
       )
       this.setState({doctorList: doctorList})
     }
@@ -124,9 +133,9 @@ export class DoctorPage extends React.Component<Props, State> {
         <td className="doctorname">
           <span className="name">{doctor.username}</span>
         </td>
-        <td className="doctorname">{doctor.profile.name}</td>
-        <td className="doctorname">{doctor.profile.code}</td>
-        <td className="doctorname">{doctor.status}</td>
+        <td className="doctorname">{doctor.profile ? doctor.profile.name : ''}</td>
+        <td className="doctorname">{doctor.profile ? doctor.profile.mobile : ''}</td>
+        {/*<td className="doctorname">{doctor.status}</td>*/}
         <td className="actions">
           <Button onClick={e => this.handleShow(e, doctor._id)}>
             <Icon icon={pencil} />
@@ -148,7 +157,7 @@ export class DoctorPage extends React.Component<Props, State> {
         <div className="card">
           <div className="card-body">
             <div className="heading">
-              <h2>Doctors</h2>
+              <h4>Doctors</h4>
               <div className="btn-container">
                 <div className="filter">
                   <Form.Group>
@@ -171,8 +180,8 @@ export class DoctorPage extends React.Component<Props, State> {
                   <tr>
                     <th>Username</th>
                     <th>Name</th>
-                    <th>Code</th>
-                    <th>Status</th>
+                    <th>Mobile</th>
+                    {/*<th>Status</th>*/}
                     <th width="10%">Actions</th>
                   </tr>
                 </thead>
@@ -189,6 +198,7 @@ export class DoctorPage extends React.Component<Props, State> {
           </div> 
         </div> 
         <Modal
+          backdrop="static"
           className="add-doctor"
           show={showDoctorFrom}
           onHide={e => this.handleClose(e)}>

@@ -2,7 +2,7 @@
 import React from 'react'
 import {Link} from 'react-router-dom'
 import './aside.css'
-import {isAdmin, authDetail} from '../../_helpers'
+import {isAdmin, isAdminHospital} from '../../_helpers'
 
 type Props = {
   pageType: string,
@@ -10,21 +10,20 @@ type Props = {
 
 
 const Asides = (props: Props) => {
-  let authData = authDetail()
   return (<nav className="sidebar sidebar-offcanvas" id="sidebar">
       <ul className="nav">
-        <li className="nav-item nav-profile">
+        {/*<li className="nav-item">
           <Link
             exact="true" 
             to="/dashboard"
             className="nav-link"
             >
             <div className="text-wrapper">
-              <p className="profile-name">{(authData && authData.detail && authData.detail.username) ? authData.detail.username : 'Admin'}</p>
+              <p className="profile-name">{(authData && authData.detail && authData.detail.username) ? capitalizeString(authData.detail.username) : 'Admin'}</p>
               <p className="designation">Administrator</p>
             </div>
           </Link>
-        </li>
+        </li>*/}
         <li className="nav-item">
           <Link to="/dashboard" className="nav-link">
             <span className="menu-title">Home Screen</span>
@@ -34,7 +33,7 @@ const Asides = (props: Props) => {
         <li className="nav-item">
           <Link /*exact*/ to="/activity" className="nav-link">
             <span className="menu-title">Activity Information</span>
-            <i className="icon-grid menu-icon"></i>
+            <i className="icon-chart menu-icon"></i>
           </Link>
         </li>
         <li className="nav-item">
@@ -46,13 +45,13 @@ const Asides = (props: Props) => {
         <li className="nav-item">
           <Link /*exact*/ to="/discrepancy" className="nav-link">
             <span className="menu-title">Discrepancy</span>
-            <i className="icon-layers menu-icon"></i>
+            <i className="icon-user-follow menu-icon"></i>
           </Link>
         </li>
         <li className="nav-item">
           <Link /*exact*/ to="/notice" className="nav-link">
             <span className="menu-title">Notices</span>
-            <i className="icon-doc menu-icon"></i>
+            <i className="icon-note menu-icon"></i>
           </Link>
         </li>
         {isAdmin() && (<li className="nav-item">
@@ -61,7 +60,7 @@ const Asides = (props: Props) => {
             <i className="icon-doc menu-icon"></i>
           </Link>
         </li>)}
-        {isAdmin() && (<li className="nav-item">
+        {isAdminHospital() && (<li className="nav-item">
           <Link /*exact*/ to="/doctor" className="nav-link">
             <span className="menu-title">Doctor</span>
             <i className="icon-doc menu-icon"></i>
@@ -71,6 +70,18 @@ const Asides = (props: Props) => {
           <Link /*exact*/ to="/radiologist" className="nav-link">
             <span className="menu-title">Radiologist</span>
             <i className="icon-doc menu-icon"></i>
+          </Link>
+        </li>)}
+        {isAdmin() && (<li className="nav-item">
+          <Link /*exact*/ to="/sales" className="nav-link">
+            <span className="menu-title">Sales Invoice</span>
+            <i className="icon-calculator menu-icon"></i>
+          </Link>
+        </li>)}
+        {isAdmin() && (<li className="nav-item">
+          <Link /*exact*/ to="/billing" className="nav-link">
+            <span className="menu-title">Billing Invoice</span>
+            <i className="icon-calculator menu-icon"></i>
           </Link>
         </li>)}
       </ul>

@@ -17,6 +17,22 @@ import "react-datepicker/dist/react-datepicker.css"
 import dateformat from "dateformat"
 import Moment from 'react-moment'
 import {authDetail, loggedInUser} from '../../_helpers'
+import { CSVLink } from "react-csv";
+import {Pagination} from '../../components/common';
+
+import drilldown from "highcharts/modules/drilldown.js";
+// import HighchartsExporting from 'highcharts/modules/exporting'
+import PieChart from "./PieChart"
+
+// Highcharts.setOptions({
+// lang: {
+// drillUpText: '[X]'
+// }
+// }); 
+drilldown(Highcharts);
+if (typeof Highcharts === 'object') {
+  // HighchartsExporting(Highcharts)
+}
 
 type Props = {
   getAuditInfo: Function,
@@ -36,19 +52,23 @@ type State = {
   startDate: any,
   endDate: any,
   auditList: Array<any>,
+  auditPagingList: Array<any>,
   isTableShow: boolean,
-  loggedInUser:string
+  loggedInUser:string,
+  currentPage: number,
+  totalPages: number,
+  pageLimit: number,
+  pageFilterLimit: Object,
 };
 
 const animatedComponents = makeAnimated()
 const Charts = ReactHighcharts.withHighcharts(Highstock);
-
 class AuditReport extends React.Component<Props, State> {
   
   constructor(props: Props) {
     super(props)
     let newCurrDate = new Date()
-    newCurrDate.setMinutes(newCurrDate.getMinutes() - 698 *24*60)
+    newCurrDate.setMinutes(newCurrDate.getMinutes() - 30 *24*60)
     this.state = {
       showChat: false,
       auditInfo: [],
@@ -60,7 +80,12 @@ class AuditReport extends React.Component<Props, State> {
       endDate: new Date(),
       auditList: [],
       isTableShow: false,
-      loggedInUser: loggedInUser()
+      loggedInUser: loggedInUser(),
+      totalPages: 0,
+      auditPagingList: [],
+      pageLimit: 15,
+      pageFilterLimit: {value: 15, label: 15},
+      currentPage: 1,
     }
   }
   componentDidMount() {
@@ -80,9 +105,14 @@ class AuditReport extends React.Component<Props, State> {
       tmpHospitalArr = [hospitalName]
       this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
     }
+    if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='doctor'){
+      let hospitalName = (idx(authData, _ => _.detail.profile.hospital_name) && authData.detail.profile.hospital_name[0] !=='') ? authData.detail.profile.hospital_name[0] : 'Hospital 7'
+      tmpHospitalArr = [hospitalName]
+      this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
+    }
     let formData = {
-      from: dateformat(startDate, 'dd-mm-yyyy'), 
-      to:dateformat(endDate, 'dd-mm-yyyy'), 
+      from: dateformat(startDate, 'yyyy-mm-dd'), 
+      to:dateformat(endDate, 'yyyy-mm-dd'), 
       hospital: tmpHospitalArr, 
       modality: tmpModalityArr, 
       category: tmpCategoryArr
@@ -91,7 +121,8 @@ class AuditReport extends React.Component<Props, State> {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
-    if (nextProps.audits) {
+    // console.log('nextProps', nextProps)
+    if (nextProps.audits && this.state.audits !== nextProps.audits ) {
       this.setState({auditInfo: nextProps.audits})
     }
 
@@ -101,7 +132,19 @@ class AuditReport extends React.Component<Props, State> {
 
     if (nextProps.auditlist && this.state.auditList !== nextProps.auditlist ) {
       this.setState({auditList: nextProps.auditlist})
+      let tmpauditList = Object.assign([], nextProps.auditlist);
+      const offset = (this.state.currentPage) * this.state.pageLimit;
+      let tmpPagingList = tmpauditList.splice(offset, this.state.pageLimit)
+      this.setState({auditPagingList: tmpPagingList})
     }
+  }
+
+  optionPageClicked = (optionsList: any) => {
+    this.setState({pageLimit: optionsList.value, pageFilterLimit: optionsList})
+    let tmpauditList = Object.assign([], this.state.auditList);
+    const offset = 1 * optionsList.value;
+    let tmpPagingList = tmpauditList.splice(offset, optionsList.value)
+    this.setState({auditPagingList: tmpPagingList})
   }
 
   checkLabel = (cval, seriesData)=> {
@@ -170,8 +213,18 @@ class AuditReport extends React.Component<Props, State> {
     this.getAuditInfo()
   }
 
+  clearDrillState = (e) => {
+    this.setState(({isTableShow: false}))
+  }
+
   showTableData = (e) => {
-    const {name} = e.target
+    let {name} = e.target
+    if(name === undefined){
+      name = e.target.innerHTML;
+    }
+    if(name === undefined || name === ""){
+      name = e.point.name;
+    }
     if(name){
       this.setState({isTableShow: true})
       const {startDate, endDate, hospitalFilter, modalityFilter} = this.state
@@ -179,14 +232,20 @@ class AuditReport extends React.Component<Props, State> {
       let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
       let tmpCategoryArr = [name];
       let formData = {
-        from: dateformat(startDate, 'dd-mm-yyyy'), 
-        to:dateformat(endDate, 'dd-mm-yyyy'), 
+        from: dateformat(startDate, 'yyyy-mm-dd'), 
+        to:dateformat(endDate, 'yyyy-mm-dd'),  
         hospital: tmpHospitalArr, 
         modality: tmpModalityArr, 
-        category: tmpCategoryArr
+        category: tmpCategoryArr,
+        radiologist: [],
+        tat: ''
       }
       this.props.getAuditByCategory(formData)
     }
+  }
+
+  hideTableData = (e:any) => {
+    this.setState({isTableShow: false})
   }
 
   stackColumnChart = (auditInfo) => {
@@ -197,6 +256,7 @@ class AuditReport extends React.Component<Props, State> {
     let scrollMax = (dateSeries.length === 0) ? 0 : ((dateSeries.length >=4) ? 4 : dateSeries.length-1) 
     return {
       chart: {
+        height: '75%',
         type: 'column',
         scrollablePlotArea: {
             scrollPositionX: 1
@@ -204,6 +264,12 @@ class AuditReport extends React.Component<Props, State> {
         plotBackgroundColor: null,
         plotBorderWidth: null,
         plotShadow: false,
+        events: {
+          load() {
+            this.showLoading();
+            setTimeout(this.hideLoading.bind(this), 2000);
+          }
+        }
       },
       title: {
           text: null
@@ -265,15 +331,128 @@ class AuditReport extends React.Component<Props, State> {
     }
   }
 
+  pieDrillDown = (auditInfo) => {
+    let pieData = (auditInfo.pieData) ? auditInfo.pieData.map( s => ({name:s.category, y: s.cat, drilldown: s.category}) ) : [];
+    const filterChartData = (e) => this.showTableData(e)
+
+    let pieCatResponse = idx(auditInfo, _ => _.pieCatResponse) ? auditInfo.pieCatResponse : {};
+    let tmpPieCatResponse = {}
+    tmpPieCatResponse = Object.keys(pieCatResponse).map((modKey, index) => {
+      let sVal = []
+      pieCatResponse[modKey].map((dataVal, index) => {
+        sVal[index] = [dataVal.ScanMonth+'-'+dataVal.ScanYear  , dataVal.TatCount]
+        return sVal;
+      })
+      return tmpPieCatResponse[modKey] = {
+        'type' : 'column',
+        'name': ' ',
+        'id'  : modKey,
+        'data' : sVal
+      }
+    })
+    const chartOpt = {
+        chart: {
+          height: '75%',
+          plotBackgroundColor: null,
+          plotBorderWidth: null,
+          plotShadow: false,
+          type: 'pie',
+        },
+        title: null,
+        tooltip: {
+          pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        accessibility: {
+          announceNewData: {
+              enabled: true
+          }
+        },
+        xAxis: {
+          type: 'category'
+        },
+        yAxis: {
+          title: null
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    // format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                },
+                showInLegend: true,
+                colors: ['#8b0000', '#ffcccb', '#ffa500', '#417f68', '#013220'],
+                point: {
+                  events: {
+                    legendItemClick: function(e) {
+                      // filterChartData(e)    
+                    }
+                  }
+                },
+                events: {
+                  click: function(e) {
+                    filterChartData(e)    
+                  }
+                }
+            },
+            series: {
+              borderWidth: 0,
+              showInLegend: true,
+              tooltip: {
+                pointFormat: '{series.name}'
+              },
+              dataLabels: {
+                enabled: true,
+              }
+            }
+        },
+        series: [{  
+            name: ' ',
+            colorByPoint: true,
+            data: pieData
+        }],
+        drilldown: {
+          tooltip: {
+            pointFormat: '{series.name}'
+          },
+          drillUpButton: {
+            // relativeTo: 'spacingBox',
+            position: {
+              y: 0,
+              x: -30
+            }
+          },
+          plotOptions: {
+            series: {
+              borderWidth: 0,
+              dataLabels: {
+                enabled: true,
+              }
+            }
+          },
+          series: tmpPieCatResponse
+        }
+    };
+    return chartOpt;
+  }
+
   pieChart = (auditInfo) => {
     let pieData = (auditInfo.pieData) ? auditInfo.pieData.map( s => ({name:s.category, y: s.cat}) ) : [];
     const filterChartData = (e) => this.showTableData(e)
     return {
       chart: {
+        height: '75%',
         plotBackgroundColor: null,
         plotBorderWidth: null,
         plotShadow: false,
-        type: 'pie'
+        type: 'pie',
+        events: {
+          load() {
+            this.showLoading();
+            setTimeout(this.hideLoading.bind(this), 2000);
+          }
+        }
       },
       title:{text: null},
       tooltip: {
@@ -324,99 +503,86 @@ class AuditReport extends React.Component<Props, State> {
     }
   }
 
-  // test = () =>{
-  //   var data = [];
-  //   for (var i = 0; i < 100; i++) {
-  //     var value = Math.random() * 10;
-  //     var x = {
-  //       id: i,
-  //       name: 'test ' + i,
-  //       y: value
-  //     }
-  //     data.push(x);
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   if(nextProps.audits !== this.state.auditInfo){
+  //     return true;  
   //   }
-  //   console.log('data', data)
-  //   return data;
+  //   if (nextProps.auditlist && this.state.auditList !== nextProps.auditlist ) {
+  //     return true; 
+  //   }
+
+  //   return false;
   // }
 
   render() {
-    const {loggedInUser, auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate, isTableShow, auditList} = this.state
-    const pieOptions = this.pieChart(auditInfo);
-
+    const pageNum = [
+    {value: 15, label: 15},
+    {value: 30, label: 30},
+    {value: 50, label: 50},
+    {value: 100, label: 100},
+    ]
+    const {auditPagingList, pageFilterLimit, pageLimit, loggedInUser, auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate, isTableShow, auditList} = this.state
+    // const pieDrillChart = this.pieDrillDown(auditInfo);
     const stackOptions = this.stackColumnChart(auditInfo);
 
     const hospitalList = this.formatFilterData('hospital')
     const modalityList = this.formatFilterData('Modality')
     const categoryList = this.formatFilterData('category')
 
-    // const testFn = () => this.test()
-
-    // const scrollChartOptions = {
-    //   chart: {
-    //     type: 'column',
-    //     scrollablePlotArea: {
-    //         minWidth: 500,
-    //         scrollPositionX: 1
-    //     },
-    //   },
-    //   plotOptions: {
-    //     column: {
-    //       stacking: 'normal',
-    //       cropThreshold: 10000
-    //     },
-    //   },
-    //   xAxis: {
-    //     type: 'category',
-    //     max: 10,
-    //   },
-    //   scrollbar: {
-    //     enabled: true
-    //   },
-    //   series: [{
-    //       name: "A",
-    //       data: testFn()
-    //     }, {
-    //       name: "B",
-    //       data: testFn()
-    //     },
-    //     {
-    //       name: "C",
-    //       data: testFn()
-    //     },
-    //     {
-    //       name: "D",
-    //       data: testFn()
-    //     }
-    //   ]
-    // }
-
-
+    const totalActivity = auditList.length
     let auditCatRow = null
-    auditCatRow = auditList.map((audit, index) => (
-      <tr key={index}>
-        <td><Moment format="lll">{audit.Scan_Received_Date}</Moment></td>
-        <td>{audit.Reported_By}</td>
-        <td>{audit.Accession_No}</td>
-        <td>{audit.Hospital_Number}</td>
-        <td>{audit.Hospital_Name}</td>
-        <td>{audit.Patient_First_Name} {audit.Surname}</td>
-        <td>{audit.Modality}</td>
-        <td>{audit.Body_Part}</td>
-        <td>{audit.Reported}</td>
-        <td>{audit.Reported_By}</td>
-        <td>{audit.TAT_Status}</td>
-        <td>{audit.Audit_Person}</td>
-        <td>{audit.Audit_Category}</td>
-        <td>Appears to have used in ACC slice 354-{359 + index + 1}</td>
-      </tr>
+    if(auditPagingList.length > 0){
+      auditCatRow = auditPagingList.map((audit, index) => {
+        let tmpScanDate = audit.Scan_Received_Date.split("-");
+         let scanDate = (tmpScanDate[0].length === 4) ? audit.Scan_Received_Date : audit.Scan_Received_Date.split("-").reverse().join("-");
+        return (<tr key={index}>
+          <td>{audit.Scan_Received_Date && (<Moment format="lll">{scanDate}</Moment>)}</td>
+          <td>{audit.Reported_By}</td>
+          <td>{audit.Accession_No}</td>
+          <td>{audit.Hospital_Number}</td>
+          <td>{audit.Hospital_Name}</td>
+          <td>{audit.Patient_First_Name} {audit.Surname}</td>
+          <td>{audit.Modality}</td>
+          <td>{audit.Body_Part}</td>
+          <td>{audit.Reported}</td>
+          <td>{audit.TAT_Status}</td>
+          <td>{audit.Audit_Person}</td>
+          <td>{audit.Audit_Category}</td>
+          <td>Appears to have used in ACC slice 354-{359 + index + 1}</td>
+        </tr>
+      )})
+    }
+    let csvData = [
+      [
+      "Scan Received Date", 
+      "Reported By", 
+      "Accession No", 
+      "Hospital Number", 
+      "Hospital Name", 
+      "Patient Name", "Surname", "Modality", "Body Part", "Reported", "TAT Status", "Audit Person", "Audit Category"]
+      ];
+    auditList.map((audit, index) => ( 
+      csvData.push([
+        audit.Scan_Received_Date, 
+        audit.Reported_By, 
+        audit.Accession_No, 
+        audit.Hospital_Number, 
+        audit.Hospital_Name,
+        audit.Patient_First_Name,
+        audit.Surname,
+        audit.Modality,
+        audit.Body_Part,
+        audit.Reported,
+        audit.TAT_Status,
+        audit.Audit_Person,
+        audit.Audit_Category])
     ))
-
     return (
       <div className="content-wrapper">
         <div className="card">
           <div className="card-body">
             <Row >
-              <Col lg={4} md={4} sm={12}>
+              <Col lg={2} md={2} sm={12}>
                 <Form.Group>
                   <Form.Label>Hospital</Form.Label>
                   <Select
@@ -426,12 +592,12 @@ class AuditReport extends React.Component<Props, State> {
                     value={hospitalFilter}
                     onChange={e => this.optionClicked(e, 'hospitalFilter')}
                     isMulti
-                    isDisabled={(loggedInUser && loggedInUser ==='hospital')}
+                    isDisabled={(loggedInUser && (['hospital', 'doctor'].find(k => k===loggedInUser)))}
                     options={hospitalList}
                   />
                 </Form.Group>
               </Col>
-              <Col lg={4} md={4} sm={12}>
+              <Col lg={2} md={2} sm={12}>
                 <Form.Group>
                   <Form.Label>Modality</Form.Label>
                   <Select
@@ -445,7 +611,7 @@ class AuditReport extends React.Component<Props, State> {
                   />
                 </Form.Group>
               </Col>
-              <Col lg={4} md={4} sm={12}>
+              <Col lg={2} md={2} sm={12}>
                 <Form.Group>
                   <Form.Label>Category</Form.Label>
                   <Select
@@ -459,29 +625,33 @@ class AuditReport extends React.Component<Props, State> {
                   />
                 </Form.Group>
               </Col>
-            </Row>
-            <hr />
-            <Row >
-              <Col lg={8} md={8} sm={12}>
+              <Col lg={4} md={4} sm={12}>
                 <Form.Group>
-                  <Form.Label style={{'width': '16%'}}>Date Range</Form.Label>
+                  <Form.Label >Date Range</Form.Label>
+                  <span className="daterow">
                   <DatePicker
                     className="form-control"
                     name= 'startDate'
                     selected={startDate}
+                    dateFormat="yyyy-MM-dd"
                     onChange={e => this.handleDateChange(e, 'startDate')}
                   /> -  
                   <DatePicker
                     className="form-control"
                     name= 'endDate'
                     selected={endDate}
-                    minDate={new Date()}
+                    dateFormat="yyyy-MM-dd"
+                    minDate={startDate}
                     onChange={e => this.handleDateChange(e, 'endDate')}
                   />
+                  </span>
                 </Form.Group>
               </Col>
               <Col lg={2} md={2} sm={12}>
-                <Button onClick={e => this.handleFilter(e)}>Filter</Button>
+                <Form.Group>
+                <Form.Label >&nbsp;</Form.Label>
+                <Button className="form-control" onClick={e => this.handleFilter(e)}>Filter</Button>
+                </Form.Group>
               </Col>
             </Row>
           </div>
@@ -492,13 +662,15 @@ class AuditReport extends React.Component<Props, State> {
             <div className="card">
               <div className="card-body">
                 <div className="d-sm-flex align-items-center mb-4">
-                  <h4 className="card-title mb-sm-0">Category Split Report</h4>
+                  <div className="heading">
+                    <h4 className="card-title mb-sm-0">Category Split Report</h4>
+                    <div className="btn-container">
+                      {(isTableShow && csvData.length > 1) && (<CSVLink data={csvData} filename={"category-report.csv"} className="csvlink" target="_blank">Export To CSV <i className="icon-layers menu-icon"></i></CSVLink>)}
+                    </div>
+                  </div>
                 </div>
-                {/*<HighchartsReact
-                  highcharts={Highcharts}
-                  options={pieOptions}
-                />*/}
-                <Charts isPureConfig={true} config={pieOptions}></Charts>
+                <PieChart auditInfo = {auditInfo} clearDrillState={this.clearDrillState} hideTableData={this.hideTableData}  showTableData={this.showTableData}/>
+                {/*<Charts isPureConfig={true} config={pieDrillChart}></Charts>*/}
               </div>
             </div>
           </div>
@@ -527,6 +699,7 @@ class AuditReport extends React.Component<Props, State> {
           <div className="col-md-12 grid-margin stretch-card">
             <div className="card">
               <div className="card-body">
+                <CSVLink data={csvData} filename={"audit-report.csv"} className="csvlink" target="_blank">Export To CSV <i className="icon-layers menu-icon"></i></CSVLink>
                 <div className="table-responsive border rounded p-1">
                   <table className="table">
                     <thead>
@@ -540,7 +713,6 @@ class AuditReport extends React.Component<Props, State> {
                         <th className="font-weight-bold">Modality</th>
                         <th className="font-weight-bold">Body Part</th>
                         <th className="font-weight-bold">Report</th>
-                        <th className="font-weight-bold">Reported By</th>
                         <th className="font-weight-bold">TAT Status</th>
                         <th className="font-weight-bold">Audit Person</th>
                         <th className="font-weight-bold">Audit Category</th>
@@ -551,6 +723,25 @@ class AuditReport extends React.Component<Props, State> {
                       {auditCatRow}
                     </tbody>
                   </table>
+                  {(auditPagingList.length > 0) && (
+                    <table className="table">
+                    <tbody>
+                  <tr><td style={{'width': '100px'}}>
+                  <Select
+                    name="pageFilter"
+                    closeMenuOnSelect={true}
+                    components={animatedComponents}
+                    onChange={e => this.optionPageClicked(e)}
+                    value={pageFilterLimit}
+                    options={pageNum}
+                  /></td><td><Pagination 
+                    totalRecords={totalActivity} 
+                    pageLimit={pageLimit} 
+                    pageNeighbours={1} 
+                    onPageChanged={this.onPageChanged} 
+                  /></td></tr>
+                  </tbody>
+                  </table>)}
                 </div>
               </div>
             </div>

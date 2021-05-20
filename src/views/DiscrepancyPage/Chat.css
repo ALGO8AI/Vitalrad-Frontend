@@ -9,3 +9,22 @@
   color: black !important;
   /*background: #c9e3fd !important;*/
 }
+
+.textRight{ float: right;font-weight: bold; }
+
+.feedback .badge{
+  font-size: 2em;
+  cursor: pointer;
+  border: 1px solid;
+}
+.chat-message .p-2 {
+  padding: 2px !important;
+}
+.chat-message {
+    max-height: 290px;
+    min-height: 100px;
+    overflow-x: scroll;
+}
+.table tbody td {
+    padding: .5rem 0.75rem !important;
+}

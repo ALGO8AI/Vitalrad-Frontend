@@ -3,6 +3,8 @@ import {DiscrepancyList} from '../views/DiscrepancyPage'
 import {AuditReport} from '../views/AuditPage'
 import {ActivityReport} from '../views/ActivityPage'
 import {NoticeList} from '../views/NoticePage'
+import {SaleList} from '../views/SalePage'
+import {BillingList} from '../views/BillingPage'
 import {HomePage} from '../views/HomePage'
 import {AccountPage} from '../views/UserPage'
 import {HospitalPage, HospitalFormPage} from '../views/HospitalPage'
@@ -38,6 +40,16 @@ export const PrivateRouteLinks = {
   notice: {
     component: NoticeList,
     path: '/notice',
+    roles: ['admin'],
+  },
+  sale: {
+    component: SaleList,
+    path: '/sales',
+    roles: ['admin'],
+  },
+  billing: {
+    component: BillingList,
+    path: '/billing',
     roles: ['admin'],
   },
   publicauditreport: {

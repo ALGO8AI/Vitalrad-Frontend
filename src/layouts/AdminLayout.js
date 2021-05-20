@@ -6,7 +6,7 @@ import {alertActions} from '../_actions'
 import {history} from '../_helpers'
 import Asides from '../components/aside/aside'
 import Footer from '../components/common/Footer'
-
+import Page from 'react-page-loading'
 type Props = {
   alert: any,
 }
@@ -51,10 +51,14 @@ class AdminLayout extends React.Component<Props, State> {
         )}
         <div className="container-fluid page-body-wrapper">
           <Asides />
+          
           <div className="main-panel">
+            <Page loader={"rotate-spin"} color={"#A9A9A9"} size={4}>
             {children}
             <Footer />
+            </Page>
           </div>
+          
         </div>
       </div>
     )

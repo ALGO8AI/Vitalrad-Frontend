@@ -6,6 +6,9 @@ body {
 .wrapper {
   height: 100%;
 }
+.fixed-top{
+  z-index: 988 !important;
+}
 .wrapper > div:last-child {
   min-height: calc(100% - 60px);
   position: relative;
@@ -17,6 +20,40 @@ body {
   -moz-transition: ease-out all 0.3s;
   -webkit-transition: ease-out all 0.3s;
 }
+.content-wrapper {
+    padding: .75rem .75rem 0 !important;
+}
+.modal .modal-dialog .modal-content .modal-body{padding: 18px 26px !important}
+.modal .modal-dialog .modal-content .modal-header {
+  padding: 13px 26px !important;
+}
+.card .card-body {
+    padding: .875rem 1.875rem !important;
+}
+.report-inner-cards-wrapper{padding-top: 0px !important}
+.specifictd {    
+  width:350px;  /* adjust to desired wrapping */
+  /*display:table !important;*/
+  white-space: pre-wrap !important; /* css-3 */
+  white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+  white-space: -pre-wrap !important; /* Opera 4-6 */
+  white-space: -o-pre-wrap !important; /* Opera 7 */
+  word-wrap: break-word !important; /* Internet Explorer 5.5+ */
+}
+
+.bg-error{
+  background-color: #c53636;
+  color: #ffffff;
+  padding: 10px !important
+}
+.bg-info, .bg-warning{
+  color: #ffffff !important;
+  padding: 10px !important
+}
+.report-count, .report-title{
+  color: #ffffff !important
+}
+
 .wrapper.active > div:last-child:after {
   opacity: 1;
   position: absolute;
@@ -32,6 +69,18 @@ body {
   z-index: 9999 !important;
 }
 
+.csvlink{
+  text-align: right;
+  float: right;
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.react-confirm-alert-body > h1 {
+  margin-top: 0;
+  font-size: 1.5em !important;
+  color: #000
+}
 .grey-border table tr {border: 0px !important}
 .table {width:99% !important;}
 .modal .modal-dialog{
@@ -84,7 +133,7 @@ h2.tip-value{
 }
 
 .daterow {float: left;}
-.daterow .react-datepicker-wrapper {width: 48%}
+.daterow .react-datepicker-wrapper {width: 40%}
 .blank-panel .content-wrapper{ padding: 0 !important }
 .App {
   text-align: center;
@@ -144,6 +193,22 @@ h2.tip-value{
     vertical-align: middle;
 }
 
+.navbar-nav .notice{
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px;
+  color: #73031a;
+}
+
+.icon-bell{ cursor: pointer; font-size: 15px }
+.organge{ background-color: #FFA500 !important }
+.yellow{ background-color: #BFBF03 !important }
+.brown{ background-color: #881717 !important }
+.blue{ background-color: #3D7EF9 !important }
+.lightbrown{background-color: #fbb0b0 !important; margin: 2px }
+.lightbrown i {color: #000000 !important } 
+.white-color{margin-left: 5px;}
+.white-color i{ color: #fff !important; font-weight: bold; }
 /* Override some Bootstrap pagination styles */
 ul.pagination {
   float: right;
@@ -195,4 +260,19 @@ ul.pagination {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.highcharts-drillup-button span{
+  display: none !important;
+}
+
+.chartTitle {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.inner-card-text h4{
+  margin-bottom: 0px !important;
+  font-size: 19px !important
 }

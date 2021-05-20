@@ -35,6 +35,19 @@ export const authentication = (
         ...state,
         loggedIn: false,
       }
+    case userConstants.USER_DETAIL_REQUEST:
+      return {
+        ...state,
+      }
+    case userConstants.USER_DETAIL_SUCCESS:
+      return {
+        ...state,
+        userInfo: action.userInfo,
+      }
+    case userConstants.USER_DETAIL_FAILURE:
+      return {
+        ...state,
+      }
     case userConstants.LOGOUT:
       return {}
     default:

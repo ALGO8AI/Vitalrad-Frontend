@@ -14,7 +14,7 @@ export const PrivateRoute = ({component: Component, ...rest}) => (
       if(tmpToken && tmpToken.token){
         isAllowed = true
       }
-      const publicUrl = ['/publicdiscrepancy', '/publicaudit'] //, '/hospital', '/doctor', '/radiologist'
+      const publicUrl = ['/publicdiscrepancy', '/publicaudit'] //, '/audit', '/discrepancy', '/hospital', '/doctor', '/radiologist', '/activity', '/dashboard', '/notice'
       if(publicUrl.find(k => k===props.match.path)){
         isAllowed = true
       }

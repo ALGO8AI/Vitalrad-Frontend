@@ -3,6 +3,14 @@
   min-height: calc(100% - 61px);
   position: relative;
 }
+
+.badge {
+  cursor: pointer;
+}
+.daterow .react-datepicker-wrapper{width: 45% !important}
+.white-color{
+  margin: 2px;
+}
 .text-center {
   text-align: center;
 }
@@ -16,6 +24,9 @@
   background: none;
   margin-right: 5px;
   margin-left: auto;
+}
+.sidebar {
+background: #ff374d !important;
 }
 .filter {
   display: flex;

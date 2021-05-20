@@ -48,8 +48,71 @@ const getAuditFilters = (formData : Object = {}) => {
     })
 }
 
+const updateAuditStatus = (formData : Object) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {...headerConfig.headerData, ...authHeader()},
+    mode: 'cors',
+    body: JSON.stringify(formData),
+  }
+
+  return fetch(`${API_URL}/updateAuditStatus`, requestOptions)
+    .then(handleResponse)
+    .then(astatus => {
+      return astatus
+    })
+}
+
+const getDashBoaordInfo = (formData : Object) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {...headerConfig.headerData, ...authHeader()},
+    mode: 'cors',
+    body: JSON.stringify(formData),
+  }
+
+  return fetch(`${API_URL}/getDashBoaordInfo`, requestOptions)
+    .then(handleResponse)
+    .then(dashboardInfo => {
+      return dashboardInfo
+    })
+}
+
+const getActivityInfo = (formData : Object) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {...headerConfig.headerData, ...authHeader()},
+    mode: 'cors',
+    body: JSON.stringify(formData),
+  }
+
+  return fetch(`${API_URL}/getActivityInfo`, requestOptions)
+    .then(handleResponse)
+    .then(activityInfo => {
+      return activityInfo
+    })
+}
+
+const getActivityLineGraph = (formData : Object) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {...headerConfig.headerData, ...authHeader()},
+    mode: 'cors',
+    body: JSON.stringify(formData),
+  }
+
+  return fetch(`${API_URL}/getActivityLineGraph`, requestOptions)
+    .then(handleResponse)
+    .then(activityInfo => {
+      return activityInfo
+    })
+}
 export const auditService = {
   getAuditInfo,
   getAuditFilters,
-  getAuditByCategory
+  getAuditByCategory,
+  updateAuditStatus,
+  getDashBoaordInfo,
+  getActivityInfo,
+  getActivityLineGraph
 }

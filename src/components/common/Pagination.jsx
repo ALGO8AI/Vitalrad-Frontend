@@ -35,11 +35,22 @@ class Pagination extends Component {
       ? Math.max(0, Math.min(pageNeighbours, 2))
       : 0;
 
-    this.totalPages = Math.floor(this.totalRecords / this.pageLimit);
-
+    this.totalPages = Math.ceil(this.totalRecords / this.pageLimit);
     this.state = { currentPage: 1 };
   }
 
+  UNSAFE_componentWillReceiveProps(nextProps: any) {
+    const { totalRecords = null, pageLimit = 30, pageNeighbours = 0 } = nextProps;
+    this.pageLimit = typeof pageLimit === 'number' ? pageLimit : 30;
+    this.totalRecords = typeof totalRecords === 'number' ? totalRecords : 0;
+
+    // pageNeighbours can be: 0, 1 or 2
+    this.pageNeighbours = typeof pageNeighbours === 'number'
+      ? Math.max(0, Math.min(pageNeighbours, 2))
+      : 0;
+
+    this.totalPages = Math.ceil(this.totalRecords / this.pageLimit);
+  }
   componentDidMount() {
     this.gotoPage(1);
   }

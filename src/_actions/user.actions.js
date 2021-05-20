@@ -18,8 +18,9 @@ const login = (username: string, password: string) => (dispatch: any) => {
       }
       else
       {
-        dispatch(failure(user.error.toString()))
-        dispatch(alertActions.error(user.error.toString()))
+        let errorMsg = user.error || user.message
+        dispatch(failure(errorMsg.toString()))
+        dispatch(alertActions.error(errorMsg.toString()))
       }
     },
     error => {
@@ -34,7 +35,31 @@ const logout = () => {
   return {type: userConstants.LOGOUT}
 }
 
+const getUser = (formData: Object) => (dispatch: any) => {
+  const request = userInfo => ({
+    type: userConstants.USER_DETAIL_REQUEST,
+    userInfo,
+  })
+  const success = userInfo => ({
+    type: userConstants.USER_DETAIL_SUCCESS,
+    userInfo,
+  })
+  const failure = error => ({type: userConstants.USER_DETAIL_FAILURE, error})
+  dispatch(request({}))
+
+  userService.getUser(formData).then(
+    response => {
+      dispatch(success(response))
+    },
+    error => {
+      dispatch(failure(error.toString()))
+      dispatch(alertActions.error(error.toString()))
+    }
+  )
+}
+
 export const userActions = {
   login,
   logout,
+  getUser
 }

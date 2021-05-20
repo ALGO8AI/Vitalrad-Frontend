@@ -10,6 +10,9 @@ import {Pagination} from '../../components/common';
 import {authDetail, loggedInUser} from '../../_helpers'
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import {auditActions} from '../../_actions'
+import Select from 'react-select'
+import makeAnimated from 'react-select/animated'
 
 type Props = {
   getDiscrepancy: Function,
@@ -23,23 +26,24 @@ type State = {
   totalPages: number,
   pageLimit: number,
   loggedInUser:string,
-  allChecked: boolean
+  allChecked: boolean,
+  pageFilterLimit: Object
 };
-
+const animatedComponents = makeAnimated()
 class NoticeList extends React.Component<Props, State> {
   
   constructor(props: Props) {
     super(props)
 
     this.state = {
-      showChat: false,
       discrepancyList: [],
       accessionNo: '',
       totalPages: 0,
-      pageLimit: 10,
+      pageLimit: 15,
       currentPage: 1,
       allChecked: false,
-      loggedInUser: loggedInUser()
+      loggedInUser: loggedInUser(),
+      pageFilterLimit: {value: 15, label: 15},
     }
   }
   componentDidMount = () => {
@@ -75,11 +79,12 @@ class NoticeList extends React.Component<Props, State> {
     return formData;
   }
 
-  getDiscrepancyList = () => {
-    const {currentPage, pageLimit} = this.state
+  getDiscrepancyList = (pageLimitOpt = 0) => {
+    const {pageLimit} = this.state
     let formData = {
-      offset: currentPage * pageLimit,
-      limit: pageLimit
+      offset: 0, //currentPage * pageLimit,
+      limit: (pageLimitOpt > 0) ? pageLimitOpt : pageLimit,
+      type: 'notices'
     }
     let userFilter = this.manageUserFilter()
     let postData = {...formData, ...userFilter}
@@ -94,54 +99,88 @@ class NoticeList extends React.Component<Props, State> {
 
   onPageChanged = data => {
     const { currentPage } = data;
-    const {pageLimit} = this.state
-    const offset = (currentPage) * pageLimit;
-    
-    let formData = {
-      offset: offset,
-      limit: pageLimit
+    if(data.currentPage !== this.state.currentPage){
+      this.setState({currentPage: currentPage })
+      const {pageLimit} = this.state
+      const offset = (currentPage -1 ) * pageLimit;
+      
+      let formData = {
+        offset: offset,
+        limit: pageLimit,
+        type: 'notices'
+      }
+      let userFilter = this.manageUserFilter()
+      let postData = {...formData, ...userFilter}
+      this.props.getDiscrepancy(postData)
     }
-    let userFilter = this.manageUserFilter()
-    let postData = {...formData, ...userFilter}
-    this.props.getDiscrepancy(postData)
-    
 
   }
 
   handleAllCheck =() => this.setState({allChecked: !this.state.allChecked})
 
-  handleCheck =(e) => {
-    console.log('e', e)
+  updateAuditStatus = (upData: Object) => {
+    let formData ={
+      accession_no : upData.Accession_No+"",
+      audited:'N',
+      type: 'notices'
+    }
+    this.props.updateAuditStatus(formData)
+    this.setState({allChecked: true})
+    let checkboxes = document.getElementsByTagName('input');
+    for (var i = 0; i < checkboxes.length; i++) {
+      if (checkboxes[i].type === 'checkbox') {
+        checkboxes[i].checked = false;
+      }
+    }
+    setTimeout(() => {
+      this.setState({allChecked: false})
+      this.getDiscrepancyList()
+    }, 400);
+  }
+
+  handleCheck =(e, disData) => {
     confirmAlert({
-      title: 'Confirm to submit',
+      title: 'Acknowlege this Report',
       message: 'Are you sure to do this.',
       buttons: [
         {
           label: 'Yes',
-          onClick: () => alert('Click Yes')
+          onClick: () => this.updateAuditStatus(disData)
         },
         {
           label: 'No',
-          onClick: () => alert('Click No')
+          onClick: () => {}
         }
       ],
       closeOnEscape: false,
       closeOnClickOutside: false,
     });
   }
+  optionClicked = (optionsList: any) => {
+    this.setState({pageLimit: optionsList.value, pageFilterLimit: optionsList})
+    this.getDiscrepancyList(optionsList.value)
+  }
 
   render() {
-    const {pageLimit} = this.state
+    const pageNum = [
+    {value: 15, label: 15},
+    {value: 30, label: 30},
+    {value: 50, label: 50},
+    {value: 100, label: 100},
+    ]
+    const {pageLimit, pageFilterLimit} = this.state
     const {match} = this.props
     let discrepancyList = idx(this.state, _ => _.discrepancyList)
       ? this.state.discrepancyList
       : []
     let disRow = null
     let totalDiscrepancy = (discrepancyList.length > 0) ? discrepancyList[0].totalcount : 0
-    disRow = discrepancyList.map((dis, index) => (
-      <tr key={index}>
+    disRow = discrepancyList.map((dis, index) => {
+      let tmpScanDate = dis.Scan_Received_Date.split("-");
+      let scanDate = (tmpScanDate[0].length === 4) ? dis.Scan_Received_Date : dis.Scan_Received_Date.split("-").reverse().join("-");
+      return (<tr key={index} style={{backgroundColor: dis.Reported === 'Reported' ? '#6af16a': '#fbaeae'}}>
         <td>{dis.Reported === 'Reported' ? 'Acknowleged' : 'Action & Acknowlege'}</td>
-        <td><Moment format="Do MMMM YYYY">{dis.Scan_Received_Date}</Moment></td>
+        <td>{dis.Scan_Received_Date && (<Moment format="Do MMMM YYYY">{scanDate}</Moment>)}</td>
         <td>{dis.Reported_By}</td>
         <td>{dis.Patient_First_Name} {dis.Surname}</td>
         <td data-tip type="light" data-for={'tip-'+dis.Accession_No}>{dis.Accession_No}
@@ -167,10 +206,10 @@ class NoticeList extends React.Component<Props, State> {
         </ReactTooltip>
         </td>
         <td>
-          <input type="checkbox" onChange={this.handleCheck} defaultChecked={this.state.allChecked}/>
+          {dis.Reported !== 'Reported' && (<input type="checkbox" value='' onChange={e => this.handleCheck(e, dis)} />)}
         </td>
       </tr>
-    ))
+    )})
     return (
       <div className="content-wrapper">
         <div className="row">
@@ -197,12 +236,22 @@ class NoticeList extends React.Component<Props, State> {
                     </tbody>
                   </table>
                 </div>
-                {(totalDiscrepancy > 0) && (<Pagination 
+                {(totalDiscrepancy > 0) && (
+                  <table className="table">
+                  <tr><td style={{'width': '100px'}}>
+                  <Select
+                    name="pageFilter"
+                    closeMenuOnSelect={true}
+                    components={animatedComponents}
+                    onChange={e => this.optionClicked(e)}
+                    value={pageFilterLimit}
+                    options={pageNum}
+                  /></td><td><Pagination 
                   totalRecords={totalDiscrepancy} 
                   pageLimit={pageLimit} 
                   pageNeighbours={1} 
                   onPageChanged={this.onPageChanged} 
-                />)}
+                /></td></tr></table>)}
               </div>
             </div>
           </div>
@@ -219,6 +268,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   getDiscrepancy: (formData: Object) => {
     dispatch(discrepancyActions.listing(formData))
+  },
+  updateAuditStatus: (formData: Object) => {
+    dispatch(auditActions.updateAuditStatus(formData))
   },
 })
 

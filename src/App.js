@@ -18,6 +18,7 @@ class App extends React.Component<Props> {
       <Suspense fallback={<PageLoader />}>
         <Router history={history}>
           <Switch>
+
             <LoginRoute exact path="/" component={LoginPage} />
             <Route exact path="/logout" component={LoginPage} />
             {_.map(PrivateRouteLinks, ({component, path, roles}, key) => {
@@ -38,6 +39,7 @@ class App extends React.Component<Props> {
               )
             })}
             <Route component={NoMatchPage} />
+            <Route exact path="*" component={LoginPage} />
           </Switch>
         </Router>
       </Suspense>

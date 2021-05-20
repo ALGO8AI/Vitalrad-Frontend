@@ -27,6 +27,13 @@
   border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.navbar-nav .notice{
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px;
+  color: #73031a;
+}
+
 .navbar-light .navbar-brand h2{
   color: #fff;
   margin-left: 10px;

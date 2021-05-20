@@ -1,42 +1,147 @@
 // @flow
 import React from 'react'
-import {Button, Row, Col, Form} from 'react-bootstrap'
+import {Button, Row, Col, Form, Card, CardColumns } from 'react-bootstrap'
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated'
-import {loggedInUser} from '../../_helpers'
+import {authDetail, loggedInUser} from '../../_helpers'
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import ReactHighcharts from 'react-highcharts';
 import Highstock from 'highcharts/highstock';
+import {auditActions} from '../../_actions'
+import idx from 'idx'
+import dateformat from "dateformat"
+import {connect} from 'react-redux'
+import Moment from 'react-moment'
+import { CSVLink } from "react-csv";
 
-type Props = {};
+import Highcharts from "highcharts";
+// import drilldown from "highcharts/modules/drilldown.js";
+// import HighchartsReact from "highcharts-react-official";
+// import HighchartsExporting from 'highcharts/modules/exporting'
+import PieChart from "./PieChart"
+// Highcharts.setOptions({
+// lang: {
+// drillUpText: '[X]',
+// drillDownText: ''
+// }
+// });
+// drilldown(Highcharts);
+if (typeof Highcharts === 'object') {
+  // HighchartsExporting(Highcharts)
+}
+
+type Props = {
+  getDashBoaordInfo: Function,
+  dashboardInfo: Object,
+  getAuditFilters: Function,
+  getAuditByCategory: Function,
+  auditfilters: Object
+};
 
 type State = {
   hospitalFilter: Array<any>,
   modalityFilter: Array<any>,
-  categoryFilter: Array<any>,
+  radiologistFilter: Array<any>,
   auditfilters: Object,
   startDate: any,
   endDate: any,
-  loggedInUser:string
+  loggedInUser:string,
+  dashboardInfo: Object,
+  chartType: string,
+  csvData: any,
+  showExport: Boolean,
+  auditList: Array<any>,
 };
 
-
+// const statIcon = ['brain', 'drop-of-blood--v2', 'dog-bone', 'gear']
+// const statSubClass = ['bg-warning', 'bg-info', 'bg-error', 'bg-success']
+const lineColor = {'MRI': '#76b56b', 'CT': '#e0b5b5', 'CR': '#e87c7c'}
 const animatedComponents = makeAnimated()
 const Charts = ReactHighcharts.withHighcharts(Highstock);
 class HomePage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     let newCurrDate = new Date()
-    newCurrDate.setMinutes(newCurrDate.getMinutes() - 698 *24*60)
+    newCurrDate.setMinutes(newCurrDate.getMinutes() - 30 *24*60)
     this.state = {
       hospitalFilter: [],
       modalityFilter: [],
-      categoryFilter: [],
+      radiologistFilter: [],
       auditfilters: {},
       startDate: newCurrDate,
       endDate: new Date(),
-      loggedInUser: loggedInUser()
+      loggedInUser: loggedInUser(),
+      chartType: 'day',
+      showExport: false,
+      auditList: [],
+    }
+  }
+
+  componentDidMount = () => {
+    this.getDashBoaordInfo()
+    this.props.getAuditFilters()
+  }
+
+  getDashBoaordInfo = () => {
+    const {startDate, endDate, hospitalFilter, modalityFilter, radiologistFilter} = this.state
+    let tmpHospitalArr = (hospitalFilter) ? hospitalFilter.map( s => s.value ) : [];
+    let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
+    let tmpRadiologistArr = (radiologistFilter) ? radiologistFilter.map( s => s.value ) : [];
+    let nameFilterValue = '';
+    let nameFilter = ''
+    let authData = authDetail()
+    if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
+      let hospitalName = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : 'Hospital 7'
+      tmpHospitalArr = [hospitalName]
+      nameFilterValue = hospitalName
+      nameFilter = 'hospital_name'
+      this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
+    }
+
+    if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='doctor'){
+      let hospitalName = (idx(authData, _ => _.detail.profile.hospital_name) && authData.detail.profile.hospital_name[0] !=='') ? authData.detail.profile.hospital_name[0] : 'Hospital 7'
+      tmpHospitalArr = [hospitalName]
+      let doctorName = (idx(authData, _ => _.detail.profile.name) && authData.detail.profile.name !=='') ? authData.detail.profile.name : ''
+      nameFilterValue = doctorName
+      nameFilter = 'doctor_name'
+      this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
+    }
+    if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='radiologist'){
+      let radiologistName = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : 'Hospital 7'
+      tmpRadiologistArr = [radiologistName]
+      nameFilter = 'radiologist_name'
+      nameFilterValue = radiologistName
+      this.setState({radiologistFilter: [{value: radiologistName, label: radiologistName}]})
+    }
+    let formData = {
+      from: dateformat(startDate, 'yyyy-mm-dd'), 
+      to:dateformat(endDate, 'yyyy-mm-dd'), 
+      hospital: tmpHospitalArr,
+      usertype: this.state.loggedInUser,
+      // hospital_name: tmpHospitalArr[0],
+      // doctor_name: tmpDoctorArr[0], 
+      // radiologist_name: tmpRadiologistArr[0],
+      modality: tmpModalityArr, 
+      radiologist: tmpRadiologistArr,
+    }
+    if(this.state.loggedInUser !=='superadmin'){
+      formData[nameFilter] = nameFilterValue
+    }
+    this.props.getDashBoaordInfo(formData)
+  }
+
+  UNSAFE_componentWillReceiveProps(nextProps: any) {
+    if (nextProps.dashboardInfo) {
+      this.setState({dashboardInfo: nextProps.dashboardInfo})
+    }
+
+    if (nextProps.auditfilters && this.state.auditfilters !== nextProps.auditfilters ) {
+      this.setState({auditfilters: nextProps.auditfilters})
+    }
+
+    if (nextProps.auditlist && this.state.auditList !== nextProps.auditlist ) {
+      this.setState({auditList: nextProps.auditlist})
     }
   }
 
@@ -51,13 +156,164 @@ class HomePage extends React.Component<Props, State> {
     return tmpArr
   }
 
-  pieChart = (auditInfo) => {
+  clearDrillState = (e) => {
+    this.setState(({showExport: false}))
+  }
+
+  showTableData = (e) => {
+    let {name} = e.target
+    if(name === undefined){
+      name = e.target.innerHTML;
+    }
+    if(name === undefined || name === ""){
+      name = e.point.name;
+    }
+    if(name){
+      this.setState({showExport: true})
+      const {startDate, endDate, hospitalFilter, modalityFilter} = this.state
+      let tmpHospitalArr = (hospitalFilter) ? hospitalFilter.map( s => s.value ) : [];
+      let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
+      let tmpCategoryArr = [name];
+      let formData = {
+        from: dateformat(startDate, 'yyyy-mm-dd'), 
+        to:dateformat(endDate, 'yyyy-mm-dd'),  
+        hospital: tmpHospitalArr, 
+        modality: tmpModalityArr, 
+        category: [],
+        radiologist: [],
+        tat: tmpCategoryArr
+      }
+      this.props.getAuditByCategory(formData)
+    }
+  }
+  pieDrillDown = (dashboardInfo) => {
+    const filterChartData = (e) => this.showTableData(e)
+    let pieData = idx(dashboardInfo, _ => _.pieRes) ? dashboardInfo.pieRes.map( s => ({name:s.TAT_Status, y: s.cat, drilldown: s.TAT_Status}) ) : [];
+    let pieTatResponse = idx(dashboardInfo, _ => _.pieTatResponse) ? dashboardInfo.pieTatResponse : {};
+    let tmpPieTatResponse = {}
+    tmpPieTatResponse = Object.keys(pieTatResponse).map((modKey, index) => {
+      let sVal = []
+      pieTatResponse[modKey].map((dataVal, index) => {
+        sVal[index] = [dataVal.ScanMonth+'-'+dataVal.ScanYear  , dataVal.TatCount]
+        return sVal;
+      })
+      return tmpPieTatResponse[modKey] = {
+        'type' : 'column',
+        'name': ' ',
+        'id'  : modKey,
+        'data' : sVal
+      }
+
+    })
+    const chartOpt = {
+        chart: {
+          height: '45%',
+          plotBackgroundColor: null,
+          plotBorderWidth: null,
+          plotShadow: false,
+          type: 'pie',
+        },
+        exporting: {
+          enabled: false
+        },
+        title: null,
+        tooltip: {
+          pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        accessibility: {
+          announceNewData: {
+              enabled: true
+          }
+        },
+        xAxis: {
+          type: 'category'
+        },
+        yAxis: {
+          title: null
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    // format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                },
+                colors: ['#e87c7c', '#76b56b', '#ffa500'],
+                point: {
+                  events: {
+                    legendItemClick: function(e) {
+                      filterChartData(e)    
+                    }
+                  }
+                },
+                events: {
+                  click: function(e) {
+                    filterChartData(e)    
+                  }
+                }
+            },
+            series: {
+              borderWidth: 0,
+              showInLegend: true,
+              tooltip: {
+                pointFormat: '{series.name}'
+              },
+              dataLabels: {
+                enabled: true,
+              },
+              allowPointSelect: true,
+            },
+            legend: {
+              layout: 'horizontal',
+              // align: 'center',
+              // verticalAlign: 'bottom'
+            },
+        },
+        series: [{  
+            name: ' ',
+            colorByPoint: true,
+            data: pieData
+        }],
+        drilldown: {
+          tooltip: {
+            pointFormat: '{series.name}'
+          },
+          drillUpButton: {
+            // relativeTo: 'spacingBox',
+            position: {
+              y: 0,
+              x: -30
+            }
+          },
+          plotOptions: {
+            series: {
+              borderWidth: 0,
+              dataLabels: {
+                enabled: true,
+              }
+            }
+          },
+          series: tmpPieTatResponse
+        }
+    };
+    return chartOpt;
+  }
+  pieChart = (dashboardInfo) => {
+    let pieData = idx(dashboardInfo, _ => _.pieRes) ? dashboardInfo.pieRes.map( s => ({name:s.TAT_Status, y: s.cat}) ) : [];
     return {
       chart: {
+        height: '45%',
         plotBackgroundColor: null,
         plotBorderWidth: null,
         plotShadow: false,
-        type: 'pie'
+        type: 'pie',
+        events: {
+          load() {
+            this.showLoading();
+            setTimeout(this.hideLoading.bind(this), 2000);
+          }
+        }
       },
       title: null,
       tooltip: {
@@ -70,60 +326,64 @@ class HomePage extends React.Component<Props, State> {
               dataLabels: {
                   enabled: true,
                   format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-              }
+              },
+              colors: ['#e87c7c', '#76b56b', '#ffa500', '#013220'],
           }
       },
       series: [{
-          name: 'Brands',
+          name: 'Value',
           colorByPoint: true,
-          data: [{
-              name: 'Chrome',
-              y: 61.41,
-              sliced: true,
-              selected: true
-          }, {
-              name: 'Internet Explorer',
-              y: 11.84
-          }, {
-              name: 'Firefox',
-              y: 10.85
-          }, {
-              name: 'Edge',
-              y: 4.67
-          }, {
-              name: 'Safari',
-              y: 4.18
-          }, {
-              name: 'Sogou Explorer',
-              y: 1.64
-          }, {
-              name: 'Opera',
-              y: 1.6
-          }, {
-              name: 'QQ',
-              y: 1.2
-          }, {
-              name: 'Other',
-              y: 2.61
-          }]
+          data: pieData
       }]
     }
   }
-  multiLieChart = (auditInfo) => {
+  multiLieChart = (dashboardInfo, chartType) => {
+    let dateSeries = idx(dashboardInfo, _ => _.lineRes.dates) ? dashboardInfo.lineRes.dates : []
+    let scrollMax = (dateSeries.length === 0) ? 0 : ((dateSeries.length >=4) ? 4 : dateSeries.length-1) 
+    let lineSeries = idx(dashboardInfo, _ => _.lineRes.series) ?  dashboardInfo.lineRes.series.map( s => ({name:s.name, data: s.data, color: lineColor[s.name]}) ) : []
+    if(chartType !== 'day'){
+      let dateArr = this.dateSeries(dateSeries, lineSeries, chartType)
+      if(dateArr.dateSeriesRow && dateArr.dateSeriesRow.length > 0){
+        dateSeries = dateArr.dateSeriesRow
+        lineSeries = dateArr.lineSeriesRow
+      }  
+    }
     return {
+        chart :{
+          height: '75%',
+          scrollablePlotArea: {
+            scrollPositionX: 1
+          },
+          events: {
+            load() {
+              this.showLoading();
+              setTimeout(this.hideLoading.bind(this), 2000);
+            }
+          }
+        },
         title: null,
 
         subtitle: null,
 
         yAxis: {
             title: {
-                text: 'Number of Employees'
+              text: 'Total'
             }
         },
+        scrollbar: {
+          enabled: true
+        },
+        xAxis: {
+          categories: dateSeries,
+          max: scrollMax,
+          title: {
+            text: 'Scan Received Date'
+          }
+        },
         legend: {
-            layout: 'vertical',
-            align: 'right',
-            verticalAlign: 'middle'
+            layout: 'horizontal',
+            // align: 'right',
+            // verticalAlign: 'middle'
         },
 
         plotOptions: {
@@ -131,31 +391,15 @@ class HomePage extends React.Component<Props, State> {
                 label: {
                     connectorAllowed: false
                 },
-                pointStart: 2010
-            }
+            },
         },
 
-        series: [{
-            name: 'Installation',
-            data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
-        }, {
-            name: 'Manufacturing',
-            data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
-        }, {
-            name: 'Sales & Distribution',
-            data: [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387]
-        }, {
-            name: 'Project Development',
-            data: [null, null, 7988, 12169, 15112, 22452, 34400, 34227]
-        }, {
-            name: 'Other',
-            data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111]
-        }],
+        series: lineSeries,
 
         responsive: {
           rules: [{
               condition: {
-                  maxWidth: 500
+                  maxWidth: 400
               },
               chartOptions: {
                   legend: {
@@ -169,23 +413,191 @@ class HomePage extends React.Component<Props, State> {
     }
   }
 
+
+
+  getQuarter = (date) => {
+    return date.getFullYear() + '-Q' + Math.ceil((date.getMonth()+ 1)/3) + '-'+(("0" + (date.getMonth() + 1)).slice(-2)) ;
+  }
+
+  listQuarters = (sDate, eDate) => {
+
+    // Ensure start is the earlier date;
+    if (sDate > eDate) {
+      var t = eDate;
+      eDate = sDate;
+      sDate = t;
+    }
+
+    // Copy input start date do don't affect original
+    sDate = new Date(sDate);
+    
+    // Set to 2nd of month so adding months doesn't roll over
+    // and not affected by daylight saving
+    sDate.setDate(2);
+
+    // // Initialise result array with start quarter
+    var startQ = this.getQuarter(sDate);
+    var endQ   = this.getQuarter(eDate);
+    var result = [startQ];
+    
+    // // List quarters from start to end
+    while (startQ < endQ) {
+      sDate.setMonth(sDate.getMonth() + 3);
+      startQ = this.getQuarter(sDate);
+      result.push(startQ);
+    } 
+    return sDate;
+  }
+
+  dateSeries = (dateSeries: any, columnSeries: any, chartType: string) => {
+    let tmpDate = [];
+    let tmpLineSeries = [];
+
+    if(chartType === 'month'){
+      dateSeries.forEach((item, i) =>{
+        let dataArr = item.split('-')
+        let monthStr = dataArr[1]+'-'+dataArr[2]
+        let activeIndex = 0;
+        if(tmpDate.indexOf(monthStr) < 0){
+          tmpDate.push(monthStr)
+          activeIndex = tmpDate.length-1
+        }
+        else
+        {
+          activeIndex = tmpDate.indexOf(monthStr)
+        }
+        columnSeries.forEach((citem, ci) =>{
+
+          // citem.data.forEach((sitem, si) =>{
+            if(tmpLineSeries[ci] && tmpLineSeries[ci].data && tmpLineSeries[ci].data.length > 0){
+              if(tmpLineSeries[ci].data[activeIndex] && parseInt(tmpLineSeries[ci].data[activeIndex]) > 0){
+                tmpLineSeries[ci].data[activeIndex] = parseInt(tmpLineSeries[ci].data[activeIndex]) + parseInt(citem.data[i])  
+              }
+              else{
+                tmpLineSeries[ci].data[activeIndex] = parseInt(citem.data[i])
+              }
+            }
+            else
+            {
+              tmpLineSeries[ci] = {'name' : citem.name, data: []}
+              tmpLineSeries[ci].data[activeIndex] = parseInt(citem.data[i])
+            }      
+          // })
+        })
+
+      })
+    }
+    if(chartType === 'year'){
+      dateSeries.forEach((item, i) =>{
+        let dataArr = item.split('-')
+        let monthStr = dataArr[2]
+        let activeIndex = 0;
+        if(tmpDate.indexOf(monthStr) < 0){
+          tmpDate.push(monthStr)
+          activeIndex = tmpDate.length-1
+        }
+        else
+        {
+          activeIndex = tmpDate.indexOf(monthStr)
+        }
+        columnSeries.forEach((citem, ci) =>{
+
+          // citem.data.forEach((sitem, si) =>{
+            if(tmpLineSeries[ci] && tmpLineSeries[ci].data && tmpLineSeries[ci].data.length > 0){
+              if(tmpLineSeries[ci].data[activeIndex] && parseInt(tmpLineSeries[ci].data[activeIndex]) > 0){
+                tmpLineSeries[ci].data[activeIndex] = parseInt(tmpLineSeries[ci].data[activeIndex]) + parseInt(citem.data[i])  
+              }
+              else{
+                tmpLineSeries[ci].data[activeIndex] = parseInt(citem.data[i])
+              }
+            }
+            else
+            {
+              tmpLineSeries[ci] = {'name' : citem.name, data: []}
+              tmpLineSeries[ci].data[activeIndex] = parseInt(citem.data[i])
+            }      
+          // })
+        })
+
+      })
+    }
+    return {dateSeriesRow : tmpDate, 'lineSeriesRow' : tmpLineSeries}
+  }
+
+  handleChartType = (ctype: string) => {
+    this.setState({chartType: ctype})
+  }
   handleDateChange = (edate: any, dType) => {
     this.setState({[dType]: edate})
   }
 
   handleFilter = (e: any) => {
     e.preventDefault()
+    this.getDashBoaordInfo()
+  }
+
+  optionClicked = (optionsList: any, optionType: string) => {
+    this.setState({[optionType]: optionsList})
   }
 
   render() {
-    const {loggedInUser, auditInfo, hospitalFilter, modalityFilter, categoryFilter, startDate, endDate} = this.state
-    const pieOptions = this.pieChart(auditInfo);
-
-    const multiLieOptions = this.multiLieChart(auditInfo);
+    const {showExport, auditList, chartType, loggedInUser, hospitalFilter, modalityFilter, radiologistFilter, startDate, endDate, dashboardInfo} = this.state
+    // const pieOptions = this.pieChart(dashboardInfo);
+    // const pieDrillChart = this.pieDrillDown(dashboardInfo);
+    const multiLieOptions = this.multiLieChart(dashboardInfo, chartType);
 
     const hospitalList = this.formatFilterData('hospital')
     const modalityList = this.formatFilterData('Modality')
-    const categoryList = this.formatFilterData('category')
+    const radiologistList = this.formatFilterData('radiologist')
+
+    const modalityData = idx(dashboardInfo, _ => _.modality) ? dashboardInfo.modality : []
+    let modalityRow = null
+    let csvData = [
+      [
+      "Scan Received Date", 
+      "Reported By", 
+      "Accession No", 
+      "Hospital Number", 
+      "Hospital Name", 
+      "Patient Name", "Surname", "Modality", "Body Part", "Reported", "TAT Status", "Audit Person", "Audit Category"]
+      ];
+    auditList.map((audit, index) => ( 
+      csvData.push([
+        audit.Scan_Received_Date, 
+        audit.Reported_By, 
+        audit.Accession_No, 
+        audit.Hospital_Number, 
+        audit.Hospital_Name,
+        audit.Patient_First_Name,
+        audit.Surname,
+        audit.Modality,
+        audit.Body_Part,
+        audit.Reported,
+        audit.TAT_Status,
+        audit.Audit_Person,
+        audit.Audit_Category])
+    ))
+    const modalityColor = ['#ffc107', '#17a2b8', '#c53636', '#013220', '#6610f2', '#e83e8c', '#28a745', '#fd7e14']
+    modalityRow = modalityData.map((mod, index) => {
+      return (mod.count > 0) && <Card  key={index} style={{'backgroundColor': modalityColor[index], 'color': '#fff', 'borderRadius':'0'}}>
+    <Card.Body>
+      <div className="row">
+            <div className="col-md-3">
+              <h4 style={{'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '0px'}}>{mod.Modality}</h4>
+            </div>
+            <div className="col-md-3">
+              <h4 style={{'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '0px'}}>{mod.count}</h4>
+            </div>
+            <div className="col-md-6">
+              <h4 style={{'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '0px'}}><Moment format="YYYY-MM-DD">{new Date()}</Moment></h4>
+            </div>
+          </div>
+    </Card.Body>
+  </Card>
+    })
+
+
+
     return (
       <div className="content-wrapper">
         <div className="card">
@@ -201,7 +613,7 @@ class HomePage extends React.Component<Props, State> {
                     value={hospitalFilter}
                     onChange={e => this.optionClicked(e, 'hospitalFilter')}
                     isMulti
-                    isDisabled={(loggedInUser && loggedInUser ==='hospital')}
+                    isDisabled={(loggedInUser && (['hospital', 'doctor'].find(k => k===loggedInUser)))}
                     options={hospitalList}
                   />
                 </Form.Group>
@@ -222,15 +634,16 @@ class HomePage extends React.Component<Props, State> {
               </Col>
               <Col lg={2} md={2} sm={12}>
                 <Form.Group>
-                  <Form.Label>Category</Form.Label>
+                  <Form.Label>Radiologist</Form.Label>
                   <Select
-                    name="categoryFilter"
+                    name="radiologistFilter"
                     closeMenuOnSelect={false}
                     components={animatedComponents}
-                    value={categoryFilter}
-                    onChange={e => this.optionClicked(e, 'categoryFilter')}
+                    value={radiologistFilter}
+                    isDisabled={(loggedInUser && loggedInUser ==='radiologist')}
+                    onChange={e => this.optionClicked(e, 'radiologistFilter')}
                     isMulti
-                    options={categoryList}
+                    options={radiologistList}
                   />
                 </Form.Group>
               </Col>
@@ -242,13 +655,15 @@ class HomePage extends React.Component<Props, State> {
                     className="form-control"
                     name= 'startDate'
                     selected={startDate}
+                    dateFormat="yyyy-MM-dd"
                     onChange={e => this.handleDateChange(e, 'startDate')}
                   /> -  
                   <DatePicker
                     className="form-control"
                     name= 'endDate'
                     selected={endDate}
-                    minDate={new Date()}
+                    minDate={startDate}
+                    dateFormat="yyyy-MM-dd"
                     onChange={e => this.handleDateChange(e, 'endDate')}
                   />
                   </span>
@@ -262,90 +677,88 @@ class HomePage extends React.Component<Props, State> {
               </Col>
             </Row>
           </div>
-        </div>
-        <br />  
-        <div className="row">
-          <div className="col-md-6 grid-margin stretch-card">
-            <div className="card">
-              <div className="card-body">
-                <div className="d-sm-flex align-items-center mb-4">
-                  <h4 className="card-title mb-sm-0">TAT Report</h4>
-                </div>
-                <Charts isPureConfig={true} config={pieOptions}></Charts>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6 grid-margin stretch-card">
-            <div className="card">
-              <div className="card-body">
-                <div className="d-sm-flex align-items-center mb-4">
-                  <h4 className="card-title mb-sm-0">Modality Report</h4>
-                </div>
-                <Charts isPureConfig={true} config={multiLieOptions}></Charts>
-              </div>
-            </div>
-          </div>
         </div>  
+        <br/>
         <div className="row">
           <div className="col-md-12 grid-margin">
             <div className="card">
               <div className="card-body">
                 <div className="row">
                   <div className="col-md-12">
-                    <div className="d-sm-flex align-items-baseline report-summary-header">
-                      <h5 className="font-weight-semibold">Report Summary</h5> <span className="ml-auto">Updated Report</span> <button className="btn btn-icons border-0 p-2"><i className="icon-refresh"></i></button>
+                    <div className="d-sm-flex align-items-baseline report-summary-header" style={{'borderBottom': '0px'}}>
+                      <h5 className="font-weight-semibold">Report Summary</h5>
                     </div>
                   </div>
                 </div>
                 <div className="row report-inner-cards-wrapper">
-                  <div className=" col-md -6 col-xl report-inner-card">
-                    <div className="inner-card-text">
-                      <span className="report-title">EXPENSE</span>
-                      <h4>$32123</h4>
-                      <span className="report-count"> 2 Reports</span>
-                    </div>
-                    <div className="inner-card-icon bg-success">
-                      <i className="icon-rocket"></i>
-                    </div>
-                  </div>
-                  <div className="col-md-6 col-xl report-inner-card">
-                    <div className="inner-card-text">
-                      <span className="report-title">PURCHASE</span>
-                      <h4>95,458</h4>
-                      <span className="report-count"> 3 Reports</span>
-                    </div>
-                    <div className="inner-card-icon bg-danger">
-                      <i className="icon-briefcase"></i>
-                    </div>
-                  </div>
-                  <div className="col-md-6 col-xl report-inner-card">
-                    <div className="inner-card-text">
-                      <span className="report-title">QUANTITY</span>
-                      <h4>2650</h4>
-                      <span className="report-count"> 5 Reports</span>
-                    </div>
-                    <div className="inner-card-icon bg-warning">
-                      <i className="icon-globe-alt"></i>
-                    </div>
-                  </div>
-                  <div className="col-md-6 col-xl report-inner-card">
-                    <div className="inner-card-text">
-                      <span className="report-title">RETURN</span>
-                      <h4>25,542</h4>
-                      <span className="report-count"> 9 Reports</span>
-                    </div>
-                    <div className="inner-card-icon bg-primary">
-                      <i className="icon-diamond"></i>
-                    </div>
-                  </div>
+                <CardColumns>
+                  {modalityRow}
+                </CardColumns>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <div className="row">
+          <div className="col-md-6 grid-margin stretch-card">
+            <div className="card">
+              <div className="card-body" style={{'padding': '0px'}}>
+                <div className="d-sm-flex align-items-center mb-4">
+                  <div className="heading">
+                    <h4 className="card-title mb-sm-0">TAT Report</h4>
+                    <div className="btn-container">
+                    {(showExport && csvData.length > 1) && (<CSVLink data={csvData} filename={"tat-report.csv"} className="csvlink" target="_blank">Export To CSV <i className="icon-layers menu-icon"></i></CSVLink>)}
+                    </div>
+                  </div>
+                </div>
+                <PieChart dashboardInfo = {dashboardInfo} clearDrillState={this.clearDrillState} showTableData={this.showTableData}/>
+                {/*<Charts isPureConfig={true} config={pieOptions}></Charts>*/}
+              </div>
+            </div>
+          </div>
+          <div className="col-md-6 grid-margin stretch-card">
+            <div className="card">
+              <div className="card-body" style={{'padding': '0px'}}>
+                <div className="d-sm-flex align-items-center mb-4">
+                  <div className="heading">
+                    <h4 className="card-title mb-sm-0">Modality Report</h4>
+                    <div className="btn-container">
+                      <div className="filter"></div>
+                      <div className={chartType==='year' ? 'badge badge-success p-2 white-color' : 'badge badge-danger lightbrown p-2'} title="Year Chart" onClick={e => this.handleChartType('year')}>Yearly</div>
+                      <div className={chartType==='month' ? 'badge badge-success p-2 white-color' : 'badge badge-danger lightbrown p-2'} title="Month Chart" onClick={e => this.handleChartType('month')}>Monthly</div>
+                      <div className={chartType==='day' ? 'badge badge-success p-2 white-color' : 'badge badge-danger lightbrown p-2'} title="Day Chart" onClick={e => this.handleChartType('day')}>Day</div>
+                    </div>
+                  </div>
+                </div>
+                <Charts isPureConfig={true} config={multiLieOptions}></Charts>
+              </div>
+            </div>
+          </div>
+        </div>  
       </div>
     )
   }
 }
 
-export {HomePage}
+const mapStateToProps = state => ({
+  dashboardInfo: state.audit.dashboardInfo || [],
+  auditfilters: state.audit.auditfilters || [],
+  ...state.audit || []
+})
+
+const mapDispatchToProps = dispatch => ({
+  getDashBoaordInfo: (formData: Object) => {
+    dispatch(auditActions.getDashBoaordInfo(formData))
+  },
+  getAuditFilters: () => {
+    dispatch(auditActions.getAuditFilters())
+  },
+  getAuditByCategory: (formData: Object) => {
+    dispatch(auditActions.getAuditByCategory(formData))
+  },
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HomePage)
