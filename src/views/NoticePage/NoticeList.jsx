@@ -3,6 +3,9 @@ import React from 'react'
 import 'react-chat-widget/lib/styles.css';
 import {connect} from 'react-redux'
 import idx from 'idx'
+import {Button, Form} from 'react-bootstrap'
+import {Icon} from 'react-icons-kit'
+import {filter} from 'react-icons-kit/fa'
 import {discrepancyActions} from '../../_actions'
 import Moment from 'react-moment'
 import ReactTooltip from 'react-tooltip'
@@ -27,7 +30,8 @@ type State = {
   pageLimit: number,
   loggedInUser:string,
   allChecked: boolean,
-  pageFilterLimit: Object
+  pageFilterLimit: Object,
+  accession_no: string
 };
 const animatedComponents = makeAnimated()
 class NoticeList extends React.Component<Props, State> {
@@ -44,6 +48,7 @@ class NoticeList extends React.Component<Props, State> {
       allChecked: false,
       loggedInUser: loggedInUser(),
       pageFilterLimit: {value: 15, label: 15},
+      accession_no: ''
     }
   }
   componentDidMount = () => {
@@ -161,6 +166,40 @@ class NoticeList extends React.Component<Props, State> {
     this.getDiscrepancyList(optionsList.value)
   }
 
+  // Search Filter
+  filterNotice = (event: any) => {
+    let formData = {
+      offset: 0, //currentPage * pageLimit,
+      limit: this.state.pageLimit,
+      type: 'notices',
+      accession_no: this.state.accession_no
+    }
+    let userFilter = this.manageUserFilter()
+    let postData = {...formData, ...userFilter}
+    this.props.getDiscrepancy(postData)
+  }
+
+  handleChange = (e: any) => {
+    const {name, value} = e.target
+    this.setState({[name]: value})
+  }
+
+  handleAccessChange = (e: any) => {
+    const {name, value} = e.target
+    this.setState({[name]: value})
+    if (e.key === 'Enter') {
+       let formData = {
+        offset: 0, //currentPage * pageLimit,
+        limit: this.state.pageLimit,
+        type: 'notices',
+        accession_no: value
+      }
+      let userFilter = this.manageUserFilter()
+      let postData = {...formData, ...userFilter}
+      this.props.getDiscrepancy(postData)
+    }
+  }
+
   render() {
     const pageNum = [
     {value: 15, label: 15},
@@ -168,7 +207,7 @@ class NoticeList extends React.Component<Props, State> {
     {value: 50, label: 50},
     {value: 100, label: 100},
     ]
-    const {pageLimit, pageFilterLimit} = this.state
+    const {pageLimit, pageFilterLimit, accession_no} = this.state
     const {match} = this.props
     let discrepancyList = idx(this.state, _ => _.discrepancyList)
       ? this.state.discrepancyList
@@ -216,8 +255,27 @@ class NoticeList extends React.Component<Props, State> {
           <div className="col-md-12 grid-margin stretch-card">
             <div className="card">
               <div className="card-body">
-                {match && match.path !== '/publicdiscrepancy' && (<div className="d-sm-flex align-items-center mb-4">
+                
+                {match && match.path !== '/publicdiscrepancy' && (
+                <div className="heading">
                   <h4 className="card-title mb-sm-0">Notices Dashboard</h4>
+                  <div className="btn-container">
+                    <div className="filter">
+                      <Form.Group>
+                        <Form.Control
+                          type="text"
+                          placeholder="Search By Accession No...."
+                          onChange={e => this.handleChange(e)}
+                          value={accession_no}
+                          name="accession_no"
+                          onKeyDown={e => this.handleAccessChange(e)}
+                        />
+                      </Form.Group>
+                      <Button className="btn-primary" onClick={e => this.filterNotice(e)}>
+                        <Icon icon={filter} />
+                      </Button>
+                    </div>
+                  </div>
                 </div>)}
                 <div className="table-responsive">
                   <table className="table">
