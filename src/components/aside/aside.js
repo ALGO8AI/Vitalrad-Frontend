@@ -84,6 +84,12 @@ const Asides = (props: Props) => {
             <i className="icon-calculator menu-icon"></i>
           </Link>
         </li>)}
+        {isAdmin() && (<li className="nav-item">
+          <Link /*exact*/ to="/manage/doctor" className="nav-link">
+            <span className="menu-title">Doctor with Null ID</span>
+            <i className="icon-calculator menu-icon"></i>
+          </Link>
+        </li>)}
       </ul>
     </nav>)
 }

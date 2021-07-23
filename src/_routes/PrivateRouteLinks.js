@@ -8,7 +8,7 @@ import {BillingList} from '../views/BillingPage'
 import {HomePage} from '../views/HomePage'
 import {AccountPage} from '../views/UserPage'
 import {HospitalPage, HospitalFormPage} from '../views/HospitalPage'
-import {DoctorPage, DoctorFormPage} from '../views/DoctorPage'
+import {DoctorPage, DoctorFormPage, DoctorList} from '../views/DoctorPage'
 import {RadiologistPage, RadiologistFormPage} from '../views/RadiologistPage'
 
 export const PrivateRouteLinks = {
@@ -65,6 +65,11 @@ export const PrivateRouteLinks = {
   addDoctor: {
     component: DoctorFormPage,
     path: '/doctor/create',
+    roles: ['admin'],
+  },
+  manageDoctor: {
+    component: DoctorList,
+    path: '/manage/doctor',
     roles: ['admin'],
   },
   hospital: {

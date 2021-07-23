@@ -84,10 +84,41 @@ const deleteRecord = (formData: Object) => {
     })
 }
 
+const getDoctorsWithNullIds = () => {
+  const requestOptions = {
+    method: 'GET',
+    headers: {...headerConfig.headerData, ...authHeader()},
+    mode: 'cors',
+  }
+
+  return fetch(`${API_URL}/getDoctorsWithNullIds`, requestOptions)
+    .then(handleResponse)
+    .then(doctor => {
+      return doctor
+    })
+}
+
+const updateDocId = (formData: formType) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {...headerConfig.headerData, ...authHeader()},
+    mode: 'cors',
+    body: JSON.stringify(formData),
+  }
+
+  return fetch(`${API_URL}/updateDocId`, requestOptions)
+    .then(handleResponse)
+    .then(doctor => {
+      return doctor
+    })
+}
+
 export const doctorService = {
   create,
   listing,
   detail,
   deleteRecord,
   updateDetail,
+  getDoctorsWithNullIds,
+  updateDocId
 }

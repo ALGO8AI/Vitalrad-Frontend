@@ -88,6 +88,59 @@ const listing = (formData) => (dispatch: any) => {
   )
 }
 
+const getDoctorsWithNullIds = () => (dispatch: any) => {
+  const request = doctors => ({
+    type: doctorConstants.DOCTOR_NULL_REQUEST,
+    doctors,
+  })
+  const success = doctors => ({
+    type: doctorConstants.DOCTOR_NULL_SUCCESS,
+    doctors,
+  })
+  const failure = error => ({type: doctorConstants.DOCTOR_NULL_FAILURE, error})
+  dispatch(request([]))
+
+  doctorService.getDoctorsWithNullIds().then(
+    doctors => {
+      dispatch(success(doctors))
+    },
+    error => {
+      dispatch(failure(error.toString()))
+      dispatch(alertActions.error(error.toString()))
+    }
+  )
+}
+
+const updateDocId = (formData: Object) => (
+  dispatch: any
+) => {
+  const request = doctor => ({type: doctorConstants.DOCTOR_UPDATE_REQUEST, doctor})
+  const success = doctor => ({type: doctorConstants.DOCTOR_UPDATE_SUCCESS, doctor})
+  const failure = error => ({type: doctorConstants.DOCTOR_UPDATE_FAILURE, error})
+
+  dispatch(request(formData))
+
+  doctorService.updateDocId(formData).then(
+    doctor => {
+      if(doctor.status){
+        dispatch(success(doctor))
+        let message = 'Doctor ID Updated successfully'
+        dispatch(alertActions.success(message.toString()))
+      }
+      else
+      {
+        let docMsg = doctor.message || 'Please send valid data';
+        dispatch(failure(docMsg.toString()))
+        dispatch(alertActions.error(docMsg.toString())) 
+      }
+    },
+    error => {
+      dispatch(failure(error.toString()))
+      dispatch(alertActions.error(error.toString()))
+    }
+  )
+}
+
 const detail = (formData: Object) => (dispatch: any) => {
   const request = doctorDetail => ({
     type: doctorConstants.DOCTOR_DETAIL_REQUEST,
@@ -144,4 +197,6 @@ export const doctorActions = {
   detail,
   deleteRecord,
   updateDetail,
+  getDoctorsWithNullIds,
+  updateDocId
 }

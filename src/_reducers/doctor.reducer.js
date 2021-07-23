@@ -66,6 +66,23 @@ export const doctor = (state: StateType = initialState, action: ActionType) => {
         ...state,
         isDataProcessing: false,
       }
+    case doctorConstants.DOCTOR_NULL_REQUEST:
+      return {
+        ...state,
+        isDataProcessing: true,
+        ...action.doctors,
+      }
+    case doctorConstants.DOCTOR_NULL_SUCCESS:
+      return {
+        ...state,
+        isDataProcessing: false,
+        ...action.doctors,
+      }
+    case doctorConstants.DOCTOR_NULL_FAILURE:
+      return {
+        ...state,
+        isDataProcessing: false,
+      }
     case doctorConstants.DOCTOR_DETAIL_REQUEST:
       return {
         ...state,
