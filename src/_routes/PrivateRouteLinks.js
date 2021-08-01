@@ -10,6 +10,7 @@ import {AccountPage} from '../views/UserPage'
 import {HospitalPage, HospitalFormPage} from '../views/HospitalPage'
 import {DoctorPage, DoctorFormPage, DoctorList} from '../views/DoctorPage'
 import {RadiologistPage, RadiologistFormPage} from '../views/RadiologistPage'
+import {ModalityPage, ModalityForm} from '../views/ModalityPage'
 
 export const PrivateRouteLinks = {
   dashboard: {
@@ -65,6 +66,16 @@ export const PrivateRouteLinks = {
   addDoctor: {
     component: DoctorFormPage,
     path: '/doctor/create',
+    roles: ['admin'],
+  },
+  modality: {
+    component: ModalityPage,
+    path: '/modality',
+    roles: ['admin'],
+  },
+  addModality: {
+    component: ModalityForm,
+    path: '/modality/create',
     roles: ['admin'],
   },
   manageDoctor: {

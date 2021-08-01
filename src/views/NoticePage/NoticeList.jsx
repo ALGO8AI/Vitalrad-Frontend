@@ -145,7 +145,7 @@ class NoticeList extends React.Component<Props, State> {
 
   handleCheck =(e, disData) => {
     confirmAlert({
-      title: 'Acknowlege this Report',
+      title: 'Acknowledge this Report',
       message: 'Are you sure to do this.',
       buttons: [
         {
@@ -184,20 +184,22 @@ class NoticeList extends React.Component<Props, State> {
     this.setState({[name]: value})
   }
 
-  handleAccessChange = (e: any) => {
-    const {name, value} = e.target
-    this.setState({[name]: value})
-    if (e.key === 'Enter') {
-       let formData = {
-        offset: 0, //currentPage * pageLimit,
-        limit: this.state.pageLimit,
-        type: 'notices',
-        accession_no: value
-      }
-      let userFilter = this.manageUserFilter()
-      let postData = {...formData, ...userFilter}
-      this.props.getDiscrepancy(postData)
+  handleAccessChange = (event: any) => {
+    let regVal = /^[A-Za-z\d\-_\s]+$/i
+    let discrepancyList = idx(this.props, _ => _.discrepancies)
+        ? this.props.discrepancies
+        : []
+    if (regVal.test(event.target.value) || event.target.value.length > 0) {
+      discrepancyList = discrepancyList.filter(
+        item =>
+          item.Scan_Received_Date.toLowerCase().search(event.target.value.toLowerCase()) !==
+            -1 ||
+          item.Reported_By.toLowerCase().search(event.target.value.toLowerCase()) !== -1 ||
+          item.Patient_First_Name.toLowerCase().search(event.target.value.toLowerCase()) !== -1 ||
+          (item.Accession_No && parseInt(item.Accession_No) === parseInt(event.target.value))
+      )
     }
+    this.setState({discrepancyList: discrepancyList})
   }
 
   render() {
@@ -218,7 +220,7 @@ class NoticeList extends React.Component<Props, State> {
       let tmpScanDate = dis.Scan_Received_Date.split("-");
       let scanDate = (tmpScanDate[0].length === 4) ? dis.Scan_Received_Date : dis.Scan_Received_Date.split("-").reverse().join("-");
       return (<tr key={index} style={{backgroundColor: dis.Reported === 'Reported' ? '#6af16a': '#fbaeae'}}>
-        <td>{dis.Reported === 'Reported' ? 'Acknowleged' : 'Action & Acknowlege'}</td>
+        <td>{dis.Reported === 'Reported' ? 'Acknowledged' : 'Action & Acknowledge'}</td>
         <td>{dis.Scan_Received_Date && (<Moment format="Do MMMM YYYY">{scanDate}</Moment>)}</td>
         <td>{dis.Reported_By}</td>
         <td>{dis.Patient_First_Name} {dis.Surname}</td>
@@ -264,7 +266,7 @@ class NoticeList extends React.Component<Props, State> {
                       <Form.Group>
                         <Form.Control
                           type="text"
-                          placeholder="Search By Accession No...."
+                          placeholder="Search ...."
                           onChange={e => this.handleChange(e)}
                           value={accession_no}
                           name="accession_no"
@@ -286,7 +288,7 @@ class NoticeList extends React.Component<Props, State> {
                         <th className="font-weight-bold">Sent By</th>
                         <th className="font-weight-bold">Patient</th>
                         <th className="font-weight-bold">Accession No.</th>
-                        <th className="font-weight-bold">Acknowlege Record {/*<input type="checkbox" onChange={this.handleAllCheck} defaultChecked={this.state.allChecked}/>*/}</th>
+                        <th className="font-weight-bold">Acknowledge Record {/*<input type="checkbox" onChange={this.handleAllCheck} defaultChecked={this.state.allChecked}/>*/}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -296,6 +298,7 @@ class NoticeList extends React.Component<Props, State> {
                 </div>
                 {(totalDiscrepancy > 0) && (
                   <table className="table">
+                  <tbody>
                   <tr><td style={{'width': '100px'}}>
                   <Select
                     name="pageFilter"
@@ -309,7 +312,7 @@ class NoticeList extends React.Component<Props, State> {
                   pageLimit={pageLimit} 
                   pageNeighbours={1} 
                   onPageChanged={this.onPageChanged} 
-                /></td></tr></table>)}
+                /></td></tr></tbody></table>)}
               </div>
             </div>
           </div>

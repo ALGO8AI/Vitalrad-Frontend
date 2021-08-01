@@ -90,6 +90,12 @@ const Asides = (props: Props) => {
             <i className="icon-calculator menu-icon"></i>
           </Link>
         </li>)}
+        {isAdmin() && (<li className="nav-item">
+          <Link /*exact*/ to="/modality" className="nav-link">
+            <span className="menu-title">Modality</span>
+            <i className="icon-calculator menu-icon"></i>
+          </Link>
+        </li>)}
       </ul>
     </nav>)
 }
