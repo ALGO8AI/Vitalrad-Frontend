@@ -78,7 +78,6 @@ class PieChart extends React.Component<Props, State> {
       }
 
     })
-    console.log('tmpPieTatResponse', tmpPieTatResponse)
     const chartOpt = {
         chart: {
           height: '75%',

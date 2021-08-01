@@ -65,8 +65,9 @@ export class DoctorList extends React.Component<Props, State> {
       }
       this.props.updateDocId(formData)
       setTimeout(() => {
-        // this.props.getDoctorsWithNullIds()
-        window.location.reload();
+        this.props.getDoctorsWithNullIds()
+        this.setState({showDoctorIdFrom: false, firstname: '', lastname: '', doctorObj: {}})
+        // window.location.reload();
       }, 1000);
     }
   }
@@ -129,21 +130,23 @@ export class DoctorList extends React.Component<Props, State> {
               <h4>Doctors</h4>
             </div>
             <div className="listing-container">
-              <Table className="responsive-grid">
+              <Table className="responsive-grid table table-hover">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Accession No</th>
-                    <th>Hospital Name</th>
-                    <th>Hospital Number</th>
-                    <th width="10%">Actions</th>
+                    <th className="font-weight-bold">Name</th>
+                    <th className="font-weight-bold">Accession No</th>
+                    <th className="font-weight-bold">Hospital Name</th>
+                    <th className="font-weight-bold">Hospital Number</th>
+                    <th width="10%" className="font-weight-bold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>{doctorRow}</tbody>
                 {doctorRow.length === 0 && (
                   <tbody>
                     <tr>
-                      <td colSpan="5">No Records Found</td>
+                      <td colSpan="5" style={{
+                        textAlign:"center"
+                      }}>No Records Found...</td>
                     </tr>
                   </tbody>
                 )}

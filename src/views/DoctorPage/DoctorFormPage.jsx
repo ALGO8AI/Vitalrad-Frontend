@@ -226,13 +226,18 @@ export class DoctorFormPage extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    let hospitalCode = '';
     if(loggedInUser() ==='hospital'){
       let authData = authDetail() 
       let hospitalId = (idx(authData, _ => _.detail._id)) ? authData.detail._id : null 
+      hospitalCode = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
       this.setState({hospitalId : hospitalId})
     }
     //edit - get data
-    this.props.getAuditFilters()
+    let filterData = {
+      hospital_id: hospitalCode
+    }
+    this.props.getAuditFilters(filterData);
 
     if (this.props.doctorID && this.props.doctorID !== '') {
       const {doctorID} = this.props
@@ -447,8 +452,8 @@ const mapDispatchToProps = dispatch => ({
   create: formData => {
     dispatch(doctorActions.create(formData))
   },
-  getAuditFilters: () => {
-    dispatch(auditActions.getAuditFilters())
+  getAuditFilters: (filterData: Object) => {
+    dispatch(auditActions.getAuditFilters(filterData))
   },
   updateDetail: (formData, doctorId) => {
     dispatch(doctorActions.updateDetail(formData, doctorId))

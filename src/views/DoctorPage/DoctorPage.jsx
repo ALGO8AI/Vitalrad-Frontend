@@ -175,21 +175,23 @@ export class DoctorPage extends React.Component<Props, State> {
               </div>
             </div>
             <div className="listing-container">
-              <Table className="responsive-grid">
+              <Table className="responsive-grid table table-hover">
                 <thead>
                   <tr>
-                    <th>Username</th>
-                    <th>Name</th>
-                    <th>Mobile</th>
+                    <th className="font-weight-bold">Username</th>
+                    <th className="font-weight-bold">Name</th>
+                    <th className="font-weight-bold">Mobile</th>
                     {/*<th>Status</th>*/}
-                    <th width="10%">Actions</th>
+                    <th width="10%" className="font-weight-bold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>{doctorRow}</tbody>
                 {doctorRow.length === 0 && (
                   <tbody>
                     <tr>
-                      <td colSpan="5">No Records Found</td>
+                      <td colSpan="5" style={{
+                        textAlign:"center"
+                      }}>No Records Found...</td>
                     </tr>
                   </tbody>
                 )}
