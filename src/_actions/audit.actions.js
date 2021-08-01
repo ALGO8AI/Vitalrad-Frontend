@@ -55,7 +55,7 @@ const getAuditByCategory = (formData: Object) => (dispatch: any) => {
   )
 }
 
-const getAuditFilters = () => (dispatch: any) => {
+const getAuditFilters = (filterData: Object) => (dispatch: any) => {
   const request = auditfilters => ({
     type: auditConstants.AUDIT_FILTER_REQUEST,
     auditfilters,
@@ -70,7 +70,7 @@ const getAuditFilters = () => (dispatch: any) => {
   })
   dispatch(request([]))
 
-  auditService.getAuditFilters().then(
+  auditService.getAuditFilters(filterData).then(
     auditfilters => {
       dispatch(success(auditfilters))
     },

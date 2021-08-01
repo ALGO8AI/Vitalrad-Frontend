@@ -89,8 +89,7 @@ class AuditReport extends React.Component<Props, State> {
     }
   }
   componentDidMount() {
-    this.getAuditInfo()
-    this.props.getAuditFilters()
+    this.getAuditInfo()  
   }
   
   getAuditInfo = () => {
@@ -98,11 +97,12 @@ class AuditReport extends React.Component<Props, State> {
     let tmpHospitalArr = (hospitalFilter) ? hospitalFilter.map( s => s.value ) : [];
     let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
     let tmpCategoryArr = (categoryFilter) ? categoryFilter.map( s => s.value ) : [];
-
+    let tmpHospitalId = '';
     let authData = authDetail()
     if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
       let hospitalName = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : 'Hospital 7'
       tmpHospitalArr = [hospitalName]
+      tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
       this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
     }
     if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='doctor'){
@@ -118,6 +118,11 @@ class AuditReport extends React.Component<Props, State> {
       category: tmpCategoryArr
     }
     this.props.getAuditInfo(formData)
+
+    let filterData = {
+      hospital_id: tmpHospitalId
+    }
+    this.props.getAuditFilters(filterData);
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
@@ -764,8 +769,8 @@ const mapDispatchToProps = dispatch => ({
   getAuditByCategory: (formData: Object) => {
     dispatch(auditActions.getAuditByCategory(formData))
   },
-  getAuditFilters: () => {
-    dispatch(auditActions.getAuditFilters())
+  getAuditFilters: (filterData: Object) => {
+    dispatch(auditActions.getAuditFilters(filterData))
   },
 })
 

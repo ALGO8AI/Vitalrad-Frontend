@@ -3,184 +3,61 @@ import React from 'react'
 import {Button, Form, Modal} from 'react-bootstrap'
 import {connect} from 'react-redux'
 import idx from 'idx'
-import {doctorActions, hospitalActions, auditActions} from '../../_actions'
-import FormValidator from '../../_helpers/FormValidator'
-import {authDetail, loggedInUser} from '../../_helpers'
+import {modalityActions} from '../../_actions'
+// import FormValidator from '../../_helpers/FormValidator'
+// import {authDetail, loggedInUser} from '../../_helpers'
+import {Icon} from 'react-icons-kit'
+import {minusCircle, plusCircle} from 'react-icons-kit/fa'
 
 type Props = {
   doctor: any,
   doctorID: string,
   hospitals: Array<any>,
-  updateDetail: Function,
-  hospitalListing: Function,
-  getAuditFilters: Function,
-  auditfilters: Object,
   create: Function,
   detail: Function,
   alert: any,
 }
 
 type State = {
-  name: string,
-  address: string,
-  username: string,
-  password: string,
-  email: string,
-  mobile: string,
-  code: string,
   submitted: boolean,
-  hospitalId: string,
-  doctorId: string,
-  hospitalList: any,
+  modalityId: string,
   validation: Object,
-  auditfilters: Object
+  modalityList: Object,
 };
-
-const checklength = (checklength: string) => {
-  return checklength.trim().length >= 3 ? false : true
-}
-
-const checkCodelength = (checklength: string) => {
-  return checklength.trim().length >= 1 ? false : true
-}
-
-const checkPassword = (password: string, state: Object) => {
-  if (state.doctorId !== '' && password.trim().length === 0) {
-    return false
-  } else if (state.doctorId !== '' && password.trim().length >= 5) {
-    return false
-  } else if (state.doctorId === '' && password.trim().length >= 5) {
-    return false
-  } else {
-    return true
-  }
-}
-
-const checkPhonenumber = (mobile: string ) => {
-  var phoneno = /^\d{10}$/;
-  if(mobile !==''){
-    return (mobile.match(phoneno)) ? false : true
-  }
-  else{
-    return false;
-  }
-}
-
-const validator = new FormValidator([
-  {
-    field: 'name',
-    method: 'isEmpty',
-    validWhen: false,
-    message: 'Name is required.',
-  },
-  {
-    field: 'name',
-    method: checklength,
-    validWhen: false,
-    message: 'Name length must be at least 3 characters long.',
-  },
-  {
-    field: 'code',
-    method: 'isEmpty',
-    validWhen: false,
-    message: 'code is required.',
-  },
-  {
-    field: 'code',
-    method: checkCodelength,
-    validWhen: false,
-    message: 'Code length must be at least 1 characters long.',
-  },
-  {
-    field: 'username',
-    method: 'isEmpty',
-    validWhen: false,
-    message: 'Username is required.',
-  },
-  {
-    field: 'username',
-    method: checklength,
-    validWhen: false,
-    message: 'Username length must be at least 3 characters long.',
-  },
-  {
-    field: 'password',
-    method: checkPassword,
-    validWhen: false,
-    message: 'Password length must be at least 5 characters long.',
-  },
-  {
-    field: 'mobile',
-    method: checkPhonenumber,
-    validWhen: false,
-    message: 'Invalid Mobile number. Mobile must be 10 digit',
-  },
-  {
-    field: 'hospitalId',
-    method: 'isEmpty',
-    validWhen: false,
-    message: 'Hospital is required.',
-  },
-])
 
 export class ModalityForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
 
     this.state = {
-      name: '',
-      address: '',
-      username: '',
-      password: '',
-      email: '',
-      mobile: '',
-      code: '',
       submitted: false,
-      hospitalId: '',
-      doctorId: '',
-      hospitalList: [],
-      auditfilters: {},
-      validation: validator.valid(),
+      modalityId: '',
+      modalityList: {'modality': '', sub_modality: ['']},
     }
   }
 
-  handleChange = (e: any) => {
+  handleChange = (e: any, subIndex:any) => {
     const {name, value} = e.target
-    this.setState({[name]: value})
+    let stateClone = JSON.parse(JSON.stringify(this.state.modalityList));
+    if(name === 'name'){
+      stateClone.modality = value
+    }
+    if(name === 'sub_modality'){
+      stateClone.sub_modality[subIndex] = value
+    }
+    this.setState({modalityList: stateClone})
   }
 
   handleSubmit = (e: any) => {
     e.preventDefault()
-    const validation = validator.validate(this.state)
-    this.setState({validation})
     this.setState({submitted: true})
-    if (validation.isValid) {
-
-      const {name, code, address, username, password, email, mobile, hospitalId, doctorId, hospitalList} = this.state
-      let hData = hospitalList.find(k => k._id === hospitalId)
-
-      if (name && username) {
-        let formData = {
-          name: name,
-          address: address,
-          username: username,
-          email: email,
-          mobile: mobile,
-          code: code,
-          hospital_id: hospitalId,
-          hospital_name: ((idx(hData, _ => _.profile.name)) ? hData.profile.name : ''),
-          user_type: 'doctor',
-        }
-        if(password !==''){
-          formData.password = password
-        }
-        if (doctorId && doctorId !== '') {
-          formData._id = doctorId
-          this.props.updateDetail(formData, doctorId)
-        } else {
-          this.props.create(formData)
-        }
+    const {modalityList} = this.state
+    if (modalityList.modality !== '') {
+      let formData = {
+        modality: modalityList.modality,
+        sub_modality: modalityList.sub_modality,
       }
+      this.props.create(formData)
     } else {
       this.setState({
         submitted: false,
@@ -190,43 +67,14 @@ export class ModalityForm extends React.Component<Props, State> {
 
   clearState = () => {
     this.setState({
-      name: '',
-      address: '',
-      username: '',
-      email: '',
-      mobile: '',
-      code: '',
-      password: '',
-      hospitalId: '',
+      modalityList: {'modality': '', sub_modality: ['']},
+      modalityId: '',
       submitted: false,
-      validation: validator.valid(),
     })
   }
 
   componentDidMount() {
-    if(loggedInUser() ==='hospital'){
-      let authData = authDetail() 
-      let hospitalId = (idx(authData, _ => _.detail._id)) ? authData.detail._id : null 
-      this.setState({hospitalId : hospitalId})
-    }
-
-    if (this.state.hospitalList.length === 0) {
-      this.props.hospitalListing({"user_type": "hospital"})
-    }
-    //edit - get data
-    this.props.getAuditFilters()
-
-    if (this.props.doctorID && this.props.doctorID !== '') {
-      const {doctorID} = this.props
-      if (doctorID) {
-        this.setState({doctorId: doctorID})
-        let formData = {
-          "_id" : doctorID,
-          "user_type" : "doctor"
-        }
-        this.props.detail(formData)
-      }
-    }
+    this.props.getModalities({})
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
@@ -260,38 +108,54 @@ export class ModalityForm extends React.Component<Props, State> {
     }
   }
 
+  customModalityRow = (options) => {
+    console.log('options', options)
+    const listItems = options.map((cusRow, index) =>
+      <div className="row" key={index}>
+        <div className="col-md-10">
+          <Form.Group>
+            <Form.Control
+              type="text"
+              name="sub_modality"
+              value={cusRow}
+              onChange={e => this.handleChange(e, index)}>
+            </Form.Control>
+          </Form.Group>
+        </div>
+        <div className="col-md-2">
+          {(index !== 0) ? <Icon icon={minusCircle} onClick={(e) => this.handleDelete(index, e)} /> : ''}
+        </div>
+      </div>
+    );
+    return (
+      listItems
+    )
+  }
+
+  handleDelete = (index, e) => {
+    let stateClone = JSON.parse(JSON.stringify(this.state.modalityList));
+    stateClone.sub_modality.splice(index, 1);
+    this.setState({ modalityList: stateClone });
+    e.preventDefault();
+  }
+
+  handleClick = (e) => {
+    const {modalityList} = this.state
+    modalityList.sub_modality.push('');
+    this.setState({ modalityList: modalityList});
+    e.preventDefault();
+  }
+
   render() {
     const {alert} = this.props
     const {isProcessing} = this.props.doctor || false
-    const {name, address, code, auditfilters, username, password, email, mobile, submitted, hospitalId, doctorId} = this.state
-    const hospitalList = this.state.hospitalList || []
-    let validation
-    validation = submitted // if the form has been submitted at least once
-      ? validator.validate(this.state) // then check validity every time we render
-      : this.state.validation // otherwise just use what's in state
-    const hospitalRow = hospitalList.map((hospital, index) => {
-      return (idx(hospital, _ => _.profile.name)) && (<option
-        defaultValue={hospitalId}
-        key={index}
-        onChange={e => this.handleChange(e)}
-        value={hospital._id}>
-        {hospital.profile.name}
-      </option>)
-    })
-
-    const doctorList = auditfilters['doctor'] || []
-    const doctorRow = doctorList.map((doctor, index) => (<option
-        defaultValue={name}
-        key={index}
-        onChange={e => this.handleChange(e)}
-        value={doctor}>
-        {doctor}
-      </option>))
+    const {modalityList, modalityId} = this.state
+    const subModalities = modalityList.sub_modality || []
 
     return (
       <div>
         <Modal.Header closeButton>
-          <Modal.Title>{doctorId ? 'Edit' : 'Add'} Modality</Modal.Title>
+          <Modal.Title>{modalityId ? 'Edit' : 'Add'} Modality</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {alert && alert.message && (
@@ -300,116 +164,30 @@ export class ModalityForm extends React.Component<Props, State> {
           <div className="hospital-detail">
             <div className="create-container">
               <Form name="form" onSubmit={e => this.handleSubmit(e)}>
-                <Form.Group
-                  className={validation.name.isInvalid ? ' has-error' : ''}>
+                <Form.Group>
                   <Form.Label>Modality Name</Form.Label>
                   <Form.Control
-                    as="select"
+                    type="text"
                     name="name"
-                    value={name}
-                    disabled={(doctorId && name !=='') ? true : false}
+                    value={modalityList.modality}
                     onChange={e => this.handleChange(e)}>
-                    <option value="">Select Name</option>
-                    {doctorRow}
                   </Form.Control>
-                  {validation.name.isInvalid && (
-                    <div className="help-block">
-                      {validation.name.message}
+                </Form.Group>
+                <React.Fragment><hr style={{height: 3}}/>
+                <div className="row">
+                  <div className="col-md-10">
+                      <Form.Label style={{'fontSize':'0.875rem', 'marginBottom': '0px !important'}}>Sub Modality</Form.Label>
+                  </div>
+                  <div className="col-md-2" style={{'marginBottom': '5px !important'}}>
+                    <div style={{'marginBottom': '5px !important'}}>
+                      <Icon icon={plusCircle} onClick={this.handleClick}/>
                     </div>
-                  )}
-                </Form.Group>
-                <Form.Group
-                  className={
-                    validation.hospitalId.isInvalid ? ' has-error' : ''
-                  }>
-                  <Form.Label>Select Hospital</Form.Label>
-                  <Form.Control
-                    as="select"
-                    name="hospitalId"
-                    value={hospitalId}
-                    disabled={((hospitalId && doctorId && hospitalId !=='') || (loggedInUser() ==='hospital' && hospitalId !=='')) ? true : false}
-                    onChange={e => this.handleChange(e)}>
-                    <option value="">Select Hospital</option>
-                    {hospitalRow}
-                  </Form.Control>
-                  {validation.hospitalId.isInvalid && (
-                    <div className="help-block">
-                      {validation.hospitalId.message}
-                    </div>
-                  )}
-                </Form.Group>
-                <Form.Group
-                  className={validation.code.isInvalid ? ' has-error' : ''}>
-                  <Form.Label>Modality Code</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="code"
-                    value={code}
-                    onChange={e => this.handleChange(e)}
-                  />
-                  {validation.code.isInvalid && (
-                    <div className="help-block">{validation.code.message}</div>
-                  )}
-                </Form.Group>
-                <Form.Group
-                  className={validation.username.isInvalid ? ' has-error' : ''}>
-                  <Form.Label>Username</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="username"
-                    value={username}
-                    onChange={e => this.handleChange(e)}
-                  />
-                  {validation.username.isInvalid && (
-                    <div className="help-block">{validation.username.message}</div>
-                  )}
-                </Form.Group>
-                <Form.Group
-                  className={validation.password.isInvalid ? ' has-error' : ''}>
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="password"
-                    value={password}
-                    onChange={e => this.handleChange(e)}
-                  />
-                  {validation.password.isInvalid && (
-                    <div className="help-block">{validation.password.message}</div>
-                  )}
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={e => this.handleChange(e)}
-                  />
-                </Form.Group>
-                <Form.Group className={validation.mobile.isInvalid ? ' has-error' : ''}>
-                  <Form.Label>Mobile</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="mobile"
-                    value={mobile}
-                    onChange={e => this.handleChange(e)}
-                  />
-                  {validation.mobile.isInvalid && (
-                    <div className="help-block">{validation.mobile.message}</div>
-                  )}
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Address</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    name="address"
-                    rows="3"
-                    value={address}
-                    onChange={e => this.handleChange(e)}
-                  />
-                </Form.Group>
+                  </div>
+                </div>
+                {this.customModalityRow(subModalities)}
+              </React.Fragment>
                 <Button type="submit" className="btn btn-primary">
-                  {doctorId ? 'Update' : 'Create'}
+                  {modalityId ? 'Update' : 'Create'}
                 </Button>
                 {isProcessing && <div className="loader"></div>}
               </Form>
@@ -430,19 +208,10 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   create: formData => {
-    dispatch(doctorActions.create(formData))
+    dispatch(modalityActions.create(formData))
   },
-  getAuditFilters: () => {
-    dispatch(auditActions.getAuditFilters())
-  },
-  updateDetail: (formData, doctorId) => {
-    dispatch(doctorActions.updateDetail(formData, doctorId))
-  },
-  detail: formData => {
-    dispatch(doctorActions.detail(formData))
-  },
-  hospitalListing: (formData) => {
-    dispatch(hospitalActions.listing(formData))
+  getModalities: (formData) => {
+    dispatch(modalityActions.getModalities(formData))
   },
 })
 

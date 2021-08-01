@@ -26,15 +26,15 @@ const create = (formData: formType) => (dispatch: any) => {
 
   modalityService.create(formData).then(
     modality => {
-      if(modality.success){
+      if(modality.status){
         dispatch(success(modality))
         let message = 'Record Created successfully'
         dispatch(alertActions.success(message.toString()))
       }
       else
       {
-        dispatch(failure(modality.data.message.toString()))
-        dispatch(alertActions.error(modality.data.message.toString()))
+        dispatch(failure(modality.message.toString()))
+        dispatch(alertActions.error(modality.message.toString()))
       }
     },
     error => {

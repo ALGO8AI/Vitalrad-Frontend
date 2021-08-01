@@ -1,10 +1,11 @@
 // @flow
 import React from 'react'
-import {Table} from 'react-bootstrap'
+import {Table, Modal} from 'react-bootstrap'
 import {connect} from 'react-redux'
 import Dialog from 'react-bootstrap-dialog'
 import idx from 'idx'
 import {doctorActions} from '../../_actions'
+import DoctorIdForm from './DoctorIdForm'
 
 type Props = {
   getDoctorsWithNullIds: Function,
@@ -17,8 +18,10 @@ type Props = {
 
 type State = {
   doctorList: Array<any>,
-  doctorId: string,
-  showDoctorFrom: boolean,
+  doctorObj: Object,
+  firstname: string,
+  lastname: string,
+  showDoctorIdFrom: boolean,
 };
 
 export class DoctorList extends React.Component<Props, State> {
@@ -26,9 +29,11 @@ export class DoctorList extends React.Component<Props, State> {
     super(props)
 
     this.state = {
-      doctorId: '',
+      firstname: '',
+      lastname: '',
+      doctorObj: {},
       doctorList: [],
-      showDoctorFrom: false,
+      showDoctorIdFrom: false,
     }
   }
 
@@ -43,21 +48,30 @@ export class DoctorList extends React.Component<Props, State> {
     }
   }
 
-  generateID = (doctor: object) => {
-    if (doctor && doctor.Hospital_Name !=='') {
+  getNameDetail = (firstname: string, lastname: string) => {
+    this.setState({firstname: firstname, lastname: lastname});
+    this.confirmGenerateId();
+    // this.generateID(firstname, lastname);
+  }
+
+  generateID = () => {
+    const {doctorObj, firstname, lastname} = this.state;
+    if (doctorObj && doctorObj.Hospital_Name !=='') {
       let formData = {
-        "hospital_name": doctor.Hospital_Name,
-        "doctor_name": doctor.Referred_By,
-        "hospital_number": doctor.Hospital_Number 
+        "hospital_name": doctorObj.Hospital_Name,
+        "firstname": firstname ,
+        lastname: lastname,
+        "hospital_number": doctorObj.Hospital_Number 
       }
       this.props.updateDocId(formData)
       setTimeout(() => {
-        this.props.getDoctorsWithNullIds()
-      }, 500);
+        // this.props.getDoctorsWithNullIds()
+        // window.location.reload();
+      }, 1000);
     }
   }
 
-  confirmGenerateId = (e: any, doctor: object) => {
+  confirmGenerateId = () => {
     //$FlowFixMe
     this.dialog.show({
       title: 'Generate Doctor\'s ID',
@@ -65,7 +79,7 @@ export class DoctorList extends React.Component<Props, State> {
       actions: [
         Dialog.CancelAction(),
         Dialog.OKAction(() => {
-          this.generateID(doctor)
+          this.generateID()
         }),
       ],
       bsSize: 'small',
@@ -75,7 +89,15 @@ export class DoctorList extends React.Component<Props, State> {
     })
   }
 
+  handleClose = (e: any) => {
+    this.setState({showDoctorIdFrom: false, firstname: '', lastname: '', doctorObj: {}})
+  }
+  handleShow = (e: any, doctor: object) => {
+    this.setState({showDoctorIdFrom: true, firstname: '', lastname: '', doctorObj: doctor})
+  }
+
   render() {
+    const { showDoctorIdFrom } = this.state;
     let doctorRow = null
     let doctorList = idx(this.state, _ => _.doctorList)
       ? this.state.doctorList
@@ -89,7 +111,7 @@ export class DoctorList extends React.Component<Props, State> {
         <td className="doctorname">{doctor.Hospital_Name ? doctor.Hospital_Name : ''}</td>
         <td className="doctorname">{doctor.Hospital_Number ? doctor.Hospital_Number : ''}</td>
         <td className="actions">
-          <span className="name" onClick={e => this.confirmGenerateId(e, doctor)}>Generate ID</span>
+          <span className="name" style={{cursor: 'pointer'}} onClick={e => this.handleShow(e, doctor)}>Generate ID</span>
         </td>
       </tr>
     ))
@@ -126,6 +148,13 @@ export class DoctorList extends React.Component<Props, State> {
                   </tbody>
                 )}
               </Table>
+              <Modal
+                backdrop="static"
+                className="add-doctor"
+                show={showDoctorIdFrom}
+                onHide={e => this.handleClose(e)}>
+                <DoctorIdForm getNameDetail={this.getNameDetail} />
+              </Modal>
             </div>
           </div> 
         </div> 

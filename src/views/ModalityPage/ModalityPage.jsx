@@ -1,149 +1,85 @@
 // @flow
 import React from 'react'
-import {Table, Button, Modal, Form} from 'react-bootstrap'
-import {Icon} from 'react-icons-kit'
-import {pencil, trashO, filter} from 'react-icons-kit/fa'
+import {Table, Button, Modal} from 'react-bootstrap'
+// import {Icon} from 'react-icons-kit'
+// import {pencil} from 'react-icons-kit/fa'
 import {connect} from 'react-redux'
 import Dialog from 'react-bootstrap-dialog'
 import idx from 'idx'
-import {doctorActions} from '../../_actions'
-import DoctorFormPage from './DoctorFormPage'
-import {authDetail, loggedInUser} from '../../_helpers'
+import {modalityActions} from '../../_actions'
+import ModalityForm from './ModalityForm'
+// import {authDetail, loggedInUser} from '../../_helpers'
 
 type Props = {
-  doctorListing: Function,
-  deleteRecord: Function,
-  doctors: Array<any>,
-  history: any,
-  doctorProcess: boolean,
+  getModalities: Function,
+  sub_modality: Array<any>,
+  modalityList: Array<any>,
+  modality: any,
+  modalityProcess: boolean,
   match: any,
 }
 
 type State = {
-  doctorList: Array<any>,
-  doctorId: string,
-  showDoctorFrom: boolean,
+  sub_modality: Array<any>,
+  modalityList: Array<any>,
+  modalityId: string,
+  modality: string,
+  showModalityFrom: boolean,
 };
 
-export class DoctorPage extends React.Component<Props, State> {
+export class ModalityPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
 
     this.state = {
-      doctorId: '',
-      doctorList: [],
-      showDoctorFrom: false,
+      modalityId: '',
+      modality: '',
+      modalityList: [],
+      showModalityFrom: false,
     }
   }
 
   componentDidMount() {
-    this.getDoctorListing()
+    this.getModalityListing()
   }
 
-  getDoctorListing = () => {
-    let hospitalName = null
-    let formData = {"user_type": "doctor"}
-    if(loggedInUser() === 'hospital'){
-      let authData = authDetail()
-      hospitalName = idx(authData, _ => _.detail.profile.name) ? authData.detail.profile.name : null
-      if(hospitalName){
-        formData.hospital_name = hospitalName
-      }
-    }
-    this.props.doctorListing(formData)
+  getModalityListing = () => {
+    this.props.getModalities({})
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
-    if (nextProps.doctors) {
-      this.setState({doctorList: nextProps.doctors})
+    if (idx(nextProps, _ => _.modality.detail) && Array.isArray(nextProps.modality.detail)) {
+      this.setState({modalityList: nextProps.modality.detail})
     }
     if (
-      nextProps.doctorProcess === false &&
-      this.props.doctorProcess !== nextProps.doctorProcess
+      nextProps.modalityProcess === false &&
+      this.props.modalityProcess !== nextProps.modalityProcess
     ) {
-      this.getDoctorListing()
+      this.getModalityListing()
     }
   }
 
-  deleteDoctor = (doctorId: string) => {
-    if (doctorId) {
-      let formData = {
-        "_id" :doctorId,
-        "deleted": true
-      }
-      this.props.deleteRecord(formData)
-      setTimeout(() => {
-        this.getDoctorListing()
-      }, 500);
-    }
-  }
-
-  confirmDeleteDoctor = (e: any, doctorId: string) => {
-    //$FlowFixMe
-    this.dialog.show({
-      title: 'Delete Doctor',
-      body: 'Are you sure you want to delete this Doctor?',
-      actions: [
-        Dialog.CancelAction(),
-        Dialog.OKAction(() => {
-          this.deleteDoctor(doctorId)
-        }),
-      ],
-      bsSize: 'small',
-      onHide: dialog => {
-        dialog.hide()
-      },
-    })
-  }
 
   handleClose = (e: any) => {
-    this.setState({showDoctorFrom: false, doctorId: ''})
-    this.getDoctorListing()
+    this.setState({showModalityFrom: false, modalityId: ''})
+    this.getModalityListing()
   }
-  handleShow = (e: any, doctorID: string) => {
-    this.setState({showDoctorFrom: true, doctorId: doctorID})
-  }
-
-  // Search Filter
-  filterDoctor = (event: any) => {
-    let regVal = /^[A-Za-z\d\-_\s]+$/i
-    if (regVal.test(event.target.value) || event.target.value.length === 0) {
-      let doctorList = idx(this.props, _ => _.doctors)
-        ? this.props.doctors
-        : []
-      doctorList = doctorList.filter(
-        item =>
-          item.profile.name.toLowerCase().search(event.target.value.toLowerCase()) !==
-            -1 ||
-          item.username.toLowerCase().search(event.target.value.toLowerCase()) !== -1 ||
-          item.profile.mobile.toLowerCase().search(event.target.value.toLowerCase()) !== -1
-      )
-      this.setState({doctorList: doctorList})
-    }
+  handleShow = (e: any, modalityID: string) => {
+    this.setState({showModalityFrom: true, modalityId: modalityID})
   }
 
   render() {
-    const {showDoctorFrom, doctorId} = this.state
-    let doctorRow = null
-    let doctorList = idx(this.state, _ => _.doctorList)
-      ? this.state.doctorList
+    const {showModalityFrom, modalityId} = this.state
+    let modalityRow = null
+    let modalityList = idx(this.state, _ => _.modalityList)
+      ? this.state.modalityList
       : []
-    doctorRow = doctorList.map((doctor, index) => (
+    modalityRow = modalityList.map((modality, index) => (
       <tr key={index}>
-        <td className="doctorname">
-          <span className="name">{doctor.username}</span>
+        <td className="modalityname">
+          <span className="name">{modality.modality}</span>
         </td>
-        <td className="doctorname">{doctor.profile.name}</td>
-        <td className="doctorname">{doctor.profile.mobile}</td>
-        {/*<td className="doctorname">{doctor.status}</td>*/}
-        <td className="actions">
-          <Button onClick={e => this.handleShow(e, doctor._id)}>
-            <Icon icon={pencil} />
-          </Button>
-          <Button onClick={e => this.confirmDeleteDoctor(e, doctor._id)}>
-            <Icon icon={trashO} />
-          </Button>
-        </td>
+        <td className="modalityname">{modality.sub_modality.join(', ')}</td>
       </tr>
     ))
     return (
@@ -157,36 +93,33 @@ export class DoctorPage extends React.Component<Props, State> {
         <div className="card">
           <div className="card-body">
             <div className="heading">
-              <h4>Doctors</h4>
+              <h4>Modality</h4>
               <div className="btn-container">
                 <div className="filter">
-                  <Form.Group>
+                  {/*<Form.Group>
                     <Form.Control
                       type="text"
-                      placeholder="Search Doctors...."
-                      onChange={e => this.filterDoctor(e)}
+                      placeholder="Search Modality...."
+                      onChange={e => this.filterModality(e)}
                     />
                   </Form.Group>
                   <Button className="btn-primary">
                     <Icon icon={filter} />
-                  </Button>
+                  </Button>*/}
                 </div>
-                <Button onClick={e => this.handleShow(e, '')}>Create Doctor</Button>
+                <Button onClick={e => this.handleShow(e, '')}>Create Modality</Button>
               </div>
             </div>
             <div className="listing-container">
               <Table className="responsive-grid">
                 <thead>
                   <tr>
-                    <th>Username</th>
-                    <th>Name</th>
-                    <th>Mobile</th>
-                    {/*<th>Status</th>*/}
-                    <th width="10%">Actions</th>
+                    <th>Modality</th>
+                    <th>Sub Modality</th>
                   </tr>
                 </thead>
-                <tbody>{doctorRow}</tbody>
-                {doctorRow.length === 0 && (
+                <tbody>{modalityRow}</tbody>
+                {modalityRow.length === 0 && (
                   <tbody>
                     <tr>
                       <td colSpan="5">No Records Found</td>
@@ -199,10 +132,10 @@ export class DoctorPage extends React.Component<Props, State> {
         </div> 
         <Modal
           backdrop="static"
-          className="add-doctor"
-          show={showDoctorFrom}
+          className="add-modality"
+          show={showModalityFrom}
           onHide={e => this.handleClose(e)}>
-          <DoctorFormPage doctorID={doctorId} />
+          <ModalityForm modalityID={modalityId} />
         </Modal>
       </div>
     )
@@ -210,19 +143,16 @@ export class DoctorPage extends React.Component<Props, State> {
 }
 
 const mapStateToProps = state => ({
-  doctors: state.doctor.detail || [],
+  modality: state.modality || null,
 })
 
 const mapDispatchToProps = dispatch => ({
-  doctorListing: (formData) => {
-    dispatch(doctorActions.listing(formData))
-  },
-  deleteRecord: formData => {
-    dispatch(doctorActions.deleteRecord(formData))
-  },
+  getModalities: (formData) => {
+    dispatch(modalityActions.getModalities(formData))
+  }
 })
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(DoctorPage)
+)(ModalityPage)
