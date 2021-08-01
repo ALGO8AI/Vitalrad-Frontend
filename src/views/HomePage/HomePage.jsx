@@ -80,7 +80,6 @@ class HomePage extends React.Component<Props, State> {
 
   componentDidMount = () => {
     this.getDashBoaordInfo()
-    this.props.getAuditFilters()
   }
 
   getDashBoaordInfo = () => {
@@ -90,12 +89,14 @@ class HomePage extends React.Component<Props, State> {
     let tmpRadiologistArr = (radiologistFilter) ? radiologistFilter.map( s => s.value ) : [];
     let nameFilterValue = '';
     let nameFilter = ''
+    let tmpHospitalId = '';
     let authData = authDetail()
     if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
       let hospitalName = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : 'Hospital 7'
       tmpHospitalArr = [hospitalName]
       nameFilterValue = hospitalName
       nameFilter = 'hospital_name'
+      tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
       this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
     }
 
@@ -128,7 +129,12 @@ class HomePage extends React.Component<Props, State> {
     if(this.state.loggedInUser !=='superadmin'){
       formData[nameFilter] = nameFilterValue
     }
-    this.props.getDashBoaordInfo(formData)
+    this.props.getDashBoaordInfo(formData);
+
+    let filterData = {
+      hospital_id: tmpHospitalId
+    }
+    this.props.getAuditFilters(filterData);
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
@@ -750,8 +756,8 @@ const mapDispatchToProps = dispatch => ({
   getDashBoaordInfo: (formData: Object) => {
     dispatch(auditActions.getDashBoaordInfo(formData))
   },
-  getAuditFilters: () => {
-    dispatch(auditActions.getAuditFilters())
+  getAuditFilters: (filterData: Object) => {
+    dispatch(auditActions.getAuditFilters(filterData))
   },
   getAuditByCategory: (formData: Object) => {
     dispatch(auditActions.getAuditByCategory(formData))

@@ -66,7 +66,7 @@ export class DoctorList extends React.Component<Props, State> {
       this.props.updateDocId(formData)
       setTimeout(() => {
         // this.props.getDoctorsWithNullIds()
-        // window.location.reload();
+        window.location.reload();
       }, 1000);
     }
   }

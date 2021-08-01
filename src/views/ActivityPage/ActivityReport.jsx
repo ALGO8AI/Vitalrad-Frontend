@@ -83,7 +83,6 @@ class ActivityReport extends React.Component<Props, State> {
   }
   componentDidMount() {
     this.getActivityLineGraph()
-    this.props.getAuditFilters()
   }
   
   getActivityLineGraph = (ctype = null) => {
@@ -92,9 +91,11 @@ class ActivityReport extends React.Component<Props, State> {
     let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
     let tmpRadiologistArr = (radiologistFilter) ? radiologistFilter.map( s => s.value ) : [];
     let authData = authDetail()
+    let tmpHospitalId = '';
     if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
       let hospitalName = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : 'Hospital 7'
       tmpHospitalArr = [hospitalName]
+      tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
       this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
     }
     if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='doctor'){
@@ -131,6 +132,10 @@ class ActivityReport extends React.Component<Props, State> {
       this.props.getActivityLineGraph(formData)  
     }
     
+    let filterData = {
+      hospital_id: tmpHospitalId
+    }
+    this.props.getAuditFilters(filterData);
     
   }
 
@@ -597,8 +602,8 @@ const mapDispatchToProps = dispatch => ({
   getActivityInfo: (formData: Object) => {
     dispatch(auditActions.getActivityInfo(formData))
   },
-  getAuditFilters: () => {
-    dispatch(auditActions.getAuditFilters())
+  getAuditFilters: (filterData: Object) => {
+    dispatch(auditActions.getAuditFilters(filterData))
   },
   getAuditByCategory: (formData: Object) => {
     dispatch(auditActions.getAuditByCategory(formData))

@@ -12,6 +12,7 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import {auditActions} from '../../_actions'
 import dateformat from "dateformat"
+import {authDetail} from '../../_helpers'
 
 type Props = {
   getInvoiceDetail: Function,
@@ -48,7 +49,15 @@ class SaleList extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.props.getAuditFilters()
+    let authData = authDetail()
+    let tmpHospitalId = '';
+    if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
+      tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
+    }
+    let filterData = {
+      hospital_id: tmpHospitalId
+    }
+    this.props.getAuditFilters(filterData);
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
@@ -624,8 +633,8 @@ const mapDispatchToProps = dispatch => ({
   getInvoiceDetail: (formData: Object) => {
     dispatch(invoiceActions.getInvoiceDetail(formData))
   },
-  getAuditFilters: () => {
-    dispatch(auditActions.getAuditFilters())
+  getAuditFilters: (filterData: Object) => {
+    dispatch(auditActions.getAuditFilters(filterData))
   },
 })
 
