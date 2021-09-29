@@ -134,7 +134,7 @@ const detail = (formData: Object) => (dispatch: any) => {
   )
 }
 
-const deleteRecord = (modalityId: string) => (dispatch: any) => {
+const deleteRecord = (formData: Object) => (dispatch: any) => {
   const request = modalityDetail => ({
     type:   modalityConstants.MODALITY_DELETE_REQUEST,
     modalityDetail,
@@ -149,7 +149,7 @@ const deleteRecord = (modalityId: string) => (dispatch: any) => {
   })
   dispatch(request({}))
 
-  modalityService.deleteRecord(modalityId).then(
+  modalityService.deleteRecord(formData).then(
     (response: any) => {
       dispatch(success(response))
       history.push('/modality')

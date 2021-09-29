@@ -594,8 +594,8 @@ class HomePage extends React.Component<Props, State> {
             <div className="col-md-3">
               <h4 style={{'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '0px'}}>{mod.count}</h4>
             </div>
-            <div className="col-md-6">
-              <h4 style={{'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '0px'}}><Moment format="YYYY-MM-DD">{new Date()}</Moment></h4>
+            <div className="col-md-6" style={{'padding': '0px'}}>
+              <h4 style={{'fontSize': '13px', 'fontWeight': 'bold', 'marginBottom': '0px'}}><Moment format="YYYY-MM-DD">{startDate}</Moment> / <Moment format="YYYY-MM-DD">{endDate}</Moment></h4>
             </div>
           </div>
     </Card.Body>

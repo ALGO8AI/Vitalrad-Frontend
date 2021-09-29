@@ -1,8 +1,8 @@
 // @flow
 import React from 'react'
 import {Table, Button, Modal} from 'react-bootstrap'
-// import {Icon} from 'react-icons-kit'
-// import {pencil} from 'react-icons-kit/fa'
+import {Icon} from 'react-icons-kit'
+import {trashO} from 'react-icons-kit/fa'
 import {connect} from 'react-redux'
 import Dialog from 'react-bootstrap-dialog'
 import idx from 'idx'
@@ -68,6 +68,36 @@ export class ModalityPage extends React.Component<Props, State> {
     this.setState({showModalityFrom: true, modalityId: modalityID})
   }
 
+  deleteModality = (modalityName: string) => {
+    if (modalityName) {
+      let formData = {
+        "modality" :modalityName
+      }
+      this.props.deleteRecord(formData)
+      setTimeout(() => {
+        this.getModalityListing()
+      }, 500);
+    }
+  }
+
+  confirmDeleteModality = (e: any, modalityName: string) => {
+    //$FlowFixMe
+    this.dialog.show({
+      title: 'Delete Modality',
+      body: 'Are you sure you want to delete this Modality?',
+      actions: [
+        Dialog.CancelAction(),
+        Dialog.OKAction(() => {
+          this.deleteModality(modalityName)
+        }),
+      ],
+      bsSize: 'small',
+      onHide: dialog => {
+        dialog.hide()
+      },
+    })
+  }
+
   render() {
     const {showModalityFrom, modalityId} = this.state
     let modalityRow = null
@@ -80,6 +110,14 @@ export class ModalityPage extends React.Component<Props, State> {
           <span className="name">{modality.modality}</span>
         </td>
         <td className="modalityname">{modality.sub_modality.join(', ')}</td>
+        <td className="actions">
+          {/*<Button onClick={e => this.handleShow(e, modality._id)}>
+            <Icon icon={pencil} />
+          </Button>*/}
+          <Button onClick={e => this.confirmDeleteModality(e, modality.modality)}>
+            <Icon icon={trashO} />
+          </Button>
+        </td>
       </tr>
     ))
     return (
@@ -116,6 +154,7 @@ export class ModalityPage extends React.Component<Props, State> {
                   <tr>
                     <th>Modality</th>
                     <th>Sub Modality</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>{modalityRow}</tbody>
@@ -149,7 +188,10 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   getModalities: (formData) => {
     dispatch(modalityActions.getModalities(formData))
-  }
+  },
+  deleteRecord: formData => {
+    dispatch(modalityActions.deleteRecord(formData))
+  },
 })
 
 export default connect(
