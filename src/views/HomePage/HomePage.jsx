@@ -134,6 +134,7 @@ class HomePage extends React.Component<Props, State> {
     let filterData = {
       hospital_id: tmpHospitalId
     }
+    console.log('filterData', filterData, formData)
     this.props.getAuditFilters(filterData);
   }
 
@@ -569,7 +570,7 @@ class HomePage extends React.Component<Props, State> {
       ];
     auditList.map((audit, index) => ( 
       csvData.push([
-        audit.Scan_Received_Date, 
+        dateformat(audit.Scan_Received_Date, 'dd/mm/yy'), 
         audit.Reported_By, 
         audit.Accession_No, 
         audit.Hospital_Number, 
@@ -583,7 +584,7 @@ class HomePage extends React.Component<Props, State> {
         audit.Audit_Person,
         audit.Audit_Category])
     ))
-    const modalityColor = ['#ffc107', '#17a2b8', '#c53636', '#013220', '#6610f2', '#e83e8c', '#28a745', '#fd7e14']
+    const modalityColor = ['#76b56b', '#e0b5b5', '#e87c7c', '#013220', '#6610f2', '#e83e8c', '#28a745', '#fd7e14']
     modalityRow = modalityData.map((mod, index) => {
       return (mod.count > 0) && <Card  key={index} style={{'backgroundColor': modalityColor[index], 'color': '#fff', 'borderRadius':'0'}}>
     <Card.Body>
@@ -595,7 +596,7 @@ class HomePage extends React.Component<Props, State> {
               <h4 style={{'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '0px'}}>{mod.count}</h4>
             </div>
             <div className="col-md-6" style={{'padding': '0px'}}>
-              <h4 style={{'fontSize': '13px', 'fontWeight': 'bold', 'marginBottom': '0px'}}><Moment format="YYYY-MM-DD">{startDate}</Moment> / <Moment format="YYYY-MM-DD">{endDate}</Moment></h4>
+              <h4 style={{'fontSize': '13px', 'fontWeight': 'bold', 'marginBottom': '0px'}}><Moment format="DD/MM/YY">{startDate}</Moment> - <Moment format="DD/MM/YY">{endDate}</Moment></h4>
             </div>
           </div>
     </Card.Body>
@@ -661,7 +662,7 @@ class HomePage extends React.Component<Props, State> {
                     className="form-control"
                     name= 'startDate'
                     selected={startDate}
-                    dateFormat="yyyy-MM-dd"
+                    dateFormat="dd/MM/yy"
                     onChange={e => this.handleDateChange(e, 'startDate')}
                   /> -  
                   <DatePicker
@@ -669,7 +670,7 @@ class HomePage extends React.Component<Props, State> {
                     name= 'endDate'
                     selected={endDate}
                     minDate={startDate}
-                    dateFormat="yyyy-MM-dd"
+                    dateFormat="dd/MM/yy"
                     onChange={e => this.handleDateChange(e, 'endDate')}
                   />
                   </span>
@@ -692,7 +693,7 @@ class HomePage extends React.Component<Props, State> {
                 <div className="row">
                   <div className="col-md-12">
                     <div className="d-sm-flex align-items-baseline report-summary-header" style={{'borderBottom': '0px'}}>
-                      <h5 className="font-weight-semibold">Report Summary</h5>
+                      <h5 className="font-weight-semibold">Activity</h5>
                     </div>
                   </div>
                 </div>

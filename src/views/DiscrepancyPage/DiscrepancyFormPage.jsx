@@ -6,6 +6,7 @@ import idx from 'idx'
 import {discrepancyActions} from '../../_actions'
 import FormValidator from '../../_helpers/FormValidator'
 import {authDetail, loggedInUser, isAdmin} from '../../_helpers'
+import dateformat from "dateformat"
 
 type Props = {
   createDiscrepancy: Function,
@@ -156,7 +157,7 @@ export class DiscrepancyFormPage extends React.Component<Props, State> {
       let accessionInfo = nextProps.accessionInfo[0]
       if(accessionInfo){
         this.setState({
-          Scan_Received_Date: accessionInfo.Scan_Received_Date || '',
+          Scan_Received_Date: dateformat(accessionInfo.Scan_Received_Date, 'dd/mm/yy') || '',
           Patient_First_Name: accessionInfo.Patient_First_Name || '',
           Surname: accessionInfo.Surname,
           Modality: accessionInfo.Modality || '',

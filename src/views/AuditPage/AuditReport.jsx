@@ -541,7 +541,7 @@ class AuditReport extends React.Component<Props, State> {
         let tmpScanDate = audit.Scan_Received_Date.split("-");
          let scanDate = (tmpScanDate[0].length === 4) ? audit.Scan_Received_Date : audit.Scan_Received_Date.split("-").reverse().join("-");
         return (<tr key={index}>
-          <td>{audit.Scan_Received_Date && (<Moment format="lll">{scanDate}</Moment>)}</td>
+          <td>{audit.Scan_Received_Date && (<Moment format="DD/MM/YY">{scanDate}</Moment>)}</td>
           <td>{audit.Reported_By}</td>
           <td>{audit.Accession_No}</td>
           <td>{audit.Hospital_Number}</td>
@@ -568,7 +568,7 @@ class AuditReport extends React.Component<Props, State> {
       ];
     auditList.map((audit, index) => ( 
       csvData.push([
-        audit.Scan_Received_Date, 
+        dateformat(audit.Scan_Received_Date, 'dd/mm/yy'), 
         audit.Reported_By, 
         audit.Accession_No, 
         audit.Hospital_Number, 
@@ -638,14 +638,14 @@ class AuditReport extends React.Component<Props, State> {
                     className="form-control"
                     name= 'startDate'
                     selected={startDate}
-                    dateFormat="yyyy-MM-dd"
+                    dateFormat="dd/MM/yy"
                     onChange={e => this.handleDateChange(e, 'startDate')}
                   /> -  
                   <DatePicker
                     className="form-control"
                     name= 'endDate'
                     selected={endDate}
-                    dateFormat="yyyy-MM-dd"
+                    dateFormat="dd/MM/yy"
                     minDate={startDate}
                     onChange={e => this.handleDateChange(e, 'endDate')}
                   />

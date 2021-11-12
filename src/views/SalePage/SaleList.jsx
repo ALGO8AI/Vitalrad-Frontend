@@ -157,8 +157,8 @@ class SaleList extends React.Component<Props, State> {
       ((invoiceDetail.PORegion) ? invoiceDetail.PORegion : ''),
       ((invoiceDetail.POPostalCode) ? invoiceDetail.POPostalCode : ''),
       ((invoiceDetail.POCountry) ? invoiceDetail.POCountry : ''),
-      ((invoiceDetail.InvoiceDate) ? dateformat(invoiceDetail.InvoiceDate, 'yyyy-mm-dd') : ''),
-      ((invoiceDetail.DueDate) ? dateformat(invoiceDetail.DueDate, 'yyyy-mm-dd') : ''),
+      ((invoiceDetail.InvoiceDate) ? dateformat(invoiceDetail.InvoiceDate, 'dd/mm/yy') : ''),
+      ((invoiceDetail.DueDate) ? dateformat(invoiceDetail.DueDate, 'dd/mm/yy') : ''),
       ((invoiceDetail.Total) ? invoiceDetail.Total : ''),
       ((invoiceDetail.InventoryItemCode) ? invoiceDetail.InventoryItemCode : ''),
       ((invoiceDetail.Description) ? invoiceDetail.Description : ''),
@@ -206,14 +206,14 @@ class SaleList extends React.Component<Props, State> {
                     className="form-control"
                     name= 'startDate'
                     selected={startDate}
-                    dateFormat="yyyy-MM-dd"
+                    dateFormat="dd/MM/yy"
                     onChange={e => this.handleDateChange(e, 'startDate')}
                   /> -  
                   <DatePicker
                     className="form-control"
                     name= 'endDate'
                     selected={endDate}
-                    dateFormat="yyyy-MM-dd"
+                    dateFormat="dd/MM/yy"
                     minDate={startDate}
                     onChange={e => this.handleDateChange(e, 'endDate')}
                   />
@@ -292,7 +292,7 @@ class SaleList extends React.Component<Props, State> {
                           <Form.Control
                             type="text"
                             name="InvoiceDate"
-                            value={(invoiceDetail.InvoiceDate) ? dateformat(invoiceDetail.InvoiceDate, 'yyyy-mm-dd') : ''}
+                            value={(invoiceDetail.InvoiceDate) ? dateformat(invoiceDetail.InvoiceDate, 'dd/mm/yy') : ''}
                             readOnly={true}
                           />
                         </Form.Group>
@@ -303,7 +303,7 @@ class SaleList extends React.Component<Props, State> {
                           <Form.Control
                             type="text"
                             name="DueDate"
-                            value={(invoiceDetail.DueDate) ? dateformat(invoiceDetail.DueDate, 'yyyy-mm-dd') : ''}
+                            value={(invoiceDetail.DueDate) ? dateformat(invoiceDetail.DueDate, 'dd/mm/yy') : ''}
                             readOnly={true}
                           />
                         </Form.Group>

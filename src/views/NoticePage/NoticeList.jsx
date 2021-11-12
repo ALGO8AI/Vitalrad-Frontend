@@ -221,7 +221,7 @@ class NoticeList extends React.Component<Props, State> {
       let scanDate = (tmpScanDate[0].length === 4) ? dis.Scan_Received_Date : dis.Scan_Received_Date.split("-").reverse().join("-");
       return (<tr key={index} style={{backgroundColor: dis.Reported === 'Reported' ? '#6af16a': '#fbaeae'}}>
         <td>{dis.Reported === 'Reported' ? 'Acknowledged' : 'Action & Acknowledge'}</td>
-        <td>{dis.Scan_Received_Date && (<Moment format="Do MMMM YYYY">{scanDate}</Moment>)}</td>
+        <td>{dis.Scan_Received_Date && (<Moment format="DD/MM/YY">{scanDate}</Moment>)}</td>
         <td>{dis.Reported_By}</td>
         <td>{dis.Patient_First_Name} {dis.Surname}</td>
         <td data-tip type="light" data-for={'tip-'+dis.Accession_No}>{dis.Accession_No}
