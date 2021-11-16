@@ -12,7 +12,7 @@ import {auditActions} from '../../_actions'
 import idx from 'idx'
 import dateformat from "dateformat"
 import {connect} from 'react-redux'
-import Moment from 'react-moment'
+// import Moment from 'react-moment'
 import { CSVLink } from "react-csv";
 
 import Highcharts from "highcharts";
@@ -589,15 +589,15 @@ class HomePage extends React.Component<Props, State> {
       return (mod.count > 0) && <Card  key={index} style={{'backgroundColor': modalityColor[index], 'color': '#fff', 'borderRadius':'0'}}>
     <Card.Body>
       <div className="row">
-            <div className="col-md-3">
+            <div className="col-md-8">
               <h4 style={{'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '0px'}}>{mod.Modality}</h4>
             </div>
-            <div className="col-md-3">
+            <div className="col-md-4">
               <h4 style={{'fontSize': '16px', 'fontWeight': 'bold', 'marginBottom': '0px'}}>{mod.count}</h4>
             </div>
-            <div className="col-md-6" style={{'padding': '0px'}}>
+            {/*<div className="col-md-6" style={{'padding': '0px'}}>
               <h4 style={{'fontSize': '13px', 'fontWeight': 'bold', 'marginBottom': '0px'}}><Moment format="DD/MM/YY">{startDate}</Moment> - <Moment format="DD/MM/YY">{endDate}</Moment></h4>
-            </div>
+            </div>*/}
           </div>
     </Card.Body>
   </Card>

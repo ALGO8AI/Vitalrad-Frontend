@@ -2,7 +2,7 @@
 import React from 'react'
 import {Table, Button, Modal} from 'react-bootstrap'
 import {Icon} from 'react-icons-kit'
-import {trashO} from 'react-icons-kit/fa'
+import {pencil, trashO} from 'react-icons-kit/fa'
 import {connect} from 'react-redux'
 import Dialog from 'react-bootstrap-dialog'
 import idx from 'idx'
@@ -23,6 +23,7 @@ type State = {
   sub_modality: Array<any>,
   modalityList: Array<any>,
   modalityId: string,
+  modalityObj: Object,
   modality: string,
   showModalityFrom: boolean,
 };
@@ -33,6 +34,7 @@ export class ModalityPage extends React.Component<Props, State> {
 
     this.state = {
       modalityId: '',
+      modalityObj: '',
       modality: '',
       modalityList: [],
       showModalityFrom: false,
@@ -61,11 +63,11 @@ export class ModalityPage extends React.Component<Props, State> {
 
 
   handleClose = (e: any) => {
-    this.setState({showModalityFrom: false, modalityId: ''})
+    this.setState({showModalityFrom: false, modalityId: '', modalityObj: ''})
     this.getModalityListing()
   }
-  handleShow = (e: any, modalityID: string) => {
-    this.setState({showModalityFrom: true, modalityId: modalityID})
+  handleShow = (e: any, modality: Object) => {
+    this.setState({showModalityFrom: true, modalityObj: modality, modalityId: modality._id})
   }
 
   deleteModality = (modalityName: string) => {
@@ -99,7 +101,7 @@ export class ModalityPage extends React.Component<Props, State> {
   }
 
   render() {
-    const {showModalityFrom, modalityId} = this.state
+    const {showModalityFrom, modalityId, modalityObj} = this.state
     let modalityRow = null
     let modalityList = idx(this.state, _ => _.modalityList)
       ? this.state.modalityList
@@ -111,9 +113,9 @@ export class ModalityPage extends React.Component<Props, State> {
         </td>
         <td className="modalityname">{modality.sub_modality.join(', ')}</td>
         <td className="actions">
-          {/*<Button onClick={e => this.handleShow(e, modality._id)}>
+          <Button onClick={e => this.handleShow(e, modality)}>
             <Icon icon={pencil} />
-          </Button>*/}
+          </Button>
           <Button onClick={e => this.confirmDeleteModality(e, modality.modality)}>
             <Icon icon={trashO} />
           </Button>
@@ -174,7 +176,7 @@ export class ModalityPage extends React.Component<Props, State> {
           className="add-modality"
           show={showModalityFrom}
           onHide={e => this.handleClose(e)}>
-          <ModalityForm modalityID={modalityId} />
+          <ModalityForm modalityID={modalityId} modalityObj={modalityObj} />
         </Modal>
       </div>
     )

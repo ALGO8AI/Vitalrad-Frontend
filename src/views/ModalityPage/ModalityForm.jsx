@@ -10,19 +10,18 @@ import {Icon} from 'react-icons-kit'
 import {minusCircle, plusCircle} from 'react-icons-kit/fa'
 
 type Props = {
-  doctor: any,
-  doctorID: string,
-  hospitals: Array<any>,
+  modalityObj: any,
+  modalityID: string,
+  updateDetail: Function,
   create: Function,
-  detail: Function,
   alert: any,
 }
 
 type State = {
   submitted: boolean,
   modalityId: string,
+  modalityObj: Object,
   validation: Object,
-  modalityList: Object,
 };
 
 export class ModalityForm extends React.Component<Props, State> {
@@ -51,13 +50,19 @@ export class ModalityForm extends React.Component<Props, State> {
   handleSubmit = (e: any) => {
     e.preventDefault()
     this.setState({submitted: true})
-    const {modalityList} = this.state
+    const {modalityList, modalityId} = this.state
     if (modalityList.modality !== '') {
       let formData = {
         modality: modalityList.modality,
         sub_modality: modalityList.sub_modality,
       }
-      this.props.create(formData)
+      if (modalityId && modalityId !== '') {
+        formData._id = modalityId
+        this.props.updateDetail(formData, modalityId)
+      } else {
+        this.props.create(formData)
+         setTimeout(() => this.clearState(), 3000);
+      }
     } else {
       this.setState({
         submitted: false,
@@ -74,7 +79,11 @@ export class ModalityForm extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.props.getModalities({})
+    console.log('props', this.props.modalityObj)
+    const {modalityObj} = this.props
+    if (idx(modalityObj, _ => _._id)) {
+      this.setState({modalityId: modalityObj._id, modalityList:{modality: modalityObj.modality, sub_modality: modalityObj.sub_modality}})
+    }
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
@@ -169,6 +178,7 @@ export class ModalityForm extends React.Component<Props, State> {
                   <Form.Control
                     type="text"
                     name="name"
+                    readOnly={modalityId ? true: false}
                     value={modalityList.modality}
                     onChange={e => this.handleChange(e)}>
                   </Form.Control>
@@ -209,6 +219,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   create: formData => {
     dispatch(modalityActions.create(formData))
+  },
+  updateDetail: formData => {
+    dispatch(modalityActions.updateDetail(formData))
   },
   getModalities: (formData) => {
     dispatch(modalityActions.getModalities(formData))

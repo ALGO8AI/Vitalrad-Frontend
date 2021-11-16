@@ -29,7 +29,7 @@ const updateDetail = (formData: formType, modalityId: string) => {
     body: JSON.stringify(formData),
   }
 
-  return fetch(`${API_URL}/updateUpdate`, requestOptions)
+  return fetch(`${API_URL}/editModality`, requestOptions)
     .then(handleResponse)
     .then(modality => {
       return modality
