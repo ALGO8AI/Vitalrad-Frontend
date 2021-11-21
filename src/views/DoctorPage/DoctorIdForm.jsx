@@ -97,7 +97,7 @@ export class DoctorIdForm extends React.Component<Props, State> {
   	return (
   		<div>
   			<Modal.Header closeButton>
-          <Modal.Title>Manage Doctor's Id</Modal.Title>
+          <Modal.Title>Manage User's Id</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {alert && alert.message && (

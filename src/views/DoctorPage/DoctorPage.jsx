@@ -81,8 +81,8 @@ export class DoctorPage extends React.Component<Props, State> {
   confirmDeleteDoctor = (e: any, doctorId: string) => {
     //$FlowFixMe
     this.dialog.show({
-      title: 'Delete Doctor',
-      body: 'Are you sure you want to delete this Doctor?',
+      title: 'Delete User',
+      body: 'Are you sure you want to delete this User?',
       actions: [
         Dialog.CancelAction(),
         Dialog.OKAction(() => {
@@ -157,13 +157,13 @@ export class DoctorPage extends React.Component<Props, State> {
         <div className="card">
           <div className="card-body">
             <div className="heading">
-              <h4>Doctors</h4>
+              <h4>Users</h4>
               <div className="btn-container">
                 <div className="filter">
                   <Form.Group>
                     <Form.Control
                       type="text"
-                      placeholder="Search Doctors...."
+                      placeholder="Search Users...."
                       onChange={e => this.filterDoctor(e)}
                     />
                   </Form.Group>
@@ -171,7 +171,7 @@ export class DoctorPage extends React.Component<Props, State> {
                     <Icon icon={filter} />
                   </Button>
                 </div>
-                <Button onClick={e => this.handleShow(e, '')}>Create Doctor</Button>
+                <Button onClick={e => this.handleShow(e, '')}>Create User</Button>
               </div>
             </div>
             <div className="listing-container">

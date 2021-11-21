@@ -310,7 +310,7 @@ export class DoctorFormPage extends React.Component<Props, State> {
     return (
       <div>
         <Modal.Header closeButton>
-          <Modal.Title>{doctorId ? 'Edit' : 'Add'} Doctor</Modal.Title>
+          <Modal.Title>{doctorId ? 'Edit' : 'Add'} User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {alert && alert.message && (
@@ -321,7 +321,7 @@ export class DoctorFormPage extends React.Component<Props, State> {
               <Form name="form" onSubmit={e => this.handleSubmit(e)}>
                 <Form.Group
                   className={validation.name.isInvalid ? ' has-error' : ''}>
-                  <Form.Label>Doctor Name</Form.Label>
+                  <Form.Label>User Name</Form.Label>
                   <Form.Control
                     as="select"
                     name="name"

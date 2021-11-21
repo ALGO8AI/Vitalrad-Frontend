@@ -75,8 +75,8 @@ export class DoctorList extends React.Component<Props, State> {
   confirmGenerateId = () => {
     //$FlowFixMe
     this.dialog.show({
-      title: 'Generate Doctor\'s ID',
-      body: 'Are you sure you want to generate ID for this Doctor?',
+      title: 'Generate User\'s ID',
+      body: 'Are you sure you want to generate ID for this User?',
       actions: [
         Dialog.CancelAction(),
         Dialog.OKAction(() => {
@@ -127,7 +127,7 @@ export class DoctorList extends React.Component<Props, State> {
         <div className="card">
           <div className="card-body">
             <div className="heading">
-              <h4>Doctors</h4>
+              <h4>Users</h4>
             </div>
             <div className="listing-container">
               <Table className="responsive-grid table table-hover">

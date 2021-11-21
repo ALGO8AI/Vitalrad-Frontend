@@ -62,7 +62,7 @@ const Asides = (props: Props) => {
         </li>)}
         {isAdminHospital() && (<li className="nav-item">
           <Link /*exact*/ to="/doctor" className="nav-link">
-            <span className="menu-title">Doctor</span>
+            <span className="menu-title">User (Referring)</span>
             <i className="icon-doc menu-icon"></i>
           </Link>
         </li>)}
@@ -86,7 +86,7 @@ const Asides = (props: Props) => {
         </li>)}
         {isAdmin() && (<li className="nav-item">
           <Link /*exact*/ to="/manage/doctor" className="nav-link">
-            <span className="menu-title">Doctor with Null ID</span>
+            <span className="menu-title">User (Non-Referring)</span>
             <i className="icon-calculator menu-icon"></i>
           </Link>
         </li>)}
