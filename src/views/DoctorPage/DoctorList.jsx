@@ -22,6 +22,7 @@ type State = {
   firstname: string,
   lastname: string,
   showDoctorIdFrom: boolean,
+  isDataProcessing: boolean
 };
 
 export class DoctorList extends React.Component<Props, State> {
@@ -34,6 +35,7 @@ export class DoctorList extends React.Component<Props, State> {
       doctorObj: {},
       doctorList: [],
       showDoctorIdFrom: false,
+      isDataProcessing: true
     }
   }
 
@@ -45,6 +47,9 @@ export class DoctorList extends React.Component<Props, State> {
   UNSAFE_componentWillReceiveProps(nextProps: any) {
     if (nextProps.doctors) {
       this.setState({doctorList: nextProps.doctors})
+      setTimeout(() => {
+        this.setState({isDataProcessing: false})
+      }, 10000);
     }
   }
 
@@ -98,7 +103,8 @@ export class DoctorList extends React.Component<Props, State> {
   }
 
   render() {
-    const { showDoctorIdFrom } = this.state;
+    const { showDoctorIdFrom, isDataProcessing } = this.state;
+    //console.log('isDataProcessing', isDataProcessing)
     let doctorRow = null
     let doctorList = idx(this.state, _ => _.doctorList)
       ? this.state.doctorList
@@ -129,7 +135,8 @@ export class DoctorList extends React.Component<Props, State> {
             <div className="heading">
               <h4>Users</h4>
             </div>
-            <div className="listing-container">
+              {isDataProcessing ? <div className="loader" style={{'display': 'block'}}></div>
+             : <div className="listing-container">
               <Table className="responsive-grid table table-hover">
                 <thead>
                   <tr>
@@ -151,6 +158,7 @@ export class DoctorList extends React.Component<Props, State> {
                   </tbody>
                 )}
               </Table>
+
               <Modal
                 backdrop="static"
                 className="add-doctor"
@@ -158,7 +166,7 @@ export class DoctorList extends React.Component<Props, State> {
                 onHide={e => this.handleClose(e)}>
                 <DoctorIdForm getNameDetail={this.getNameDetail} />
               </Modal>
-            </div>
+            </div>}
           </div> 
         </div> 
       </div>
@@ -169,6 +177,7 @@ export class DoctorList extends React.Component<Props, State> {
 const mapStateToProps = state => {
   return {
     doctors: state.doctor.detail || [],
+    // isDataProcessing: state.doctor.isDataProcessing || true
   }
 }
 

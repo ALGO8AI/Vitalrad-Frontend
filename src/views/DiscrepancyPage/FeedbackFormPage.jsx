@@ -5,7 +5,8 @@ import {connect} from 'react-redux'
 import idx from 'idx'
 import {discrepancyActions} from '../../_actions'
 import {authDetail, loggedInUser} from '../../_helpers'
-import dateformat from "dateformat"
+// import dateformat from "dateformat"
+// import * as moment from 'moment'
 
 type Props = {
   getAccessionDetail: Function,
@@ -113,7 +114,7 @@ export class FeedbackFormPage extends React.Component<Props, State> {
       let accessionInfo = nextProps.accessionInfo[0]
       if(accessionInfo){
         this.setState({
-          Scan_Received_Date: dateformat(accessionInfo.Scan_Received_Date, 'dd/mm/yy') || '',
+          Scan_Received_Date: (accessionInfo.Scan_Received_Date !== '') ? accessionInfo.Scan_Received_Date : '',
           Patient_First_Name: accessionInfo.Patient_First_Name || '',
           Surname: accessionInfo.Surname,
           Modality: accessionInfo.Modality || '',

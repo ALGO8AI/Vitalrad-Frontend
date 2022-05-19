@@ -14,12 +14,13 @@ import dateformat from "dateformat"
 import {connect} from 'react-redux'
 // import Moment from 'react-moment'
 import { CSVLink } from "react-csv";
-
+import * as moment from 'moment'
 import Highcharts from "highcharts";
 // import drilldown from "highcharts/modules/drilldown.js";
 // import HighchartsReact from "highcharts-react-official";
 // import HighchartsExporting from 'highcharts/modules/exporting'
 import PieChart from "./PieChart"
+import $ from 'jquery';
 // Highcharts.setOptions({
 // lang: {
 // drillUpText: '[X]',
@@ -52,6 +53,8 @@ type State = {
   csvData: any,
   showExport: Boolean,
   auditList: Array<any>,
+  totalActivity: any,
+  chartPieTitle: string
 };
 
 // const statIcon = ['brain', 'drop-of-blood--v2', 'dog-bone', 'gear']
@@ -72,14 +75,29 @@ class HomePage extends React.Component<Props, State> {
       startDate: newCurrDate,
       endDate: new Date(),
       loggedInUser: loggedInUser(),
-      chartType: 'day',
+      chartType: 'month',
       showExport: false,
       auditList: [],
+      totalActivity: 0,
+      chartPieTitle: ''
     }
   }
 
   componentDidMount = () => {
+    let tmpHospitalId = '';
+    let authData = authDetail()
+    if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
+      tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
+    }
+    let filterData = {
+      hospital_id: tmpHospitalId
+    }
+    //console.log('filterData', filterData)
+    this.props.getAuditFilters(filterData);
+
     this.getDashBoaordInfo()
+
+    this.getCategoryData()
   }
 
   getDashBoaordInfo = () => {
@@ -89,14 +107,13 @@ class HomePage extends React.Component<Props, State> {
     let tmpRadiologistArr = (radiologistFilter) ? radiologistFilter.map( s => s.value ) : [];
     let nameFilterValue = '';
     let nameFilter = ''
-    let tmpHospitalId = '';
     let authData = authDetail()
     if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
       let hospitalName = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : 'Hospital 7'
       tmpHospitalArr = [hospitalName]
       nameFilterValue = hospitalName
       nameFilter = 'hospital_name'
-      tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
+      // tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
       this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
     }
 
@@ -131,11 +148,7 @@ class HomePage extends React.Component<Props, State> {
     }
     this.props.getDashBoaordInfo(formData);
 
-    let filterData = {
-      hospital_id: tmpHospitalId
-    }
-    console.log('filterData', filterData, formData)
-    this.props.getAuditFilters(filterData);
+
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
@@ -146,9 +159,11 @@ class HomePage extends React.Component<Props, State> {
     if (nextProps.auditfilters && this.state.auditfilters !== nextProps.auditfilters ) {
       this.setState({auditfilters: nextProps.auditfilters})
     }
-
     if (nextProps.auditlist && this.state.auditList !== nextProps.auditlist ) {
       this.setState({auditList: nextProps.auditlist})
+      setTimeout(() => {
+        this.setState({showExport: true})
+      }, 1000);
     }
   }
 
@@ -164,7 +179,24 @@ class HomePage extends React.Component<Props, State> {
   }
 
   clearDrillState = (e) => {
-    this.setState(({showExport: false}))
+    this.setState(({showExport: true, chartPieTitle: ''}))
+    this.getCategoryData()
+  }
+  getCategoryData = () => {
+    const {startDate, endDate, hospitalFilter, modalityFilter} = this.state
+    let tmpHospitalArr = (hospitalFilter) ? hospitalFilter.map( s => s.value ) : [];
+    let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
+    let tmpCategoryArr = [];
+    let formData = {
+      from: dateformat(startDate, 'yyyy-mm-dd'), 
+      to:dateformat(endDate, 'yyyy-mm-dd'),  
+      hospital: tmpHospitalArr, 
+      modality: tmpModalityArr, 
+      category: [],
+      radiologist: [],
+      tat: tmpCategoryArr
+    }
+    this.props.getAuditByCategory(formData)
   }
 
   showTableData = (e) => {
@@ -176,7 +208,11 @@ class HomePage extends React.Component<Props, State> {
       name = e.point.name;
     }
     if(name){
-      this.setState({showExport: true})
+      this.setState({showExport: false, chartPieTitle: name})
+      setTimeout(() => {
+        this.setState({showExport: true})
+      }, 1000);
+      
       const {startDate, endDate, hospitalFilter, modalityFilter} = this.state
       let tmpHospitalArr = (hospitalFilter) ? hospitalFilter.map( s => s.value ) : [];
       let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
@@ -355,9 +391,14 @@ class HomePage extends React.Component<Props, State> {
         lineSeries = dateArr.lineSeriesRow
       }  
     }
+    else{
+      lineSeries = idx(dashboardInfo, _ => _.lineRes.series) ?  dashboardInfo.lineRes.series.map( s => ({name:s.name, data: s.data.reverse(), color: lineColor[s.name]}) ) : []
+      dateSeries.reverse()  
+    }
     return {
         chart :{
           height: '75%',
+          type: 'column',
           scrollablePlotArea: {
             scrollPositionX: 1
           },
@@ -456,6 +497,8 @@ class HomePage extends React.Component<Props, State> {
     return sDate;
   }
 
+  rangeGenerate = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+
   dateSeries = (dateSeries: any, columnSeries: any, chartType: string) => {
     let tmpDate = [];
     let tmpLineSeries = [];
@@ -493,6 +536,27 @@ class HomePage extends React.Component<Props, State> {
         })
 
       })
+      if(tmpDate.length < 5){
+        if(tmpDate.length === 0){
+          let today = new Date();
+          // let dd = String(today.getDate()).padStart(2, '0');
+          let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+          let yyyy = today.getFullYear();
+          tmpDate = [String(mm + '-' + yyyy)];
+        } 
+        let tmp_date_arr = tmpDate.at(-1).split('-');
+        let tmp_date = tmp_date_arr[0]+'-01-'+tmp_date_arr[1];
+        let last_date = new Date(tmp_date);
+        let tmpDateArr = [];
+        for (let i = 0; i < 5; i++) {
+          let tmp_f_date = (i===0) ? last_date.setMonth(last_date.getMonth()) : last_date.setMonth(last_date.getMonth() - 1)
+          // console.log(moment(tmp_f_date).format('MM-YYYY'));
+          tmpDateArr.push(moment(tmp_f_date).format('MM-YYYY'));
+        }
+        if(tmpDateArr.length > 1){
+          tmpDate = tmpDateArr;
+        }
+      }
     }
     if(chartType === 'year'){
       dateSeries.forEach((item, i) =>{
@@ -527,7 +591,13 @@ class HomePage extends React.Component<Props, State> {
         })
 
       })
+      if(tmpDate.length < 5){
+        const currentYear = (new Date()).getFullYear();
+        tmpDate = this.rangeGenerate(currentYear, currentYear - (5-tmpDate.length), -1);
+      }
     }
+    
+    // console.log({dateSeriesRow : tmpDate, 'lineSeriesRow' : tmpLineSeries}, chartType)
     return {dateSeriesRow : tmpDate, 'lineSeriesRow' : tmpLineSeries}
   }
 
@@ -540,6 +610,9 @@ class HomePage extends React.Component<Props, State> {
 
   handleFilter = (e: any) => {
     e.preventDefault()
+    $('.highcharts-button-box').click();
+    // document.getElementsByClassName('highcharts-button-box').click();
+    this.setState({chartPieTitle: ''})
     this.getDashBoaordInfo()
   }
 
@@ -548,7 +621,7 @@ class HomePage extends React.Component<Props, State> {
   }
 
   render() {
-    const {showExport, auditList, chartType, loggedInUser, hospitalFilter, modalityFilter, radiologistFilter, startDate, endDate, dashboardInfo} = this.state
+    const {chartPieTitle, showExport, auditList, chartType, loggedInUser, hospitalFilter, modalityFilter, radiologistFilter, startDate, endDate, dashboardInfo} = this.state
     // const pieOptions = this.pieChart(dashboardInfo);
     // const pieDrillChart = this.pieDrillDown(dashboardInfo);
     const multiLieOptions = this.multiLieChart(dashboardInfo, chartType);
@@ -565,27 +638,26 @@ class HomePage extends React.Component<Props, State> {
       "Reported By", 
       "Accession No", 
       "Hospital Number", 
-      "Hospital Name", 
-      "Patient Name", "Surname", "Modality", "Body Part", "Reported", "TAT Status", "Audit Person", "Audit Category"]
+      "Patient Name", "Surname", "Modality", "Body Part", "Reported", "TAT Status", "Actual TAT"]
       ];
     auditList.map((audit, index) => ( 
       csvData.push([
-        dateformat(audit.Scan_Received_Date, 'dd/mm/yy'), 
+        dateformat(audit.Scan_Received_Date, 'dd-mm-yyyy'), 
         audit.Reported_By, 
         audit.Accession_No, 
         audit.Hospital_Number, 
-        audit.Hospital_Name,
         audit.Patient_First_Name,
         audit.Surname,
         audit.Modality,
         audit.Body_Part,
         audit.Reported,
         audit.TAT_Status,
-        audit.Audit_Person,
-        audit.Audit_Category])
+        audit.actualTAT])
     ))
     const modalityColor = ['#76b56b', '#e0b5b5', '#e87c7c', '#013220', '#6610f2', '#e83e8c', '#28a745', '#fd7e14']
+    let totalActivity = 0
     modalityRow = modalityData.map((mod, index) => {
+      totalActivity += mod.count
       return (mod.count > 0) && <Card  key={index} style={{'backgroundColor': modalityColor[index], 'color': '#fff', 'borderRadius':'0'}}>
     <Card.Body>
       <div className="row">
@@ -662,7 +734,8 @@ class HomePage extends React.Component<Props, State> {
                     className="form-control"
                     name= 'startDate'
                     selected={startDate}
-                    dateFormat="dd/MM/yy"
+                    maxDate={new Date()}
+                    dateFormat="dd-MM-yyyy"
                     onChange={e => this.handleDateChange(e, 'startDate')}
                   /> -  
                   <DatePicker
@@ -670,7 +743,7 @@ class HomePage extends React.Component<Props, State> {
                     name= 'endDate'
                     selected={endDate}
                     minDate={startDate}
-                    dateFormat="dd/MM/yy"
+                    dateFormat="dd-MM-yyyy"
                     onChange={e => this.handleDateChange(e, 'endDate')}
                   />
                   </span>
@@ -693,7 +766,7 @@ class HomePage extends React.Component<Props, State> {
                 <div className="row">
                   <div className="col-md-12">
                     <div className="d-sm-flex align-items-baseline report-summary-header" style={{'borderBottom': '0px'}}>
-                      <h5 className="font-weight-semibold">Activity</h5>
+                      <h5 className="font-weight-semibold">Activity ({totalActivity})</h5>
                     </div>
                   </div>
                 </div>
@@ -718,7 +791,7 @@ class HomePage extends React.Component<Props, State> {
                     </div>
                   </div>
                 </div>
-                <PieChart dashboardInfo = {dashboardInfo} clearDrillState={this.clearDrillState} showTableData={this.showTableData}/>
+                <PieChart dashboardInfo = {dashboardInfo} chartPieTitle={chartPieTitle} clearDrillState={this.clearDrillState} showTableData={this.showTableData}/>
                 {/*<Charts isPureConfig={true} config={pieOptions}></Charts>*/}
               </div>
             </div>

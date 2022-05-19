@@ -112,7 +112,8 @@ class NoticeList extends React.Component<Props, State> {
       let formData = {
         offset: offset,
         limit: pageLimit,
-        type: 'notices'
+        type: 'notices',
+        accession_no: this.state.accession_no
       }
       let userFilter = this.manageUserFilter()
       let postData = {...formData, ...userFilter}
@@ -185,21 +186,17 @@ class NoticeList extends React.Component<Props, State> {
   }
 
   handleAccessChange = (event: any) => {
-    let regVal = /^[A-Za-z\d\-_\s]+$/i
-    let discrepancyList = idx(this.props, _ => _.discrepancies)
-        ? this.props.discrepancies
-        : []
-    if (regVal.test(event.target.value) || event.target.value.length > 0) {
-      discrepancyList = discrepancyList.filter(
-        item =>
-          item.Scan_Received_Date.toLowerCase().search(event.target.value.toLowerCase()) !==
-            -1 ||
-          item.Reported_By.toLowerCase().search(event.target.value.toLowerCase()) !== -1 ||
-          item.Patient_First_Name.toLowerCase().search(event.target.value.toLowerCase()) !== -1 ||
-          (item.Accession_No && parseInt(item.Accession_No) === parseInt(event.target.value))
-      )
+    if (event.key === 'Enter') {
+      let formData = {
+        offset: 0, //currentPage * pageLimit,
+        limit: this.state.pageLimit,
+        type: 'notices',
+        accession_no: this.state.accession_no
+      }
+      let userFilter = this.manageUserFilter()
+      let postData = {...formData, ...userFilter}
+      this.props.getDiscrepancy(postData)
     }
-    this.setState({discrepancyList: discrepancyList})
   }
 
   render() {
@@ -220,12 +217,8 @@ class NoticeList extends React.Component<Props, State> {
       let tmpScanDate = dis.Scan_Received_Date.split("-");
       let scanDate = (tmpScanDate[0].length === 4) ? dis.Scan_Received_Date : dis.Scan_Received_Date.split("-").reverse().join("-");
       return (<tr key={index} style={{backgroundColor: dis.Reported === 'Reported' ? '#6af16a': '#fbaeae'}}>
-        <td>{dis.Reported === 'Reported' ? 'Acknowledged' : 'Action & Acknowledge'}</td>
-        <td>{dis.Scan_Received_Date && (<Moment format="DD/MM/YY">{scanDate}</Moment>)}</td>
-        <td>{dis.Reported_By}</td>
-        <td>{dis.Patient_First_Name} {dis.Surname}</td>
         <td data-tip type="light" data-for={'tip-'+dis.Accession_No}>{dis.Accession_No}
-        <ReactTooltip  type="light" className="grey-border" id={'tip-'+dis.Accession_No} aria-haspopup='true' role='example'>
+        <ReactTooltip resizeHide="true" scrollHide="false" place="right"  type="light" className="grey-border" id={'tip-'+dis.Accession_No} aria-haspopup='true' role='example'>
           <table>
             <tbody>
               <tr><td className="tip-label">Accession No :</td><td className="tip-value">{dis.Accession_No}</td></tr>
@@ -246,6 +239,10 @@ class NoticeList extends React.Component<Props, State> {
           </table>
         </ReactTooltip>
         </td>
+        <td>{dis.Scan_Received_Date && (<Moment format="DD-MM-YYYY">{scanDate}</Moment>)}</td>
+        <td>{dis.Reported_By}</td>
+        <td>{dis.Patient_First_Name} {dis.Surname}</td>
+        <td>{dis.Reported === 'Reported' ? 'Acknowledged' : 'Action & Acknowledge'}</td>
         <td>
           {dis.Reported !== 'Reported' && (<input type="checkbox" value='' onChange={e => this.handleCheck(e, dis)} />)}
         </td>
@@ -283,11 +280,11 @@ class NoticeList extends React.Component<Props, State> {
                   <table className="table">
                     <thead>
                       <tr>
-                        <th className="font-weight-bold">Action Required</th>
+                        <th className="font-weight-bold">Accession No.</th>
                         <th className="font-weight-bold">Scan Received Date</th>
                         <th className="font-weight-bold">Sent By</th>
                         <th className="font-weight-bold">Patient</th>
-                        <th className="font-weight-bold">Accession No.</th>
+                        <th className="font-weight-bold">Action Required</th>
                         <th className="font-weight-bold">Acknowledge Record {/*<input type="checkbox" onChange={this.handleAllCheck} defaultChecked={this.state.allChecked}/>*/}</th>
                       </tr>
                     </thead>

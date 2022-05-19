@@ -386,7 +386,7 @@ export class HospitalFormPage extends React.Component<Props, State> {
           </Form.Group>
         </div>
         <div className="col-md-1">
-          {this.state.hospitalId ==='' && (<Icon icon={minusCircle} onClick={(e) => this.handleDelete(index, e)} />)}
+          {(this.state.hospitalId ==='' && options.length>1) && (<Icon icon={minusCircle} onClick={(e) => this.handleDelete(index, e)} />)}
         </div>
       </div>
     );

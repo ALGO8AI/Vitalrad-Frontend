@@ -30,6 +30,10 @@ body {
 .card .card-body {
     padding: .875rem 1.875rem !important;
 }
+.card-columns {
+column-count: 4 !important;
+width: 100%;
+}
 .report-inner-cards-wrapper{padding-top: 0px !important}
 .specifictd {    
   width:350px;  /* adjust to desired wrapping */

@@ -6,6 +6,7 @@ import idx from 'idx'
 import { $ }  from 'react-jquery-plugin'
 import ReactHighcharts from 'react-highcharts';
 import Highstock from 'highcharts/highstock';
+import * as moment from 'moment'
 
 type Props = {
   activityInfo: Array<any>,
@@ -114,14 +115,18 @@ class LineChart extends React.Component<Props, State> {
   }
 
   stackColumnChart = (activityInfo, chartType) => {
-    let dateSeries = idx(activityInfo, _ => _.dateSeries) ? activityInfo.dateSeries : []    
+    let dateSeries = idx(activityInfo, _ => _.dateSeries) ? activityInfo.dateSeries.map( s => moment(s).format('YYYY')) : []    
+    if(chartType === 'monthly'){
+      dateSeries = idx(activityInfo, _ => _.dateSeries) ? activityInfo.dateSeries.map( s => moment(s).format('MM-YYYY')) : []    
+    }  
     let scrollMax = (dateSeries.length === 0) ? 0 : ((dateSeries.length >=4) ? 4 : dateSeries.length-1) 
-    let columnSeries = idx(activityInfo, _ => _.series) ?  activityInfo.series.map( s => ({name:s.name, data: s.data}) ) : []
+    let columnSeries = idx(activityInfo, _ => _.series) ?  activityInfo.series.map( s => ({name:s.name, data: s.data.reverse()}) ) : []
+    dateSeries.reverse()
 
     return {
       chart: {
         height: '30%',
-        type: 'line',
+        type: 'column',
         scrollablePlotArea: {
           scrollPositionX: 1
         },
@@ -145,7 +150,7 @@ class LineChart extends React.Component<Props, State> {
           events: {                        
             click: function() {
               alert(this.x);  
-              console.log('this.x', this.x)                              
+              // console.log('this.x', this.x)                              
             }
           }
         }
@@ -161,7 +166,7 @@ class LineChart extends React.Component<Props, State> {
           labels: {
             events: {
                 click: function () {
-                  console.log('this.x', this)  
+                  // console.log('this.x', this)  
                 }
             }
         }
@@ -180,7 +185,7 @@ class LineChart extends React.Component<Props, State> {
       },
       tooltip: {
           headerFormat: '<b>{point.x}</b><br/>',
-          pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+          pointFormat: '{series.name}: {point.y}'
       },
       plotOptions: {
         column: {

@@ -47,8 +47,14 @@ const getAccessionDetail = (formData: Object) => (dispatch: any) => {
   discrepancyService.getAccessionDetail(formData).then(
     accessioninfo => {
       dispatch(success(accessioninfo))
-      if(accessioninfo.detail && accessioninfo.detail.length===0){
-        dispatch(alertActions.error('Record Not Found / Discrepancy already Raised / Not Authorized for this number!'))
+      // console.log('accessioninfo', accessioninfo)
+      // if(!accessioninfo.status){
+      //   let emsg = accessioninfo.message || 'Record Not Found / Discrepancy already Raised / Not Authorized for this number!'
+      //   dispatch(alertActions.error(emsg))
+      // }
+      if((accessioninfo.detail && accessioninfo.detail.length===0) || !accessioninfo.status){
+        let emsg = accessioninfo.message || 'Record Not Found / Discrepancy already Raised / Not Authorized for this number!'
+        dispatch(alertActions.error(emsg))
       }
     },
     error => {

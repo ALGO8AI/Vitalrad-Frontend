@@ -271,7 +271,9 @@ export class DoctorFormPage extends React.Component<Props, State> {
       !nextProps.doctor.isProcessing
     ) {
       let {doctorDetail} = nextProps.doctor
+
       let profileData = (idx(doctorDetail, _ => _.profile.name)) ? doctorDetail.profile : {} 
+      console.log('doctorDetail',profileData, profileData.hospital_name[0])
       this.setState({
         name: profileData.name,
         address: profileData.address,
@@ -284,7 +286,7 @@ export class DoctorFormPage extends React.Component<Props, State> {
       })
     }
 
-    if (this.state.doctorId === '' && idx(nextProps, _ => _.doctor.doctor._id)) {
+    if (idx(nextProps, _ => _.doctor.doctor._id)) {
       this.clearState()
     }
   }

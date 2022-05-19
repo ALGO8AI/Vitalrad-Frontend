@@ -101,14 +101,16 @@ class BarChart extends React.Component<Props, State> {
         })
       }
     })
+
     return {dateSeriesRow : tmpDate, 'columnSeriesRow' : tmpColSeries}
   }
 
   stackColumnChart = (activityInfo, chartType) => {
     let dateSeries = idx(activityInfo, _ => _.dateSeries) ? activityInfo.dateSeries : []    
     let scrollMax = (dateSeries.length === 0) ? 0 : ((dateSeries.length >=4) ? 4 : dateSeries.length-1) 
-    let columnSeries = idx(activityInfo, _ => _.series) ?  activityInfo.series.map( s => ({name:s.name, data: s.data}) ) : []
-
+    let columnSeries = idx(activityInfo, _ => _.series) ?  activityInfo.series.map( s => ({name:s.name, data: s.data.reverse()}) ) : []
+    //console.log('tmpDate', dateSeries, columnSeries )
+    dateSeries.reverse()
     return {
       chart: {
         height: '30%',
@@ -171,7 +173,7 @@ class BarChart extends React.Component<Props, State> {
       },
       tooltip: {
           headerFormat: '<b>{point.x}</b><br/>',
-          pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+          pointFormat: '{series.name}: {point.y}'
       },
       plotOptions: {
         column: {

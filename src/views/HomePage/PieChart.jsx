@@ -36,7 +36,7 @@ class PieChart extends React.Component<Props, State> {
 
   UNSAFE_componentWillReceiveProps(nextProps: any) {
     if (nextProps.dashboardInfo && this.state.dashboardInfo !== nextProps.dashboardInfo) {
-      this.setState({dashboardInfo: nextProps.dashboardInfo})
+      this.setState({dashboardInfo: nextProps.dashboardInfo, chartPieTitle: ''})
     }
   }
 
@@ -60,7 +60,16 @@ class PieChart extends React.Component<Props, State> {
   pieDrillDown = (dashboardInfo) => {
     const filterChartData = (e) => this.showTableData(e)
     const clearDrillState = (e) => this.clearDrillState(e)
-    let pieData = idx(dashboardInfo, _ => _.pieRes) ? dashboardInfo.pieRes.map( s => ({name:s.TAT_Status, y: s.cat, drilldown: s.TAT_Status}) ) : [];
+    if(idx(dashboardInfo, _ => _.pieTatResponse)){
+      let pieTatResponse1 = {};
+      Object.keys(dashboardInfo.pieTatResponse)
+      .filter(key => key !== '')
+      .map((key, index) => {
+        pieTatResponse1[key] = dashboardInfo.pieTatResponse[key];
+        return true;
+      });
+    }
+    let pieData = idx(dashboardInfo, _ => _.pieRes) ? dashboardInfo.pieRes.filter(val => val.TAT_Status !== '').map( s => ({name:s.TAT_Status, y: s.cat, drilldown: s.TAT_Status}) ) : [];
     let pieTatResponse = idx(dashboardInfo, _ => _.pieTatResponse) ? dashboardInfo.pieTatResponse : {};
     let tmpPieTatResponse = {}
     let chartPieTitle = this.state.chartPieTitle
@@ -85,11 +94,15 @@ class PieChart extends React.Component<Props, State> {
           plotBorderWidth: null,
           plotShadow: false,
           type: 'pie',
-          // events: {
-          //   drillup: function (e) {
-          //     clearDrillState(e)
-          //   }
-          // },
+          events: {
+            drillup: function (e) {
+              // clearDrillState(e)
+              setTimeout(function () {
+                  clearDrillState(e);
+                  // console.log(chart.series[0].options._levelNumber);
+              }, 100);
+            }
+          },
         },
         exporting: {
           enabled: false
@@ -190,10 +203,11 @@ class PieChart extends React.Component<Props, State> {
 
 
   shouldComponentUpdate(nextProps, nextState) {
+    
     if(nextProps.dashboardInfo !== this.state.dashboardInfo){
 	    return true;  
 	  }
-    if(nextState.chartPieTitle !== this.state.chartPieTitle){
+    else if(nextProps.chartPieTitle !== this.state.chartPieTitle){
       return true;  
     }
 	  return false;

@@ -339,7 +339,9 @@ export class RadiologistFormPage extends React.Component<Props, State> {
       let subModality = this.state.modalityList.filter(val => val.modality === optvalue)
       
       let tmpSubMod = this.state.subModalityList
-      tmpSubMod[index] = subModality[0].sub_modality
+      if(subModality.length > 0){
+        tmpSubMod[index] = subModality[0].sub_modality
+      }
       this.setState({subModalityList: tmpSubMod})
     }
   }
@@ -398,7 +400,7 @@ export class RadiologistFormPage extends React.Component<Props, State> {
           </Form.Group>
         </div>
         <div className="col-md-1">
-          {this.state.radiologistId ==='' && (<Icon icon={minusCircle} onClick={(e) => this.handleDelete(index, e)} />)}
+          {(this.state.radiologistId ==='' && options.length>1) && (<Icon icon={minusCircle} onClick={(e) => this.handleDelete(index, e)} />)}
         </div>
       </div>
     );

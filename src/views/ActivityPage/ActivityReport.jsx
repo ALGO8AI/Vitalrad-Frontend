@@ -6,6 +6,8 @@ import idx from 'idx'
 import {auditActions} from '../../_actions'
 import {Button, Row, Col, Form} from 'react-bootstrap'
 import Highcharts from 'highcharts'
+import {Icon} from 'react-icons-kit'
+import {filter} from 'react-icons-kit/fa'
 // import Highstock from 'highcharts/highstock';
 // import ReactHighcharts from 'react-highcharts';
 
@@ -49,7 +51,8 @@ type State = {
   accession_no:string,
   pageFilterLimit: Object,
   isLabelSelected: boolean,
-  yearLabel: string
+  yearLabel: string,
+  isDataProcessing: boolean
 };
 
 const animatedComponents = makeAnimated()
@@ -78,10 +81,20 @@ class ActivityReport extends React.Component<Props, State> {
       chartType: 'yearly',
       accession_no: '',
       isLabelSelected: false,
+      isDataProcessing: false,
       yearLabel: ''
     }
   }
   componentDidMount() {
+    let authData = authDetail()
+    let tmpHospitalId = '';
+    if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
+      tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
+    }
+    let filterData = {
+      hospital_id: tmpHospitalId
+    }
+    this.props.getAuditFilters(filterData);
     this.getActivityLineGraph()
   }
   
@@ -91,11 +104,11 @@ class ActivityReport extends React.Component<Props, State> {
     let tmpModalityArr = (modalityFilter) ? modalityFilter.map( s => s.value ) : [];
     let tmpRadiologistArr = (radiologistFilter) ? radiologistFilter.map( s => s.value ) : [];
     let authData = authDetail()
-    let tmpHospitalId = '';
+    // let tmpHospitalId = '';
     if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='hospital'){
       let hospitalName = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.name : 'Hospital 7'
       tmpHospitalArr = [hospitalName]
-      tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
+      // tmpHospitalId = (idx(authData, _ => _.detail.profile.name)) ? authData.detail.profile.code : ''
       this.setState({hospitalFilter: [{value: hospitalName, label: hospitalName}]})
     }
     if(idx(authData, _ => _.detail.user_type) && authData.detail.user_type ==='doctor'){
@@ -116,26 +129,26 @@ class ActivityReport extends React.Component<Props, State> {
       hospital: tmpHospitalArr, 
       modality: tmpModalityArr, 
       radiologist: tmpRadiologistArr,
-      accession_no: (accession_no !== '') ? [parseInt(accession_no)] : [],
-      tat: '',
+      accession_no: (accession_no !== '') ? [accession_no] : [],
+      tat: [],
+      category:[],
       type: (ctype) ? ctype : chartType
     }
     if(isLabelSelected && yearLabel !=='' && ctype === null){
       let selectedLabelArr = yearLabel.split('-')
-      formData.requestedYear = selectedLabelArr[0]
-      formData.requestedMonth = (chartType === 'monthly') ? selectedLabelArr[1] : ''
+      // console.log('selectedLabelArr', selectedLabelArr)
+      formData.requestedYear = (selectedLabelArr[1]) ? selectedLabelArr[1] : selectedLabelArr[0]
+      formData.requestedMonth = (chartType === 'monthly') ? selectedLabelArr[0] : ''
       this.props.getActivityInfo(formData)
       formData.category = []
       this.props.getAuditByCategory(formData)
+      this.setState({isDataProcessing: true})
     }
     else{
+      this.props.getAuditByCategory(formData)
+      this.setState({isDataProcessing: true}) 
       this.props.getActivityLineGraph(formData)  
     }
-    
-    let filterData = {
-      hospital_id: tmpHospitalId
-    }
-    this.props.getAuditFilters(filterData);
     
   }
 
@@ -148,13 +161,17 @@ class ActivityReport extends React.Component<Props, State> {
     if (nextProps.auditfilters && this.state.auditfilters !== nextProps.auditfilters ) {
       this.setState({auditfilters: nextProps.auditfilters})
     }
-
+    //console.log('nextProps', nextProps)
     if (nextProps.auditlist && this.state.auditList !== nextProps.auditlist ) {
       this.setState({auditList: nextProps.auditlist})
       let tmpauditList = Object.assign([], nextProps.auditlist);
       const offset = (this.state.currentPage) * this.state.pageLimit;
       let tmpPagingList = tmpauditList.splice(offset, this.state.pageLimit)
+      // console.log('tmpPagingList', tmpPagingList)
       this.setState({auditPagingList: tmpPagingList})
+      setTimeout(() => {
+        this.setState({isDataProcessing: false})
+      }, 1000);
     }
   }
 
@@ -322,7 +339,7 @@ class ActivityReport extends React.Component<Props, State> {
       },
       tooltip: {
           headerFormat: '<b>{point.x}</b><br/>',
-          pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+          pointFormat: '{series.name}: {point.y}'
       },
       plotOptions: {
         column: {
@@ -351,17 +368,27 @@ class ActivityReport extends React.Component<Props, State> {
 
   handleChange = (e: any) => {
     const {name, value} = e.target
+    // console.log('handleChange', name, value)
     this.setState({[name]: value})
   }
 
   handleAccessChange = (e: any) => {
     const {name, value} = e.target
+    // console.log('handleAccessChange', name, value)
     this.setState({[name]: value})
     if (e.key === 'Enter') {
       this.getActivityLineGraph()
     }
   }
 
+  handleAccessFilter = (e: any) => {
+    // const {accession_no, auditList} = this.state;
+    
+    // let tmpAuditArr = [...this.state.auditList].filter((rec) =>
+    //   accession_no === rec.Accession_No)
+    // console.log('===', accession_no, auditList, tmpAuditArr)
+    // this.getActivityLineGraph()
+  }
   handleLabelChange = (yearLabel) => {
     if(!this.state.isLabelSelected){
       this.setState({isLabelSelected: (yearLabel) ? true : false, yearLabel: yearLabel})
@@ -381,26 +408,31 @@ class ActivityReport extends React.Component<Props, State> {
     {value: 50, label: 50},
     {value: 100, label: 100},
     ]
-    const {isLabelSelected, yearLabel, pageFilterLimit, accession_no, chartType, auditPagingList, pageLimit, loggedInUser, activityInfo, hospitalFilter, modalityFilter, radiologistFilter, startDate, endDate, auditList} = this.state
+    const {isDataProcessing, isLabelSelected, yearLabel, pageFilterLimit, accession_no, chartType, pageLimit, loggedInUser, activityInfo, hospitalFilter, modalityFilter, radiologistFilter, startDate, endDate, auditList} = this.state
     // const stackOptions = this.stackColumnChart(activityInfo, chartType);
     const hospitalList = this.formatFilterData('hospital')
     const modalityList = this.formatFilterData('Modality')
     const radiologistList = this.formatFilterData('radiologist')
     let auditCatRow = null
     const totalActivity = auditList.length
-
+    let auditPagingList = [...this.state.auditPagingList]
     if(auditPagingList.length > 0){
+      if(accession_no !== ''){
+        auditPagingList = [...this.state.auditPagingList].filter((rec) =>
+        accession_no && rec.Accession_No.search(accession_no) >= 0
+      )}
       auditCatRow = auditPagingList.map((audit, index) => {
        let tmpScanDate = audit.Scan_Received_Date.split("-");
        let scanDate = (tmpScanDate[0].length === 4) ? audit.Scan_Received_Date : audit.Scan_Received_Date.split("-").reverse().join("-");
        return (<tr key={index}>
           <td>{audit.Accession_No}</td>
-          <td>{audit.Scan_Received_Date && (<Moment format="DD/MM/YY">{scanDate}</Moment>)}</td>
+          <td>{audit.Scan_Received_Date && (<Moment format="DD-MM-YYYY">{scanDate}</Moment>)}</td>
           <td>{audit.Patient_First_Name} {audit.Surname}</td>
           <td>{audit.TAT+ ' Hrs'}</td>
           <td>{audit.Body_Part}</td>
           <td>{audit.Hospital_Number}</td>
-          <td>{audit.Hospital_Name}</td>
+          {/*<td>{audit.Hospital_Name}</td>*/}
+          <td>{audit.actualTAT}</td>
         </tr>
       )})
     }
@@ -414,25 +446,42 @@ class ActivityReport extends React.Component<Props, State> {
       "Audit Category",
       "Body Part",
       "Hospital Number", 
-      "Hospital Name",
-      "Reported By"
+      "Reported By",
+      "Actual TAT"
       ]
     ];
-    auditList.map((audit, index) => ( 
-      csvData.push([
-        audit.Accession_No,
-        dateformat(audit.Scan_Received_Date, 'dd/mm/yy'), 
-        audit.Patient_First_Name+' '+audit.Surname,
-        audit.Turnaround_Time,
-        audit.Modality,
-        audit.Audit_Category,
-        audit.Body_Part,
-        audit.Hospital_Number, 
-        audit.Hospital_Name,
-        audit.Reported_By
-        ])
-    ))
-
+    if(accession_no !== ''){
+      auditPagingList.map((audit, index) => ( 
+        csvData.push([
+          audit.Accession_No,
+          dateformat(audit.Scan_Received_Date, 'dd-mm-yyyy'), 
+          audit.Patient_First_Name+' '+audit.Surname,
+          audit.TAT+ ' Hrs',
+          audit.Modality,
+          audit.Audit_Category,
+          audit.Body_Part,
+          audit.Hospital_Number, 
+          audit.Reported_By,
+          audit.actualTAT
+          ])
+      ))
+    }
+    else{
+      auditList.map((audit, index) => ( 
+        csvData.push([
+          audit.Accession_No,
+          dateformat(audit.Scan_Received_Date, 'dd-mm-yyyy'), 
+          audit.Patient_First_Name+' '+audit.Surname,
+          audit.TAT+ ' Hrs',
+          audit.Modality,
+          audit.Audit_Category,
+          audit.Body_Part,
+          audit.Hospital_Number, 
+          audit.Reported_By,
+          audit.actualTAT
+          ])
+      ))
+    }
     return (
       <div className="content-wrapper">
         <div className="card">
@@ -490,14 +539,15 @@ class ActivityReport extends React.Component<Props, State> {
                     className="form-control"
                     name= 'startDate'
                     selected={startDate}
-                    dateFormat="dd/MM/yy"
+                    maxDate={new Date()}
+                    dateFormat="dd-MM-yyyy"
                     onChange={e => this.handleDateChange(e, 'startDate')}
                   /> -  
                   <DatePicker
                     className="form-control"
                     name= 'endDate'
                     selected={endDate}
-                    dateFormat="dd/MM/yy"
+                    dateFormat="dd-MM-yyyy"
                     minDate={startDate}
                     onChange={e => this.handleDateChange(e, 'endDate')}
                   />
@@ -521,14 +571,14 @@ class ActivityReport extends React.Component<Props, State> {
                 <div className="heading">
                   <h4 className="card-title mb-sm-0">Time-Line Activity Report</h4>
                   <div className="btn-container">
-                    <div className="filter"><Form.Control
+                    {/*<div className="filter"><Form.Control
                         type="text"
                         placeholder="Accession No"
                         name="accession_no"
                         value={accession_no}
                         onChange={e => this.handleChange(e)}
                         onKeyDown={e => this.handleAccessChange(e)}
-                      /></div>
+                      /></div>*/}
                     
                     <div className={chartType==='yearly' ? 'badge badge-success p-2 white-color' : 'badge badge-danger lightbrown p-2'} title="Year Chart" onClick={e => this.handleChartType('yearly')}>Yearly</div>
                     <div className={chartType==='monthly' ? 'badge badge-success p-2 white-color' : 'badge badge-danger lightbrown p-2'} title="Month Chart" onClick={e => this.handleChartType('monthly')}>Monthly</div>
@@ -542,12 +592,24 @@ class ActivityReport extends React.Component<Props, State> {
               </div>
             </div>
           </div>
-        </div>   
-        {(auditPagingList.length > 0) && (<div className="row">
+        </div>    
+        {(isLabelSelected || auditPagingList.length > 0) && (<div className="row">
           <div className="col-md-12 grid-margin stretch-card">
             <div className="card">
               <div className="card-body">
-                <CSVLink data={csvData} filename={"activity-report.csv"} className="csvlink" target="_blank">Export To CSV <i className="icon-layers menu-icon"></i></CSVLink>
+                {(auditPagingList.length > 0) && (<CSVLink data={csvData} filename={"activity-report.csv"} className="csvlink" target="_blank">Export To CSV <i className="icon-layers menu-icon"></i></CSVLink>)}
+                <Form.Control
+                    type="text"
+                    placeholder="Accession No"
+                    name="accession_no"
+                    value={accession_no}
+                    onChange={e => this.handleChange(e)}
+                    onKeyDown={e => this.handleAccessChange(e)}
+                    style={{'float':'left', 'width': '30%', 'marginBottom':'5px', 'height': 'calc(1.5em + 0.75rem + 0px)'}}
+                  />
+                  <Button className="btn-primary" onClick={e => this.handleAccessFilter(e)}>
+                  <Icon icon={filter} />
+                </Button>
                 <div className="table-responsive border rounded p-1">
                   <table className="table">
                     <thead>
@@ -557,15 +619,16 @@ class ActivityReport extends React.Component<Props, State> {
                         <th className="font-weight-bold">Patient</th>
                         <th className="font-weight-bold">Turnaround Time</th>
                         <th className="font-weight-bold">Body Part</th>
-                        <th className="font-weight-bold">Hospital No.</th>
+                        {/*<th className="font-weight-bold">Hospital No.</th>*/}
                         <th className="font-weight-bold">Hospital</th>
+                        <th className="font-weight-bold">Actual TAT</th>
                       </tr>
                     </thead>
                     <tbody>
                       {auditCatRow}
                     </tbody>
                   </table>
-                  {(auditPagingList.length > 0) && (
+                  {(auditPagingList.length > 1) && (
                     <table className="table">
                   <tr><td style={{'width': '100px'}}>
                   <Select
@@ -586,6 +649,7 @@ class ActivityReport extends React.Component<Props, State> {
             </div>
           </div>
         </div>)}
+        {isDataProcessing ? <div style={{'textAlign':'center'}}><div className="loader" style={{'display': 'block'}}></div></div> : ''}
       </div>
     )
   }

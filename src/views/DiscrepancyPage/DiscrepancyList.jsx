@@ -358,7 +358,7 @@ class DiscrepancyList extends React.Component<Props, State> {
         scanDate = (tmpScanDate && tmpScanDate[0].length === 4) ? dis.Scan_Received_Date : dis.Scan_Received_Date.split("-").reverse().join("-");
       }
       return (<tr key={index}>
-        <td>{dis.Scan_Received_Date && (<Moment format="Do MMMM YYYY">{scanDate}</Moment>)}</td>
+        <td>{dis.Scan_Received_Date && (<Moment format="DD-MM-YYYY">{scanDate}</Moment>)}</td>
         <td>{dis.Discrepency_Raised_by}</td>
         <td data-tip type="light" data-for={'tip-'+dis.Accession_No}>{dis.Accession_No}
         <ReactTooltip  type="light" className="grey-border" id={'tip-'+dis.Accession_No} aria-haspopup='true' role='example' style={{'z-index':'9999999'}} >
